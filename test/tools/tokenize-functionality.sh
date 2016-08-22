@@ -8,11 +8,11 @@ fi
 
 # Prerequisites
 if ! $TOOLDIR/hfst-lexc -q < $srcdir/tokenize-dog-in.lexc > $srcdir/tokenize-dog-gen.hfst; then
-    echo lexc dog
+    echo lexc dog fail
     exit 1
 fi
 if ! $TOOLDIR/hfst-invert < $srcdir/tokenize-dog-gen.hfst > $srcdir/tokenize-dog.hfst; then
-    echo invert dog
+    echo invert dog fail
     exit 1
 fi
 if ! $TOOLDIR/hfst-pmatch2fst < $srcdir/tokenize-dog.pmscript > $srcdir/tokenize-dog.pmhfst; then
@@ -65,5 +65,5 @@ if ! diff test.strings $srcdir/tokenize-dog-out-xerox.strings ; then
 fi
 
 
-rm test.strings tokenize-dog.pmhfst
+rm test.strings tokenize-dog.pmhfst tokenize-dog.hfst tokenize-dog-gen.hfst
 exit 0

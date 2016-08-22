@@ -163,7 +163,7 @@ if WANT_PROC
 TESTS += proc-functionality.sh
 endif
 if WANT_TOKENIZE
-TESTS += tokenize-functionality.sh
+TESTS += tokenize-functionality.sh tokenize-backtrack-functionality.sh
 endif
 
 TESTS += $(STRESSES)
@@ -363,7 +363,12 @@ tokenize-dog-out-cg.strings \
 tokenize-dog-out-gtd.strings \
 tokenize-dog-out.strings \
 tokenize-dog-out-xerox.strings \
-tokenize-dog.pmscript
+tokenize-dog.pmscript \
+tokenize-backtrack-gen.hfst \
+tokenize-backtrack.hfst \
+tokenize-backtrack.lexc \
+tokenize-backtrack-out-gtd.strings \
+tokenize-backtrack.pmscript
 
 
 RESULT_FILES=basic.cat-dog-bird.lexc.flag.result.prolog \

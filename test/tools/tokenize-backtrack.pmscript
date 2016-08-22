@@ -1,0 +1,16 @@
+Define morphology @bin"tokenize-backtrack.hfst" ;
+
+Define blank           Whitespace | Punct ;
+
+! Define incondword       morphology & [ Punct 0:?* ] ;
+Define morphoword       morphology                   LC([blank | #]) RC([blank | # ]);
+
+Define alphabet "a-z" | {á}|{š}|{ž}|{č}|{đ}|{ŋ}|{æ}|{ø}|{å} | "A-Z" | {Á}|{Š}|{Ž}|{Č}|{Đ}|{Ŋ}|{Æ}|{Ø}|{Å} ;
+Define alphaword alphabet+;
+Define unknownform [ [alphaword].u - [morphology].u];
+Define unknownwordEmpty unknownform:0 LC([blank | #]) RC([[blank ] | # ]);
+
+! Define token [ morphoword | unknownwordEmpty | incondword ] EndTag(token);
+Define token [ morphoword | unknownwordEmpty ] EndTag(token);
+
+Define TOP token ;

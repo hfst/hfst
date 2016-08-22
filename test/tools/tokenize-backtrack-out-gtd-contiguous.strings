@@ -1,0 +1,9 @@
+"<su.>"
+	"." PUNCT <W:0> "<.>"
+		"su" Adv Abbr <W:0> "<su>"
+	"." PUNCT <W:0> "<.>"
+		"su" Prn <W:0> "<su>"
+: 
+"<su>"
+	"su" Prn <W:0>
+:\n

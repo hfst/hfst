@@ -1,0 +1,21 @@
+"<busse>"
+	"busse" N <W:0>
+	"busset" V <W:0>
+: 
+"<skuvla>"
+	"skuvla" N <W:0>
+: 
+"<skuvla busse>"
+	"skuvlabusse" N ErrSpace <W:0>
+	"busset" V <W:0> "<busse>"
+		"skuvla" N <W:0> "<skuvla>"
+	"busse" N <W:0> "<busse>"
+		"skuvla" N <W:0> "<skuvla>"
+: 
+"<Jan.>"
+	"Jan." N Abbr <W:0>
+	"." PUNCT <W:0> "<.>"
+		"Jan." N Abbr <W:0> "<Jan>"
+	"." PUNCT <W:0> "<.>"
+		"Jan" N Prop <W:0> "<Jan>"
+:\n
