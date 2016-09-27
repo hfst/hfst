@@ -93,6 +93,12 @@ INLINE void *xxcalloc(size_t nmemb, size_t size) {
 }
 
 INLINE char *xxstrdup(const char *s) {
-    return(strdup(s));
+  //    return(strdup(s));
+  size_t size = strlen(s) + 1;
+  char *p = malloc(size);
+  if (p) {
+    memcpy(p, s, size);
+  }
+  return p;
 }
 

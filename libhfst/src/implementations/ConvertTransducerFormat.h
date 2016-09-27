@@ -17,14 +17,29 @@
 #include <map>
 #include <iostream>
 #include <vector>
-#include <map>
 
 #if HAVE_OPENFST
-#ifdef _MSC_VER
-#include "back-ends/openfstwin/src/include/fst/fstlib.h"
+#if OPENFST_VERSION_1_5_4
+  #include "back-ends/openfst/src/include/fst/fst-decl.h"
+  namespace fst { typedef fst::VectorFst<LogArc> LogFst; }
 #else
-#include "back-ends/openfst/src/include/fst/fstlib.h"
-#endif // _MSC_VER
+namespace fst
+{
+  template <class W> class TropicalWeightTpl;
+  typedef TropicalWeightTpl<float> TropicalWeight;
+
+  template <class W> class LogWeightTpl;
+  typedef LogWeightTpl<float> LogWeight;
+
+  template <class W> class ArcTpl;
+  typedef ArcTpl<TropicalWeight> StdArc;
+  typedef ArcTpl<LogWeight> LogArc;
+
+  template <class A> class VectorFst;
+  typedef VectorFst<StdArc> StdVectorFst;
+  typedef VectorFst<LogArc> LogFst;
+}
+#endif // OPENFST_VERSION_1_5_4
 #endif // HAVE_OPENFST
 
 #if HAVE_SFST
@@ -67,13 +82,8 @@ namespace hfst {
 namespace implementations {
 
 #if HAVE_OPENFST
-  typedef fst::StdArc::StateId StateId;
-  typedef fst::ArcIterator<fst::StdVectorFst> StdArcIterator;
-
-#if HAVE_OPENFST_LOG
-  typedef fst::ArcTpl<fst::LogWeight> LogArc;
-  typedef fst::VectorFst<LogArc> LogFst;
-#endif
+  typedef /*fst::StdArc::StateId*/ unsigned int StateId;
+  //typedef fst::ArcIterator<fst::StdVectorFst> StdArcIterator;
 #endif
 
 
@@ -193,13 +203,13 @@ namespace implementations {
 
 #if HAVE_OPENFST_LOG
   static HfstBasicTransducer * log_ofst_to_hfst_basic_transducer
-    (LogFst * t, bool had_hfst_header=true);
+    (fst::LogFst * t, bool had_hfst_header=true);
   
   static StateId hfst_state_to_state_id
     (HfstState s, std::map<HfstState, StateId> &state_map,
-     LogFst * t);
+     fst::LogFst * t);
 
-  static LogFst * hfst_basic_transducer_to_log_ofst
+  static fst::LogFst * hfst_basic_transducer_to_log_ofst
     (const HfstBasicTransducer * t);
 
 

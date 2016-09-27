@@ -357,10 +357,17 @@ StringPairVector HfstTokenizer::tokenize_and_align_flag_diacritics
   return spv;
 }
 
-  
-  void
-  HfstTokenizer::check_utf8_correctness(const std::string &input_string)
+
+void 
+HfstTokenizer::check_utf8_correctness(const std::string &input_string)
 {
+  (void)check_utf8_correctness_and_calculate_length(input_string);
+}
+  
+  unsigned int
+  HfstTokenizer::check_utf8_correctness_and_calculate_length(const std::string &input_string)
+{
+  unsigned int retval = 0;
   // Check that input_string is made up from utf-8 sequences.
   for (std::string::const_iterator it = input_string.begin();
        it != input_string.end();
@@ -410,7 +417,9 @@ StringPairVector HfstTokenizer::tokenize_and_align_flag_diacritics
         { HFST_THROW_MESSAGE(IncorrectUtf8CodingException,
                              "not continuation octet & 100000000b"); }
     }
+      retval = retval + 1;
     }
+  return retval;
 }
   
 }

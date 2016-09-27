@@ -12,7 +12,7 @@
 #endif
 
 #include "ConvertTransducerFormat.h"
-#include "HfstTransitionGraph.h"
+#include "HfstBasicTransducer.h"
 #include "HfstTransducer.h"
 
 #ifndef MAIN_TEST

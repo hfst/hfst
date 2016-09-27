@@ -154,6 +154,8 @@ namespace hfst
     //!        continuation bytes.
     //! (For reference: http://en.wikipedia.org/wiki/UTF-8)
     HFSTDLL static void check_utf8_correctness(const std::string &input_string);
+
+    HFSTDLL static unsigned int check_utf8_correctness_and_calculate_length(const std::string &input_string);
   };
 }
 #endif

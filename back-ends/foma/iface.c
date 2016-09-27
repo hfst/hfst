@@ -822,7 +822,7 @@ void iface_apply_random(char *(*applyer)(), int limit) {
             if (result != NULL) {
 		for (tempresults = results; tempresults - results < limit; tempresults++) {
 		    if (tempresults->string == NULL) {
-			tempresults->string = strdup(result);
+			tempresults->string = xxstrdup(result);
 			tempresults->count = 1;
 			break;
 		    }

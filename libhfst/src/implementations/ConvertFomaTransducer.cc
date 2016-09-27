@@ -12,7 +12,7 @@
 #endif
 
 #include "ConvertTransducerFormat.h"
-#include "HfstTransitionGraph.h"
+#include "HfstBasicTransducer.h"
 #include "HfstTransducer.h"
 
 #ifndef MAIN_TEST
@@ -99,9 +99,9 @@ namespace hfst { namespace implementations
   static void copy_alphabet(const HfstBasicTransducer * hfst_fsm,
                             struct fsm_construct_handle * h)
   {
-    const HfstBasicTransducer::HfstTransitionGraphAlphabet & alpha
+    const HfstBasicTransducer::HfstAlphabet & alpha
       = hfst_fsm->get_alphabet();
-    for (HfstBasicTransducer::HfstTransitionGraphAlphabet::iterator it
+    for (HfstBasicTransducer::HfstAlphabet::iterator it
            = alpha.begin();
          it != alpha.end(); it++)
       {

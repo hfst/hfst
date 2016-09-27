@@ -274,7 +274,7 @@ namespace hfst
           HfstTransducer retval( trVector[0] );
           for ( unsigned int i = 1; i < trVector.size(); i++ )
           {
-              retval.disjunct(trVector[i]).minimize();
+              retval.disjunct(trVector[i]).optimize();
           }
           return retval;
       }
@@ -293,14 +293,14 @@ namespace hfst
         String leftMarker("@LM@");
         String rightMarker("@RM@");
 
-        retval.substitute(StringPair(leftMarker, leftMarker), StringPair("@_EPSILON_SYMBOL_@", "@_EPSILON_SYMBOL_@")).minimize();
-        retval.substitute(StringPair(rightMarker, rightMarker), StringPair("@_EPSILON_SYMBOL_@", "@_EPSILON_SYMBOL_@")).minimize();
+        retval.substitute(StringPair(leftMarker, leftMarker), StringPair("@_EPSILON_SYMBOL_@", "@_EPSILON_SYMBOL_@")).optimize();
+        retval.substitute(StringPair(rightMarker, rightMarker), StringPair("@_EPSILON_SYMBOL_@", "@_EPSILON_SYMBOL_@")).optimize();
 
 
         retval.remove_from_alphabet(leftMarker);
         retval.remove_from_alphabet(rightMarker);
 
-        retval.minimize();
+        retval.optimize();
 
 
         
@@ -332,22 +332,22 @@ namespace hfst
           HfstTransducer retval(t);
           retval.transform_weights(&zero_weight);
 
-          retval.input_project().minimize();
+          retval.input_project().optimize();
 
           HfstTransducer tmp(retval);
-          tmp.compose(Constraint).minimize();
+          tmp.compose(Constraint).optimize();
           //printf("tmp: \n");
            //tmp.write_in_att_format(stdout, 1);
 
-          tmp.compose(retval).minimize();
+          tmp.compose(retval).optimize();
          //printf("tmp 2: \n");
          //tmp.write_in_att_format(stdout, 1);
-          tmp.output_project().minimize();
-          retval.subtract(tmp).minimize();
+          tmp.output_project().optimize();
+          retval.subtract(tmp).optimize();
 
           //transform weights to zero
           retval.transform_weights(&zero_weight);
-          retval.compose(t).minimize();
+          retval.compose(t).optimize();
 
           return retval;
       }
@@ -371,16 +371,16 @@ namespace hfst
           HfstTransducer leftBracket(leftMarker, TOK, type);
           HfstTransducer rightBracket(rightMarker, TOK, type);
 
-          t.insert_freely(leftBracket, false).minimize();
-          t.insert_freely(rightBracket, false).minimize();
+          t.insert_freely(leftBracket, false).optimize();
+          t.insert_freely(rightBracket, false).optimize();
 
           if ( !optional )
           {
               HfstTransducer leftBracket2(leftMarker2, TOK, type);
               HfstTransducer rightBracket2(rightMarker2, TOK, type);
 
-              t.insert_freely(leftBracket2, false).minimize();
-              t.insert_freely(rightBracket2, false).minimize();
+              t.insert_freely(leftBracket2, false).optimize();
+              t.insert_freely(rightBracket2, false).optimize();
           }
       }
 
@@ -416,7 +416,7 @@ namespace hfst
             HfstTransducer firstContext( identityStar);
             firstContext.concatenate(ContextVector[i].first);
             firstContext.transform_weights(&zero_weight);
-            firstContext.minimize();
+            firstContext.optimize();
 
             insertFreelyAllTheBrackets( firstContext, optional );
 
@@ -424,7 +424,7 @@ namespace hfst
             HfstTransducer secondContext(ContextVector[i].second);
             secondContext.concatenate(identityStar);
             secondContext.transform_weights(&zero_weight);
-            secondContext.minimize();
+            secondContext.optimize();
             insertFreelyAllTheBrackets( secondContext, optional);
 
             /* RULE:    LC:        RC:
@@ -482,14 +482,14 @@ namespace hfst
 
             leftContextExpanded.transform_weights(&zero_weight);
             rightContextExpanded.transform_weights(&zero_weight);
-            leftContextExpanded.minimize();
-            rightContextExpanded.minimize();
+            leftContextExpanded.optimize();
+            rightContextExpanded.optimize();
 
             firstContext.disjunct(leftContextExpanded);
-            firstContext.minimize();
+            firstContext.optimize();
 
             secondContext.disjunct(rightContextExpanded);
-            secondContext.minimize();
+            secondContext.optimize();
 
             // add boundary symbol before/after contexts
             String boundaryMarker(".#.");
@@ -514,7 +514,7 @@ namespace hfst
                 //printf("\n - Left context boundary false! - \n");
                 firstContext.insert_to_alphabet(boundaryMarker);
                 HfstTransducer tmp(boundary);
-                tmp.concatenate(identityStar).minimize();
+                tmp.concatenate(identityStar).optimize();
                 //printf("tmp \n");
                 //tmp.write_in_att_format(stdout, 1);
                 tmp.concatenate(firstContext);
@@ -540,7 +540,7 @@ namespace hfst
             {
               // printf("\n - Right context boundary false! - \n");
                 secondContext.insert_to_alphabet(boundaryMarker);
-                secondContext.concatenate(identityStar).concatenate(boundary).minimize();
+                secondContext.concatenate(identityStar).concatenate(boundary).optimize();
             }
 
          // put mapping between (expanded) contexts
@@ -551,7 +551,7 @@ namespace hfst
 
           oneContextReplace.transform_weights(&zero_weight);
           unionContextReplace.disjunct(oneContextReplace);
-          unionContextReplace.minimize();
+          unionContextReplace.optimize();
 
           }
           return unionContextReplace;
@@ -607,7 +607,7 @@ namespace hfst
         // Identity (normal)
         HfstTransducer identityPair = HfstTransducer::identity_pair( type );
         HfstTransducer identity (identityPair);
-        identity.repeat_star().minimize();
+        identity.repeat_star().optimize();
 
 
         HfstTransducer epsilon("@_EPSILON_SYMBOL_@", TOK, type);
@@ -631,7 +631,7 @@ namespace hfst
             identityWithoutBoundary.insert_to_alphabet(".#.");
             HfstTransducer removeHash(identityWithoutBoundary);
             HfstTransducer boundary(".#.", TOK, type);
-            removeHash.concatenate(boundary).concatenate(identityWithoutBoundary).minimize();
+            removeHash.concatenate(boundary).concatenate(identityWithoutBoundary).optimize();
             //printf("removeHash \n");
             //removeHash.write_in_att_format(stdout, 1);
 
@@ -644,15 +644,15 @@ namespace hfst
             {
                 // remove .#. from the center
                 // center - (?* .#. ?*)
-                oneMappingPair.subtract(removeHash, false).minimize();
+                oneMappingPair.subtract(removeHash, false).optimize();
                 oneMappingPair.remove_from_alphabet(".#.");
                 mapping = oneMappingPair;
             }
             else
             {
-                oneMappingPair.subtract(removeHash, false).minimize();
+                oneMappingPair.subtract(removeHash, false).optimize();
                 oneMappingPair.remove_from_alphabet(".#.");
-                mapping.disjunct(oneMappingPair).minimize();
+                mapping.disjunct(oneMappingPair).optimize();
             }
         }
         //printf("mapping all after cross product \n");
@@ -694,12 +694,12 @@ namespace hfst
 
         // Surround mapping with brackets
         HfstTransducer tmpMapping(leftBracket);
-        tmpMapping.concatenate(mapping).concatenate(rightBracket).minimize();
+        tmpMapping.concatenate(mapping).concatenate(rightBracket).optimize();
 
         HfstTransducer mappingWithBrackets(tmpMapping);
 
         //printf("mappingWithBrackets: \n");
-        //mappingWithBrackets.minimize().write_in_att_format(stdout, 1);
+        //mappingWithBrackets.optimize().write_in_att_format(stdout, 1);
 
         // Identity pair
         // HfstTransducer identityPair = HfstTransducer::identity_pair( type );
@@ -714,7 +714,7 @@ namespace hfst
             leftMappingUnion = mappingPairVector[0].first;
             for ( unsigned int i = 1; i < mappingPairVector.size(); i++ )
             {
-                leftMappingUnion.disjunct(mappingPairVector[i].first).minimize();
+                leftMappingUnion.disjunct(mappingPairVector[i].first).optimize();
             }
             // needed in case of ? -> x replacement
             leftMappingUnion.insert_to_alphabet(leftMarker2);
@@ -724,24 +724,24 @@ namespace hfst
             leftMappingUnion.insert_to_alphabet(tmpMarker);
 
             //printf("leftMappingUnion: \n");
-            //leftMappingUnion.minimize().write_in_att_format(stdout, 1);
+            //leftMappingUnion.optimize().write_in_att_format(stdout, 1);
 
 
-            mappingWithBrackets2.concatenate(leftMappingUnion).concatenate(rightBracket2).minimize();
+            mappingWithBrackets2.concatenate(leftMappingUnion).concatenate(rightBracket2).optimize();
 
             //printf("mappingWithBrackets2: \n");
-            //mappingWithBrackets2.minimize().write_in_att_format(stdout, 1);
+            //mappingWithBrackets2.optimize().write_in_att_format(stdout, 1);
 
               // mappingWithBrackets...... expanded
             mappingWithBrackets.insert_to_alphabet(leftMarker2);
             mappingWithBrackets.insert_to_alphabet(rightMarker2);
             //mappingWithBrackets.insert_to_alphabet(leftMarker);
             //mappingWithBrackets.insert_to_alphabet(rightMarker);
-            mappingWithBrackets.disjunct(mappingWithBrackets2).minimize();
+            mappingWithBrackets.disjunct(mappingWithBrackets2).optimize();
         }
 
         //printf("mappingWithBrackets: \n");
-        //mappingWithBrackets.minimize().write_in_att_format(stdout, 1);
+        //mappingWithBrackets.optimize().write_in_att_format(stdout, 1);
 
 
         // Identity with bracketed mapping and marker symbols and TmpMarker in alphabet
@@ -758,8 +758,8 @@ namespace hfst
           identityExpanded.insert_to_alphabet(rightMarker2);
         }
 
-        identityExpanded.disjunct(mappingWithBrackets).minimize();
-        identityExpanded.repeat_star().minimize();
+        identityExpanded.disjunct(mappingWithBrackets).optimize();
+        identityExpanded.repeat_star().optimize();
 
         // when there aren't any contexts, result is identityExpanded
         if ( ContextVector.size() == 1 )
@@ -769,21 +769,21 @@ namespace hfst
           {
               identityExpanded.remove_from_alphabet(tmpMarker);
               //printf("identityExpanded: \n");
-              //identityExpanded.minimize().write_in_att_format(stdout, 1);
+              //identityExpanded.optimize().write_in_att_format(stdout, 1);
               return identityExpanded;
           }
         }
 
         // Surround mapping with tmp boudaries
         HfstTransducer mappingWithBracketsAndTmpBoundary(tmpBracket);
-        mappingWithBracketsAndTmpBoundary.concatenate(mappingWithBrackets).concatenate(tmpBracket).minimize();
+        mappingWithBracketsAndTmpBoundary.concatenate(mappingWithBrackets).concatenate(tmpBracket).optimize();
         //printf("mappingWithBracketsAndTmpBoundary: \n");
         //mappingWithBracketsAndTmpBoundary.write_in_att_format(stdout, 1);
 
 
         // .* |<a:b>| :*
         HfstTransducer bracketedReplace(identityExpanded);
-        bracketedReplace.concatenate(mappingWithBracketsAndTmpBoundary).concatenate(identityExpanded).minimize();
+        bracketedReplace.concatenate(mappingWithBracketsAndTmpBoundary).concatenate(identityExpanded).optimize();
 
         //printf("mappingWithBracketsAndTmpBoundary: \n");
         //mappingWithBracketsAndTmpBoundary.write_in_att_format(stdout, 1);
@@ -805,22 +805,22 @@ namespace hfst
 
         // subtract all mappings in contexts from replace without contexts
         HfstTransducer replaceWithoutContexts(bracketedReplace);
-        replaceWithoutContexts.subtract(unionContextReplace).minimize();
+        replaceWithoutContexts.subtract(unionContextReplace).optimize();
 
         //printf("replaceWithoutContexts \n");
         //replaceWithoutContexts.write_in_att_format(stdout, 1);
 
         // remove tmpMaprker
         replaceWithoutContexts.substitute(StringPair(tmpMarker, tmpMarker),
-                        StringPair("@_EPSILON_SYMBOL_@", "@_EPSILON_SYMBOL_@")).minimize();
+                        StringPair("@_EPSILON_SYMBOL_@", "@_EPSILON_SYMBOL_@")).optimize();
         replaceWithoutContexts.remove_from_alphabet(tmpMarker);
-        replaceWithoutContexts.minimize();
+        replaceWithoutContexts.optimize();
 
         identityExpanded.remove_from_alphabet(tmpMarker);
 
         // final negation
         HfstTransducer uncondidtionalTr(identityExpanded);
-        uncondidtionalTr.subtract(replaceWithoutContexts).minimize();
+        uncondidtionalTr.subtract(replaceWithoutContexts).optimize();
 
         return uncondidtionalTr;
 
@@ -905,7 +905,7 @@ namespace hfst
         HfstTransducer identity (identityPair);
         // unknowns/identities must not be expanded to marker symbols
         identity.insert_to_alphabet(marker_symbols);
-        identity.repeat_star().minimize();
+        identity.repeat_star().optimize();
 
         HfstTransducer identityExpanded(identityPair);
         identityExpanded.insert_to_alphabet(leftMarker);
@@ -924,7 +924,7 @@ namespace hfst
         HfstTransducer removeHash(identityWithoutBoundary);
         HfstTransducer boundary(".#.", TOK, type);
         removeHash.concatenate(boundary)
-          .concatenate(identityWithoutBoundary).minimize();
+          .concatenate(identityWithoutBoundary).optimize();
         //printf("removeHash \n");
         //removeHash.write_in_att_format(stdout, 1);
 
@@ -962,15 +962,15 @@ namespace hfst
                 {
                   // remove .#. from the center
                   // center - (?* .#. ?*)
-                  oneMappingPair.subtract(removeHash, false).minimize();
+                  oneMappingPair.subtract(removeHash, false).optimize();
                   oneMappingPair.remove_from_alphabet(".#.");
                   mapping = oneMappingPair;
                 }
               else
                 {
-                  oneMappingPair.subtract(removeHash, false).minimize();
+                  oneMappingPair.subtract(removeHash, false).optimize();
                   oneMappingPair.remove_from_alphabet(".#.");
-                  mapping.disjunct(oneMappingPair).minimize();
+                  mapping.disjunct(oneMappingPair).optimize();
                 }
             }
           
@@ -1025,7 +1025,7 @@ namespace hfst
           // Surround mapping with brackets
           HfstTransducer mappingWithBrackets(leftBracket);
           mappingWithBrackets.concatenate(mapping)
-            .concatenate(rightBracket).minimize();
+            .concatenate(rightBracket).optimize();
           
           
           // non - optional
@@ -1040,7 +1040,7 @@ namespace hfst
               
               
               HfstTransducer mappingProject(mapping);
-              mappingProject.input_project().minimize();
+              mappingProject.input_project().optimize();
               
               HfstTransducer mappingWithBracketsNonOptional(leftBracket2);
               // needed in case of ? -> x replacement
@@ -1050,18 +1050,18 @@ namespace hfst
 
               mappingWithBracketsNonOptional.concatenate(mappingProject).
                 concatenate(rightBracket2).
-                minimize();
+                optimize();
               // mappingWithBrackets...... expanded
               mappingWithBrackets.disjunct(mappingWithBracketsNonOptional)
-                .minimize();
+                .optimize();
 
             }
 
-          identityExpanded.disjunct(mappingWithBrackets).minimize();
+          identityExpanded.disjunct(mappingWithBrackets).optimize();
           mappingWithBracketsVector.push_back(mappingWithBrackets);
         }
         
-        identityExpanded.repeat_star().minimize();
+        identityExpanded.repeat_star().optimize();
         
         // if none of the rules have contexts, return identityExpanded
         if ( noContexts )
@@ -1098,15 +1098,15 @@ namespace hfst
             mappingWithBracketsAndTmpBoundary
               .concatenate(mappingWithBracketsVector[i])
               .concatenate(tmpBracket)
-              .minimize();
+              .optimize();
             // .* |<a:b>| :*
             HfstTransducer bracketedReplaceTmp(identityExpanded);
             bracketedReplaceTmp.concatenate(mappingWithBracketsAndTmpBoundary)
               .concatenate(identityExpanded)
-              .minimize();
+              .optimize();
             
             bracketedReplaceTmp.transform_weights(&zero_weight);
-            bracketedReplace.disjunct(bracketedReplaceTmp).minimize();
+            bracketedReplace.disjunct(bracketedReplaceTmp).optimize();
             
             //Create context part
             HfstTransducer unionContextReplaceTmp(type);
@@ -1150,7 +1150,7 @@ namespace hfst
             
             unionContextReplaceTmp.transform_weights(&zero_weight);
             
-            unionContextReplace.disjunct(unionContextReplaceTmp).minimize();
+            unionContextReplace.disjunct(unionContextReplaceTmp).optimize();
            /*
            //THIS part is for disjuncting labels first, and then substitute
            // them with transducers
@@ -1169,7 +1169,7 @@ namespace hfst
            
            //disjunct all keys
            unionContextReplace_labels.disjunct(HfstTransducer(contx_key,
-           TOK, type)).minimize();
+           TOK, type)).optimize();
            
            //   printf("unionContextReplace_labels: \n");
            //   unionContextReplace_labels.write_in_att_format(stdout, 1);
@@ -1201,7 +1201,7 @@ namespace hfst
         unionContextReplace.transform_weights(&zero_weight);
         
         printf("min \n");
-        unionContextReplace.minimize();
+        unionContextReplace.optimize();
         printf("min done. \n");
         
         */
@@ -1211,15 +1211,15 @@ namespace hfst
         //contexts: \n");
         // subtract all mappings in contexts from replace without contexts
         HfstTransducer replaceWithoutContexts(bracketedReplace);
-        replaceWithoutContexts.subtract(unionContextReplace).minimize();
+        replaceWithoutContexts.subtract(unionContextReplace).optimize();
         
         //printf("remove bla bla: \n");
         // remove tmpMaprker
         replaceWithoutContexts.substitute
           (StringPair(tmpMarker, tmpMarker),
-           StringPair("@_EPSILON_SYMBOL_@", "@_EPSILON_SYMBOL_@")).minimize();
+           StringPair("@_EPSILON_SYMBOL_@", "@_EPSILON_SYMBOL_@")).optimize();
         replaceWithoutContexts.remove_from_alphabet(tmpMarker);
-        replaceWithoutContexts.minimize();
+        replaceWithoutContexts.optimize();
 
         identityExpanded.remove_from_alphabet(tmpMarker);
         
@@ -1229,7 +1229,7 @@ namespace hfst
         //printf("final subtract: \n");
         // final negation
         HfstTransducer uncondidtionalTr(identityExpanded);
-        uncondidtionalTr.subtract(replaceWithoutContexts).minimize();
+        uncondidtionalTr.subtract(replaceWithoutContexts).optimize();
         
         //printf("uncondidtionalTr: \n");
         //uncondidtionalTr.write_in_att_format(stdout, 1);
@@ -1269,7 +1269,7 @@ namespace hfst
 
           // Create Right Part
           HfstTransducer B(leftBracket);
-          B.disjunct(rightBracket).minimize();
+          B.disjunct(rightBracket).optimize();
 
           HfstTransducer epsilon("@_EPSILON_SYMBOL_@", TOK, type);
           HfstTransducer epsilonToLeftMark("@_EPSILON_SYMBOL_@", leftMarker, TOK, type);
@@ -1282,10 +1282,10 @@ namespace hfst
           bracketsToEpsilon.cross_product(epsilon);
 
           HfstTransducer identityPairMinusBrackets(identityPair);
-          identityPairMinusBrackets.subtract(B).minimize();//.repeat_plus().minimize();
+          identityPairMinusBrackets.subtract(B).optimize();//.repeat_plus().optimize();
 
           HfstTransducer rightPart(epsilonToBrackets);
-          rightPart.disjunct(bracketsToEpsilon).disjunct(identityPairMinusBrackets).minimize().repeat_star().minimize();
+          rightPart.disjunct(bracketsToEpsilon).disjunct(identityPairMinusBrackets).optimize().repeat_star().optimize();
 
           return rightPart;
       }
@@ -1307,7 +1307,7 @@ namespace hfst
             // Identity (normal)
             HfstTransducer identityPair = HfstTransducer::identity_pair( type );
             HfstTransducer identity (identityPair);
-            identity.repeat_star().minimize();
+            identity.repeat_star().optimize();
 
             HfstTransducer leftBracketToZero(leftMarker, "@_EPSILON_SYMBOL_@", TOK, type);
             HfstTransducer rightBracketToZero(rightMarker, "@_EPSILON_SYMBOL_@", TOK, type);
@@ -1320,7 +1320,7 @@ namespace hfst
                .concatenate(rightBracketToZero)
                .concatenate(boundary)
                .concatenate(identity)
-               .minimize();
+               .optimize();
 
 //            printf("Constraint: \n");
 //            Constraint.write_in_att_format(stdout, 1);
@@ -1361,7 +1361,7 @@ namespace hfst
           // Identity (normal)
           HfstTransducer identityPair = HfstTransducer::identity_pair( type );
           HfstTransducer identity (identityPair);
-          identity.repeat_star().minimize();
+          identity.repeat_star().optimize();
 
 
           // Create Right Part:  [ B:0 | 0:B | ?-B ]*
@@ -1373,24 +1373,24 @@ namespace hfst
           HfstTransducer epsilon("@_EPSILON_SYMBOL_@", TOK, type);
           // B
           HfstTransducer B(leftBracket);
-          B.disjunct(rightBracket).minimize();
+          B.disjunct(rightBracket).optimize();
           // (B:0)*
 
 
           HfstTransducer bracketsToEpsilonStar(B);
-          bracketsToEpsilonStar.cross_product(epsilon).minimize().repeat_star().minimize();
+          bracketsToEpsilonStar.cross_product(epsilon).optimize().repeat_star().optimize();
 
           // (I-B) and (I-B)+
           HfstTransducer identityPairMinusBrackets(identityPair);
-          identityPairMinusBrackets.subtract(B).minimize();
+          identityPairMinusBrackets.subtract(B).optimize();
 
           HfstTransducer identityPairMinusBracketsPlus(identityPairMinusBrackets);
-          identityPairMinusBracketsPlus.repeat_plus().minimize();
+          identityPairMinusBracketsPlus.repeat_plus().optimize();
 
           /*
           HfstTransducer epsilon("@_EPSILON_SYMBOL_@", TOK, type);
           HfstTransducer identityPairMinusBracketsOrEpsilon(identityPairMinusBrackets);
-          identityPairMinusBracketsOrEpsilon.disjunct(epsilon).minimize();
+          identityPairMinusBracketsOrEpsilon.disjunct(epsilon).optimize();
           */
           HfstTransducer LeftBracketToEpsilon(leftMarker, "@_EPSILON_SYMBOL_@", TOK, type);
 
@@ -1406,9 +1406,9 @@ namespace hfst
                   concatenate(bracketsToEpsilonStar).
                   concatenate(identityPairMinusBrackets).
                   concatenate(rightPart).
-                  minimize();
+                  optimize();
 
-          Constraint.concatenate(boundary).minimize();
+          Constraint.concatenate(boundary).optimize();
 
         //  printf("Constraint: \n");
          // Constraint.write_in_att_format(stdout, 1);
@@ -1447,7 +1447,7 @@ namespace hfst
           // Identity (normal)
           HfstTransducer identityPair = HfstTransducer::identity_pair( type );
           HfstTransducer identity (identityPair);
-          identity.repeat_star().minimize();
+          identity.repeat_star().optimize();
 
 
           // Create Right Part:  [ B:0 | 0:B | ?-B ]*
@@ -1459,20 +1459,20 @@ namespace hfst
           HfstTransducer epsilon("@_EPSILON_SYMBOL_@", TOK, type);
           // B
           HfstTransducer B(leftBracket);
-          B.disjunct(rightBracket).minimize();
+          B.disjunct(rightBracket).optimize();
           // (B:0)*
           HfstTransducer bracketsToEpsilonStar(B);
-          bracketsToEpsilonStar.cross_product(epsilon).minimize().repeat_star().minimize();
+          bracketsToEpsilonStar.cross_product(epsilon).optimize().repeat_star().optimize();
 
           // (I-B) and (I-B)+
           HfstTransducer identityPairMinusBrackets(identityPair);
-          identityPairMinusBrackets.subtract(B).minimize();
+          identityPairMinusBrackets.subtract(B).optimize();
 
           HfstTransducer identityPairMinusBracketsPlus(identityPairMinusBrackets);
-          identityPairMinusBracketsPlus.repeat_plus().minimize();
+          identityPairMinusBracketsPlus.repeat_plus().optimize();
 
           HfstTransducer identityPairMinusBracketsStar(identityPairMinusBrackets);
-          identityPairMinusBracketsStar.repeat_star().minimize();
+          identityPairMinusBracketsStar.repeat_star().optimize();
 
 
           HfstTransducer RightBracketToEpsilon(rightMarker, "@_EPSILON_SYMBOL_@", TOK, type);
@@ -1483,7 +1483,7 @@ namespace hfst
           Constraint.concatenate(identityPairMinusBracketsPlus).
                   concatenate(RightBracketToEpsilon).
                   concatenate(identity).
-                  minimize();
+                  optimize();
 
           //// Compose with unconditional replace transducer
           // tmp = t.1 .o. Constr .o. t.1
@@ -1522,23 +1522,23 @@ namespace hfst
           // Identity
           HfstTransducer identityPair = HfstTransducer::identity_pair( type );
           HfstTransducer identity(identityPair);
-          identity.repeat_star().minimize();
+          identity.repeat_star().optimize();
 
           // epsilon
           HfstTransducer epsilon("@_EPSILON_SYMBOL_@", TOK, type);
           // B
           HfstTransducer B(leftBracket);
-          B.disjunct(rightBracket).minimize();
+          B.disjunct(rightBracket).optimize();
           // (B:0)*
           HfstTransducer bracketsToEpsilonStar(B);
-          bracketsToEpsilonStar.cross_product(epsilon).minimize().repeat_star().minimize();
+          bracketsToEpsilonStar.cross_product(epsilon).optimize().repeat_star().optimize();
 
           // (I-B) and (I-B)+
           HfstTransducer identityPairMinusBrackets(identityPair);
-          identityPairMinusBrackets.subtract(B).minimize();
+          identityPairMinusBrackets.subtract(B).optimize();
 
           HfstTransducer identityPairMinusBracketsPlus(identityPairMinusBrackets);
-          identityPairMinusBracketsPlus.repeat_plus().minimize();
+          identityPairMinusBracketsPlus.repeat_plus().optimize();
 
 
 
@@ -1559,15 +1559,15 @@ namespace hfst
                   disjunct(LeftBracketToEpsilon).
                   disjunct(epsilonToRightBracket).
                   disjunct(B).
-                  minimize();
+                  optimize();
           //    printf("nonClosingBracketInsertion: \n");
           //    nonClosingBracketInsertion.write_in_att_format(stdout, 1);
 
 
-          nonClosingBracketInsertion.concatenate(identityPairMinusBracketsPlus).minimize();
+          nonClosingBracketInsertion.concatenate(identityPairMinusBracketsPlus).optimize();
 
           HfstTransducer middlePart(identityPairMinusBrackets);
-          middlePart.disjunct(nonClosingBracketInsertion).minimize();
+          middlePart.disjunct(nonClosingBracketInsertion).optimize();
 
 
           // ?* < [?-B]+ 0:> [ ? | 0:< | <:0 | 0:> | B ] [?-B]+ [ B:0 | 0:B | ?-B ]*
@@ -1579,7 +1579,7 @@ namespace hfst
               //    concatenate(identityPairMinusBracketsPlus).
                   concatenate(middlePart).
                   concatenate(rightPart).
-                  minimize();
+                  optimize();
           //printf("Constraint Longest Match: \n");
           //Constraint.write_in_att_format(stdout, 1);
 
@@ -1612,23 +1612,23 @@ namespace hfst
           // Identity
           HfstTransducer identityPair = HfstTransducer::identity_pair( type );
           HfstTransducer identity(identityPair);
-          identity.repeat_star().minimize();
+          identity.repeat_star().optimize();
 
           // epsilon
           HfstTransducer epsilon("@_EPSILON_SYMBOL_@", TOK, type);
           // B
           HfstTransducer B(leftBracket);
-          B.disjunct(rightBracket).minimize();
+          B.disjunct(rightBracket).optimize();
           // (B:0)*
           HfstTransducer bracketsToEpsilonStar(B);
-          bracketsToEpsilonStar.cross_product(epsilon).minimize().repeat_star().minimize();
+          bracketsToEpsilonStar.cross_product(epsilon).optimize().repeat_star().optimize();
 
           // (I-B) and (I-B)+
           HfstTransducer identityPairMinusBrackets(identityPair);
-          identityPairMinusBrackets.subtract(B).minimize();
+          identityPairMinusBrackets.subtract(B).optimize();
 
           HfstTransducer identityPairMinusBracketsPlus(identityPairMinusBrackets);
-          identityPairMinusBracketsPlus.repeat_plus().minimize();
+          identityPairMinusBracketsPlus.repeat_plus().optimize();
 
 
 
@@ -1651,19 +1651,19 @@ namespace hfst
                   disjunct(RightBracketToEpsilon).
                   disjunct(epsilonToRightBracket).
                   disjunct(B).
-                  minimize();
+                  optimize();
 
 
           // [ B:0 | 0:B | ?-B ]* [?-B]+ [ ? | 0:< | <:0 | 0:> | B ] 0:< [?-B]+ > ?*
 
           HfstTransducer Constraint(rightPart);
           Constraint.concatenate(identityPairMinusBracketsPlus).
-                  concatenate(nonClosingBracketInsertion).minimize().
+                  concatenate(nonClosingBracketInsertion).optimize().
                   concatenate(epsilonToLeftBracket).
                   concatenate(identityPairMinusBracketsPlus).
                   concatenate(rightBracket).
                   concatenate(identity).
-                  minimize();
+                  optimize();
           //printf("Constraint Longest Match: \n");
           //Constraint.write_in_att_format(stdout, 1);
 
@@ -1700,7 +1700,7 @@ namespace hfst
           // Identity
           HfstTransducer identityPair = HfstTransducer::identity_pair( type );
           HfstTransducer identity(identityPair);
-          identity.repeat_star().minimize();
+          identity.repeat_star().optimize();
 
 
           // Create Right Part:  [ B:0 | 0:B | ?-B ]*
@@ -1709,11 +1709,11 @@ namespace hfst
 
           // [?-B] and [?-B]+
           HfstTransducer B(leftBracket);
-          B.disjunct(rightBracket).minimize();
+          B.disjunct(rightBracket).optimize();
           HfstTransducer identityPairMinusBrackets(identityPair);
-          identityPairMinusBrackets.subtract(B).minimize();
+          identityPairMinusBrackets.subtract(B).optimize();
           HfstTransducer identityPairMinusBracketsPlus(identityPairMinusBrackets);
-          identityPairMinusBracketsPlus.repeat_plus().minimize();
+          identityPairMinusBracketsPlus.repeat_plus().optimize();
 
 
           HfstTransducer RightBracketToEpsilon(rightMarker, "@_EPSILON_SYMBOL_@", TOK, type);
@@ -1729,12 +1729,12 @@ namespace hfst
                   disjunct(LeftBracketToEpsilon).
                   disjunct(RightBracketToEpsilon).
                   disjunct(B).
-                  minimize();
+                  optimize();
 
-          nonClosingBracketInsertion.concatenate(identityPairMinusBracketsPlus).minimize();
+          nonClosingBracketInsertion.concatenate(identityPairMinusBracketsPlus).optimize();
 
           HfstTransducer middlePart(identityPairMinusBrackets);
-          middlePart.disjunct(nonClosingBracketInsertion).minimize();
+          middlePart.disjunct(nonClosingBracketInsertion).optimize();
 
       //    printf("nonClosingBracketInsertion: \n");
       //    nonClosingBracketInsertion.write_in_att_format(stdout, 1);
@@ -1746,9 +1746,9 @@ namespace hfst
           Constraint.concatenate(leftBracket).
                   concatenate(identityPairMinusBracketsPlus).
                   concatenate(RightBracketToEpsilon).
-                  concatenate(middlePart).minimize().
+                  concatenate(middlePart).optimize().
                   concatenate(rightPart).
-                  minimize();
+                  optimize();
 
           //printf("Constraint Shortest Match: \n");
           //Constraint.write_in_att_format(stdout, 1);
@@ -1787,7 +1787,7 @@ namespace hfst
           // Identity
           HfstTransducer identityPair = HfstTransducer::identity_pair( type );
           HfstTransducer identity(identityPair);
-          identity.repeat_star().minimize();
+          identity.repeat_star().optimize();
 
 
           // Create Right Part:  [ B:0 | 0:B | ?-B ]*
@@ -1796,11 +1796,11 @@ namespace hfst
 
           // [?-B] and [?-B]+
           HfstTransducer B(leftBracket);
-          B.disjunct(rightBracket).minimize();
+          B.disjunct(rightBracket).optimize();
           HfstTransducer identityPairMinusBrackets(identityPair);
-          identityPairMinusBrackets.subtract(B).minimize();
+          identityPairMinusBrackets.subtract(B).optimize();
           HfstTransducer identityPairMinusBracketsPlus(identityPairMinusBrackets);
-          identityPairMinusBracketsPlus.repeat_plus().minimize();
+          identityPairMinusBracketsPlus.repeat_plus().optimize();
 
 
 
@@ -1815,13 +1815,13 @@ namespace hfst
           nonClosingBracketInsertionTmp.
                   disjunct(RightBracketToEpsilon).
                   disjunct(LeftBracketToEpsilon).
-                  disjunct(B).minimize();
+                  disjunct(B).optimize();
           HfstTransducer nonClosingBracketInsertion(identityPairMinusBracketsPlus);
-          nonClosingBracketInsertion.concatenate(nonClosingBracketInsertionTmp).minimize();
+          nonClosingBracketInsertion.concatenate(nonClosingBracketInsertionTmp).optimize();
 
 
           HfstTransducer middlePart(identityPairMinusBrackets);
-          middlePart.disjunct(nonClosingBracketInsertion).minimize();
+          middlePart.disjunct(nonClosingBracketInsertion).optimize();
 
 
           //[ B:0 | 0:B | ?-B ]*
@@ -1834,7 +1834,7 @@ namespace hfst
                   concatenate(identityPairMinusBracketsPlus).
                   concatenate(rightBracket).
                   concatenate(identity).
-                  minimize();
+                  optimize();
 
           //printf("Constraint Shortest Match: \n");
           //Constraint.write_in_att_format(stdout, 1);
@@ -1874,13 +1874,13 @@ namespace hfst
           // Identity (normal)
           HfstTransducer identityPair = HfstTransducer::identity_pair( type );
           HfstTransducer identity (identityPair);
-          identity.repeat_star().minimize();
+          identity.repeat_star().optimize();
 
           HfstTransducer identityPlus (identityPair);
-          identityPlus.repeat_plus().minimize();
+          identityPlus.repeat_plus().optimize();
 
           HfstTransducer identityStar (identityPair);
-          identityStar.repeat_star().minimize();
+          identityStar.repeat_star().optimize();
 
           // epsilon
           String epsilon("@_EPSILON_SYMBOL_@");
@@ -1889,7 +1889,7 @@ namespace hfst
           HfstTransducer leftBracketToEpsilon(leftMarker, epsilon, TOK, type );
           HfstTransducer leftBracket2ToEpsilon(leftMarker2, epsilon, TOK, type );
           HfstTransducer allLeftBracketsToEpsilon(leftBracketToEpsilon);
-          allLeftBracketsToEpsilon.disjunct(leftBracket2ToEpsilon).minimize();
+          allLeftBracketsToEpsilon.disjunct(leftBracket2ToEpsilon).optimize();
 
 
           //    printf("allLeftBracketsToEpsilon: \n");
@@ -1899,31 +1899,31 @@ namespace hfst
           HfstTransducer rightBracketToEpsilon(rightMarker, epsilon, TOK, type );
           HfstTransducer rightBracket2ToEpsilon(rightMarker2, epsilon, TOK, type );
           HfstTransducer allRightBracketsToEpsilon(rightBracketToEpsilon);
-          allRightBracketsToEpsilon.disjunct(rightBracket2ToEpsilon).minimize();
+          allRightBracketsToEpsilon.disjunct(rightBracket2ToEpsilon).optimize();
 
           // B (B1 | B2)
           HfstTransducer B(leftBracket);
-          B.disjunct(rightBracket).minimize();
-          B.disjunct(leftBracket2).minimize();
-          B.disjunct(rightBracket2).minimize();
+          B.disjunct(rightBracket).optimize();
+          B.disjunct(leftBracket2).optimize();
+          B.disjunct(rightBracket2).optimize();
 
 
 
           // (? - B)+
           HfstTransducer identityPairMinusBracketsPlus(identityPair);
-          identityPairMinusBracketsPlus.subtract(B).minimize().repeat_plus().minimize();
+          identityPairMinusBracketsPlus.subtract(B).optimize().repeat_plus().optimize();
 
           // repeatingPart ( BL:0 (?-B)+ BR:0 ?* )+
           HfstTransducer repeatingPart(allLeftBracketsToEpsilon);
-          repeatingPart.concatenate(identityPairMinusBracketsPlus).minimize();
-          repeatingPart.concatenate(allRightBracketsToEpsilon).minimize();
-          repeatingPart.concatenate(identityStar).minimize();
-          repeatingPart.repeat_plus().minimize();
+          repeatingPart.concatenate(identityPairMinusBracketsPlus).optimize();
+          repeatingPart.concatenate(allRightBracketsToEpsilon).optimize();
+          repeatingPart.concatenate(identityStar).optimize();
+          repeatingPart.repeat_plus().optimize();
           //printf("middlePart: \n");
           //middlePart.write_in_att_format(stdout, 1);
 
           HfstTransducer Constraint(identityStar);
-          Constraint.concatenate(repeatingPart).minimize();
+          Constraint.concatenate(repeatingPart).optimize();
           //printf("Constraint: \n");
           //Constraint.write_in_att_format(stdout, 1);
 
@@ -1968,14 +1968,14 @@ namespace hfst
           // Identity (normal)
           HfstTransducer identityPair = HfstTransducer::identity_pair( type );
           HfstTransducer identity (identityPair);
-          identity.repeat_star().minimize();
+          identity.repeat_star().optimize();
 
           HfstTransducer identityPlus (identityPair);
-          identityPlus.repeat_plus().minimize();
+          identityPlus.repeat_plus().optimize();
 
 
           HfstTransducer identityStar (identityPair);
-          identityStar.repeat_star().minimize();
+          identityStar.repeat_star().optimize();
 
 
           // epsilon
@@ -1985,7 +1985,7 @@ namespace hfst
           HfstTransducer leftBracketToEpsilon(leftMarker, epsilon, TOK, type );
           HfstTransducer leftBracket2ToEpsilon(leftMarker2, epsilon, TOK, type );
           HfstTransducer allLeftBracketsToEpsilon(leftBracketToEpsilon);
-          allLeftBracketsToEpsilon.disjunct(leftBracket2ToEpsilon).minimize();
+          allLeftBracketsToEpsilon.disjunct(leftBracket2ToEpsilon).optimize();
 
           //    printf("allLeftBracketsToEpsilon: \n");
           //    allLeftBracketsToEpsilon.write_in_att_format(stdout, 1);
@@ -1994,29 +1994,29 @@ namespace hfst
           HfstTransducer rightBracketToEpsilon(rightMarker, epsilon, TOK, type );
           HfstTransducer rightBracket2ToEpsilon(rightMarker2, epsilon, TOK, type );
           HfstTransducer allRightBracketsToEpsilon(rightBracketToEpsilon);
-          allRightBracketsToEpsilon.disjunct(rightBracket2ToEpsilon).minimize();
+          allRightBracketsToEpsilon.disjunct(rightBracket2ToEpsilon).optimize();
 
           // B (B1 | B2)
           HfstTransducer B(leftBracket);
-          B.disjunct(rightBracket).minimize();
-          B.disjunct(leftBracket2).minimize();
-          B.disjunct(rightBracket2).minimize();
+          B.disjunct(rightBracket).optimize();
+          B.disjunct(leftBracket2).optimize();
+          B.disjunct(rightBracket2).optimize();
 
           // (? - B)*
           HfstTransducer identityPairMinusBracketsStar(identityPair);
-          identityPairMinusBracketsStar.subtract(B).minimize().repeat_star().minimize();
+          identityPairMinusBracketsStar.subtract(B).optimize().repeat_star().optimize();
 
           // repeatingPart [ BL:0 (?-B)* BR:0 ?* ]+
           HfstTransducer repeatingPart(allLeftBracketsToEpsilon);
-          repeatingPart.concatenate(identityPairMinusBracketsStar).minimize();
-          repeatingPart.concatenate(allRightBracketsToEpsilon).minimize();
-          repeatingPart.concatenate(identityStar).minimize();
-          repeatingPart.repeat_plus().minimize();
+          repeatingPart.concatenate(identityPairMinusBracketsStar).optimize();
+          repeatingPart.concatenate(allRightBracketsToEpsilon).optimize();
+          repeatingPart.concatenate(identityStar).optimize();
+          repeatingPart.repeat_plus().optimize();
           //printf("middlePart: \n");
           //repeatingPart.write_in_att_format(stdout, 1);
 
           HfstTransducer Constraint(identityStar);
-          Constraint.concatenate(repeatingPart).minimize();
+          Constraint.concatenate(repeatingPart).optimize();
           //printf("Constraint: \n");
           //Constraint.write_in_att_format(stdout, 1);
 
@@ -2051,19 +2051,19 @@ namespace hfst
           // Identity (normal)
           HfstTransducer identityPair = HfstTransducer::identity_pair( type );
           HfstTransducer identity (identityPair);
-          identity.repeat_star().minimize();
+          identity.repeat_star().optimize();
 
           HfstTransducer identityStar (identityPair);
-          identityStar.repeat_star().minimize();
+          identityStar.repeat_star().optimize();
 
           // B (B2)
           HfstTransducer B(leftBracket2);
-          B.disjunct(rightBracket2).minimize();
+          B.disjunct(rightBracket2).optimize();
 
 
           HfstTransducer Constraint(identityStar);
-          Constraint.concatenate(B).minimize();
-          Constraint.concatenate(identityStar).minimize();
+          Constraint.concatenate(B).optimize();
+          Constraint.concatenate(identityStar).optimize();
 
           //// Compose with unconditional replace transducer
           // tmp = t.1 .o. Constr .o. t.1
@@ -2126,13 +2126,13 @@ namespace hfst
           HfstTransducer leftBrackets(leftBracket);
           if (!optional)
           {
-              leftBrackets.disjunct(leftBracket2).minimize();
+              leftBrackets.disjunct(leftBracket2).optimize();
           }
 
           HfstTransducer rightBrackets(rightBracket);
           if (!optional)
           {
-              rightBrackets.disjunct(rightBracket2).minimize();
+              rightBrackets.disjunct(rightBracket2).optimize();
           }
           // Identity (normal)
           HfstTransducer identityPair = HfstTransducer::identity_pair( type );
@@ -2144,7 +2144,7 @@ namespace hfst
            */
 
           HfstTransducer identityStar (identityPair);
-          identityStar.repeat_star().minimize();
+          identityStar.repeat_star().optimize();
 
 
           HfstTransducer Constraint(identityStar);
@@ -2152,7 +2152,7 @@ namespace hfst
                   concatenate(rightBrackets).
                   concatenate(leftBrackets).
                   concatenate(rightBrackets).
-                  concatenate(identityStar).minimize();
+                  concatenate(identityStar).optimize();
 
 
           //// Compose with unconditional replace transducer
@@ -2200,25 +2200,25 @@ namespace hfst
             identityPair.insert_to_alphabet(boundaryMarker);
             // ? - .#.
             HfstTransducer identityMinusBoundary(identityPair);
-            identityMinusBoundary.subtract(boundary).minimize();
+            identityMinusBoundary.subtract(boundary).optimize();
 
             // (? - .#.)*
             HfstTransducer identityMinusBoundaryStar(identityMinusBoundary);
-            identityMinusBoundaryStar.repeat_star().minimize();
+            identityMinusBoundaryStar.repeat_star().optimize();
 
             // .#. (? - .#.)* .#.
             HfstTransducer boundaryAnythingBoundary(boundary);
             boundaryAnythingBoundary.concatenate(identityMinusBoundaryStar)
                                     .concatenate(boundary)
-                                    .minimize();
+                                    .optimize();
 
             // [0:.#. | ? - .#.]*
             HfstTransducer zeroToBoundary("@_EPSILON_SYMBOL_@", boundaryMarker, TOK, type);
             HfstTransducer retval(zeroToBoundary);
             retval.disjunct(identityMinusBoundary)
-                  .minimize()
+                  .optimize()
                   .repeat_star()
-                  .minimize();
+                  .optimize();
 
             //printf("retval .o. t: \n");
             //retval.write_in_att_format(stdout, 1);
@@ -2226,9 +2226,9 @@ namespace hfst
             HfstTransducer boundaryToZero(boundaryMarker, "@_EPSILON_SYMBOL_@", TOK, type);
             HfstTransducer removeBoundary(boundaryToZero);
             removeBoundary.disjunct(identityMinusBoundary)
-               .minimize()
+               .optimize()
                .repeat_star()
-               .minimize();
+               .optimize();
 
             // apply boundary to the transducer
             // compose [0:.#. | ? - .#.]* .o. t
@@ -2242,7 +2242,7 @@ namespace hfst
             //printf("----first: ----\n");
             //tr.write_in_att_format(stdout, 1);
 
-            retval.compose(tr).minimize();
+            retval.compose(tr).optimize();
 
 
 //            printf("first composition: \n");
@@ -2250,13 +2250,13 @@ namespace hfst
 
             // compose with .#. (? - .#.)* .#.
             retval.compose(boundaryAnythingBoundary)
-                  .minimize();
+                  .optimize();
 
 //            printf("2. composition: \n");
 //            retval.write_in_att_format(stdout, 1);
 
             // compose with [.#.:0 | ? - .#.]*
-            retval.compose(removeBoundary).minimize();
+            retval.compose(removeBoundary).optimize();
 
 //            printf("3. composition: \n");
 //            retval.write_in_att_format(stdout, 1);
@@ -2292,10 +2292,10 @@ namespace hfst
             HfstTransducer rightMark(marks.second);
 
             HfstTransducer epsilonToLeftMark("@_EPSILON_SYMBOL_@", TOK, type);
-            epsilonToLeftMark.cross_product(leftMark).minimize();
+            epsilonToLeftMark.cross_product(leftMark).optimize();
 
             HfstTransducer epsilonToRightMark(epsilon, TOK, type);
-            epsilonToRightMark.cross_product(rightMark).minimize();
+            epsilonToRightMark.cross_product(rightMark).optimize();
 
             //Go through left part of every mapping pair
             // and concatenate: epsilonToLeftMark.leftMapping.epsilonToRightMark
@@ -2303,7 +2303,7 @@ namespace hfst
             HfstTransducer mappingCrossProduct(epsilonToLeftMark);
             mappingCrossProduct.concatenate(mappingPair.first).
                     concatenate(epsilonToRightMark).
-                    minimize();
+                    optimize();
 
             mappingCrossProduct.set_property("isMarkup", "yes");
             
@@ -2327,7 +2327,7 @@ namespace hfst
           HfstTransducer retval( bracketedReplace(rule, optional) );
 
           //printf("---bracketed replace done---: \n");
-          //retval.minimize().write_in_att_format(stdout, 1);
+          //retval.optimize().write_in_att_format(stdout, 1);
 
           // for epenthesis rules
           // it can't have more than one epsilon repetition in a row
@@ -2422,7 +2422,7 @@ namespace hfst
       {
           HfstTransducerPairVector mappingPairVector = rule.get_mapping();
           //HfstTransducer newMapping = rule.get_mapping();
-          //newMapping.invert().minimize();
+          //newMapping.invert().optimize();
 
           HfstTransducerPairVector newMappingPairVector;
           for ( unsigned int i = 0; i < mappingPairVector.size(); i++ )
@@ -2438,7 +2438,7 @@ namespace hfst
           Rule newRule ( newMappingPairVector, rule.get_context(), rule.get_replType());
           HfstTransducer retval (replace( newRule, optional));
 
-          retval.invert().minimize();
+          retval.invert().optimize();
           return retval;
       }
       // replace left parallel
@@ -2451,7 +2451,7 @@ namespace hfst
 
               HfstTransducerPairVector mappingPairVector = ruleVector[i].get_mapping();
               //HfstTransducer newMapping = rule.get_mapping();
-              //newMapping.invert().minimize();
+              //newMapping.invert().optimize();
 
               HfstTransducerPairVector newMappingPairVector;
               for ( unsigned int j = 0; j < mappingPairVector.size(); j++ )
@@ -2470,7 +2470,7 @@ namespace hfst
           }
 
           HfstTransducer retval(replace(leftRuleVector, optional));
-          retval.invert().minimize();
+          retval.invert().optimize();
 
           return retval;
       }
@@ -2838,20 +2838,20 @@ namespace hfst
         // Identity
         HfstTransducer identityPair = HfstTransducer::identity_pair( type );
         HfstTransducer identity (identityPair);
-        identity.repeat_star().minimize();
+        identity.repeat_star().optimize();
 
         HfstTransducer universalWithoutD(identity);
         universalWithoutD.insert_to_alphabet(restrictionMark);
         HfstTransducer universalWithoutDStar(universalWithoutD);
-        universalWithoutDStar.repeat_star().minimize();
+        universalWithoutDStar.repeat_star().optimize();
 
         // NODU
         HfstTransducer noDUpper("@_EPSILON_SYMBOL_@", restrictionMark, TOK, type );
-        noDUpper.disjunct(universalWithoutD).repeat_star().minimize();
+        noDUpper.disjunct(universalWithoutD).repeat_star().optimize();
 
         // NODL
         HfstTransducer noDLower(restrictionMark, "@_EPSILON_SYMBOL_@", TOK, type );
-        noDLower.disjunct(universalWithoutD).repeat_star().minimize();
+        noDLower.disjunct(universalWithoutD).repeat_star().optimize();
 
         // 1. Surround center with marks
         // [ U* %<D%> CENTER %<D%> U* ]
@@ -2863,7 +2863,7 @@ namespace hfst
                     .concatenate(center)
                     .concatenate(mark)
                     .concatenate(universalWithoutDStar)
-                    .minimize();
+                    .optimize();
 
         // 2. Put mark in context
         // [ U* L1 %<D%> U* %<D%> R1 U* ]
@@ -2883,7 +2883,7 @@ namespace hfst
                 .concatenate(mark)
                 .concatenate(rightContext)
                 .concatenate(universalWithoutDStar)
-                .minimize();
+                .optimize();
 
             if ( i == 0 )
             {
@@ -2891,19 +2891,19 @@ namespace hfst
             }
             else
             {
-                contextMarked.disjunct(RES).minimize();
+                contextMarked.disjunct(RES).optimize();
             }
         }
         HfstTransducer centerMinusCtx(centerMarked);
-        centerMinusCtx.subtract(contextMarked).minimize();
+        centerMinusCtx.subtract(contextMarked).optimize();
 
         HfstTransducer tmp(noDUpper);
         tmp.compose(centerMinusCtx)
             .compose(noDLower)
-            .minimize();
+            .optimize();
 
         HfstTransducer retval(universalWithoutDStar);
-        retval.subtract(tmp).minimize();
+        retval.subtract(tmp).optimize();
 
         retval.remove_from_alphabet(restrictionMark);
 
@@ -2938,17 +2938,17 @@ namespace hfst
         // Identity
         HfstTransducer identityPair = HfstTransducer::identity_pair( type );
         HfstTransducer identity (identityPair);
-        identity.repeat_star().minimize();
+        identity.repeat_star().optimize();
 
         HfstTransducer tmp(identity);
         tmp.concatenate(right)
             .concatenate(identity)
             .concatenate(left)
             .concatenate(identity)
-            .minimize();
+            .optimize();
 
         HfstTransducer retval(identity);
-        retval.subtract(tmp).minimize();
+        retval.subtract(tmp).optimize();
 
         return retval;
     }
@@ -2976,17 +2976,17 @@ namespace hfst
         // Identity
         HfstTransducer identityPair = HfstTransducer::identity_pair( type );
         HfstTransducer identity (identityPair);
-        identity.repeat_star().minimize();
+        identity.repeat_star().optimize();
 
         HfstTransducer tmp(identity);
         tmp.concatenate(left)
            .concatenate(identity)
            .concatenate(right)
            .concatenate(identity)
-           .minimize();
+           .optimize();
 
         HfstTransducer retval(identity);
-        retval.subtract(tmp).minimize();
+        retval.subtract(tmp).optimize();
 
         return retval;
     }

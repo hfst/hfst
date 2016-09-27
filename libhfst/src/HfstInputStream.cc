@@ -374,7 +374,7 @@ namespace hfst
                 ConversionFunctions::
                   tropical_ofst_to_hfst_basic_transducer
                 (t.implementation.tropical_ofst, false);
-              delete t.implementation.tropical_ofst;
+              t.tropical_ofst_interface.delete_transducer(t.implementation.tropical_ofst);
               t.implementation.tropical_ofst =
                 ConversionFunctions::
                   hfst_basic_transducer_to_tropical_ofst(net);
@@ -490,7 +490,7 @@ namespace hfst
                 ConversionFunctions::
                   log_ofst_to_hfst_basic_transducer
                 (t.implementation.log_ofst, false);
-              delete t.implementation.log_ofst;
+              t.log_ofst_interface.delete_transducer(t.implementation.log_ofst);
               t.implementation.log_ofst =
                 ConversionFunctions::
                   hfst_basic_transducer_to_log_ofst(net);

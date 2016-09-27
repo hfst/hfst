@@ -10,8 +10,15 @@
 #include "TropicalWeightTransducer.h"
 #include "HfstSymbolDefs.h"
 #include "HfstLookupFlagDiacritics.h"
-#include "HfstTransitionGraph.h"
+#include "HfstBasicTransducer.h"
 #include "ConvertTransducerFormat.h"
+
+#ifdef _MSC_VER
+#include "back-ends/openfstwin/src/include/fst/fstlib.h"
+#else
+#include "back-ends/openfst/src/include/fst/fstlib.h"
+#endif // _MSC_VER
+
 
 #ifndef MAIN_TEST
 
@@ -1231,7 +1238,7 @@ namespace hfst {
   }
 
 
-  TropicalWeightStateIterator::TropicalWeightStateIterator(StdVectorFst * t):
+    /*TropicalWeightStateIterator::TropicalWeightStateIterator(StdVectorFst * t):
     iterator(new StateIterator<StdVectorFst>(*t))
   {}
 
@@ -1305,7 +1312,7 @@ namespace hfst {
   TropicalWeightTransition TropicalWeightTransitionIterator::value()
   {
     return TropicalWeightTransition(arc_iterator->Value(), this->t);
-  }
+    }*/
 
 
   fst::SymbolTable TropicalWeightTransducer::create_symbol_table
@@ -1339,6 +1346,11 @@ namespace hfst {
     t->SetStart(s);
     t->SetFinal(s,0);
     return t;
+  }
+
+  void TropicalWeightTransducer::delete_transducer(StdVectorFst * t)
+  {
+    delete t;
   }
 
   StdVectorFst * TropicalWeightTransducer::define_transducer

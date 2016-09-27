@@ -67,7 +67,7 @@ typedef yy_buffer_state *YY_BUFFER_STATE;
 extern YY_BUFFER_STATE hxfst_scan_string(const char*);
 extern void hxfst_delete_buffer(YY_BUFFER_STATE);
 
-#include "implementations/HfstTransitionGraph.h"
+#include "implementations/HfstBasicTransducer.h"
 
 using hfst::implementations::HfstBasicTransducer;
 using hfst::implementations::HfstBasicTransition;
@@ -79,7 +79,7 @@ using hfst::implementations::HfstBasicTransition;
 #define PROMPT_AND_RETURN_THIS prompt(); return *this;
 #define PRINT_INFO_PROMPT_AND_RETURN_THIS print_transducer_info(); prompt(); return *this;
 #define IF_NULL_PROMPT_AND_RETURN_THIS(x) if (x == NULL) { if(variables_["quit-on-fail"] == "ON") { /*exit(EXIT_FAILURE);*/ this->fail_flag_ = true; } prompt(); return *this; }
-#define MAYBE_MINIMIZE(x) if (variables_["minimal"] == "ON") { x->minimize(); }
+#define MAYBE_MINIMIZE(x) x->optimize();
 #define MAYBE_ASSERT(assertion, value) if (!value && ((variables_["assert"] == "ON" || assertion) && (variables_["quit-on-fail"] == "ON"))) { /*exit(EXIT_FAILURE);*/ this->fail_flag_ = true; }
 #define MAYBE_QUIT if(variables_["quit-on-fail"] == "ON") { /*exit(EXIT_FAILURE);*/ this->fail_flag_ = true; }
 
@@ -93,6 +93,9 @@ using hfst::implementations::HfstBasicTransition;
 
 namespace hfst {
 namespace xfst {
+
+  // whether we need to reset the lexc parser before reading lexc
+  static bool has_lexc_been_read_ = false;
 
   static std::map<std::string, std::string> variable_explanations_;
 
@@ -904,7 +907,7 @@ namespace xfst {
             flush(&error());
           }
         t = new HfstTransducer(*(stack_.top()));
-        t->invert().minimize();
+        t->invert().minimize(); // the user has been warned for possible slow performance
         HfstBasicTransducer fsm(*t);
         this->lookup(line, &fsm);
         delete t;
@@ -1066,7 +1069,7 @@ namespace xfst {
                 flush(&error());
               }
             t = new HfstTransducer(*(stack_.top()));
-            t->invert().minimize();
+            t->invert().minimize(); // the user has been warned for possible slow performance
           }
 
         if (t->get_type() != hfst::HFST_OL_TYPE && t->get_type() != hfst::HFST_OLW_TYPE)
@@ -2111,6 +2114,13 @@ namespace xfst {
           if (strcmp(text, "OFF") == 0)
             hfst::set_flag_is_epsilon_in_composition(false);
         }
+      if (strcmp(name, "minimal") == 0)
+        {
+          if (strcmp(text, "ON") == 0)
+            hfst::set_minimization(true);
+          if (strcmp(text, "OFF") == 0)
+            hfst::set_minimization(false);
+        }
 
       if (verbose_)
         {
@@ -2290,7 +2300,7 @@ namespace xfst {
       
       HfstTransducer tmp(*temp);
       tmp.output_project();
-      tmp.minimize();
+      tmp.remove_epsilons(); // needed for testing cyclicity
       
       bool result = ! tmp.is_cyclic();
       this->print_bool(result);
@@ -2340,7 +2350,7 @@ namespace xfst {
       
       HfstTransducer tmp(*temp);
       tmp.input_project();
-      tmp.minimize();
+      tmp.remove_epsilons(); // needed for testing cyclicity
       
       bool result = ! tmp.is_cyclic();
       this->print_bool(result);
@@ -3089,8 +3099,8 @@ namespace xfst {
     // Variables needed to find out some properties about the transducer
     HfstTransducer tmp_lower(*topmost);
     HfstTransducer tmp_upper(*topmost);
-    tmp_lower.output_project().minimize();
-    tmp_upper.input_project().minimize();
+    tmp_lower.output_project().remove_epsilons();
+    tmp_upper.input_project().remove_epsilons();
 
     HfstTwoLevelPaths paths_upper;
     HfstTwoLevelPaths paths_lower;
@@ -4067,7 +4077,7 @@ namespace xfst {
         xfst_fail();
       }
       
-    tmp->minimize();
+    tmp->minimize(); // a trie should be easily minimizable
     stack_.push(tmp);
     PRINT_INFO_PROMPT_AND_RETURN_THIS;
   }
@@ -4170,7 +4180,7 @@ namespace xfst {
             result->reverse();
             break;
           case MINIMIZE_NET:
-            result->minimize();
+            result->minimize(); // implicit minimization requested, do not use optimize()
             break;
           case PRUNE_NET_:
             result->prune();
@@ -4182,7 +4192,10 @@ namespace xfst {
             break;
           }
 
-        MAYBE_MINIMIZE(result);
+        if (operation != MINIMIZE_NET && operation != DETERMINIZE_NET && operation != EPSILON_REMOVE_NET)
+          {
+            MAYBE_MINIMIZE(result);
+          }
         stack_.push(result);
         print_transducer_info();
       }
@@ -4410,7 +4423,7 @@ namespace xfst {
           result->disjunct(label_tr);
         }
 
-      result->minimize();
+      result->minimize(); // should be safe to minimize
       stack_.pop();
       delete topmost;
       stack_.push(result);
@@ -4470,7 +4483,7 @@ namespace xfst {
         (hfst::internal_unknown, hfst::internal_unknown, format_);
       result->disjunct(unk2unk);
       result->repeat_star();
-      result->minimize();
+      result->minimize(); // should be safe to minimize
 
       HfstTransducer* t = stack_.top();
       stack_.pop();
@@ -4978,13 +4991,13 @@ namespace xfst {
     HfstTransducer * well_formed = contains_regexps(xre_);
     // subtract those paths from copy of t
     HfstTransducer tc(*t);
-    tc.subtract(*well_formed).minimize();
+    tc.subtract(*well_formed);
     delete well_formed;
     // all paths that contain one or more ^[ or ^]
     HfstTransducer * brackets = xre_.compile("$[ \"^[\" | \"^]\" ] ;");
 
     // test if the result is empty
-    tc.intersect(*brackets).minimize();
+    tc.intersect(*brackets);
     delete(brackets);
     HfstTransducer empty(tc.get_type());
     bool value = empty.compare(tc, false);
@@ -5138,7 +5151,7 @@ namespace xfst {
                        return *this;
                      }
 
-                   replacement->minimize();
+                   replacement->optimize();
                    HfstBasicTransducer repl(*replacement);
                    delete replacement;
                    fsm.insert_transducer(start_state, end_state, repl);
@@ -5154,9 +5167,9 @@ namespace xfst {
 
       // filter out regexps
       HfstTransducer * cr = contains_regexp_markers_on_one_side(xre_, (level == UPPER_LEVEL) /*input side*/);
-      cr->minimize();
+      cr->optimize();
 
-      result->subtract(*cr).minimize();
+      result->subtract(*cr).optimize();
       delete cr;
       stack_.pop();
       delete tmp;
@@ -5215,8 +5228,14 @@ namespace xfst {
         PROMPT_AND_RETURN_THIS;
       }
 
+    if (has_lexc_been_read_)
+      lexc_.reset();
+    else
+      has_lexc_been_read_ = true;
+
     lexc_.parse(infile);
     t = lexc_.compileLexical();
+
     if (0 != fclose(infile))
       {
         error() << "Could not close file " << filename << std::endl;

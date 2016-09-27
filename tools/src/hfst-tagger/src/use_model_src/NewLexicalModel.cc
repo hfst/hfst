@@ -4,6 +4,7 @@
 
 #include <algorithm>
 #include <queue>
+#include <math.h>
 
 using hfst::StringVector;
 using hfst::HfstOneLevelPaths;

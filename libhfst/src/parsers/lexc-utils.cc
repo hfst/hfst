@@ -298,7 +298,7 @@ strip_percents(const char* s, bool do_zeros)
       {
         if (in_at)
           {
-            if (*p == '@')
+            if (*c == '@')
               {
                 in_at = false;
               }

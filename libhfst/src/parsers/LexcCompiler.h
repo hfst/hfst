@@ -32,7 +32,7 @@
 namespace hfst { class HfstTransducer; }
 #include "XreCompiler.h"
 #include "../HfstTokenizer.h"
-#include "../implementations/HfstTransitionGraph.h"
+#include "../implementations/HfstBasicTransducer.h"
 
 namespace hfst {
 //! @brief Namespace for Xerox LexC related specific functions and classes.
@@ -53,6 +53,8 @@ class LexcCompiler
   //! @brief create a lexc compiler with @c impl as transducer format and @c withFlags
   // as indicator as the trasnducer should be build with or without flags
   LexcCompiler(hfst::ImplementationType impl, bool withFlags, bool alignStrings);
+
+  void reset();
 
   //! @brief compile lexc description from @c infile into current compiler
   LexcCompiler& parse(FILE* infile);

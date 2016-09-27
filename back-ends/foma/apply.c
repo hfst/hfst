@@ -79,22 +79,22 @@ void apply_set_show_flags(struct apply_handle *h, int value) {
 
 void apply_set_print_space(struct apply_handle *h, int value) {
     h->print_space = value;
-    h->space_symbol = strdup(" ");
+    h->space_symbol = xxstrdup(" ");
 }
 
 void apply_set_separator(struct apply_handle *h, char *symbol) {
-    h->separator = strdup(symbol);
+    h->separator = xxstrdup(symbol);
 }
 
 void apply_set_epsilon(struct apply_handle *h, char *symbol) {
     xxfree(h->epsilon_symbol);
-    h->epsilon_symbol = strdup(symbol);
+    h->epsilon_symbol = xxstrdup(symbol);
     (h->sigs+EPSILON)->symbol = h->epsilon_symbol;
     (h->sigs+EPSILON)->length =  strlen(h->epsilon_symbol);
 }
 
 void apply_set_space_symbol(struct apply_handle *h, char *space) {
-    h->space_symbol = strdup(space);
+    h->space_symbol = xxstrdup(space);
     h->print_space = 1;
 }
 
@@ -284,8 +284,8 @@ struct apply_handle *apply_init(struct fsm *net) {
     h->show_flags = 0;
     h->print_space = 0;
     h->print_pairs = 0;
-    h->separator = strdup(":");
-    h->epsilon_symbol = strdup("0");
+    h->separator = xxstrdup(":");
+    h->epsilon_symbol = xxstrdup("0");
     h->last_net = net;
     h->outstring = xxmalloc(sizeof(char)*DEFAULT_OUTSTRING_SIZE);
     h->outstringtop = DEFAULT_OUTSTRING_SIZE;

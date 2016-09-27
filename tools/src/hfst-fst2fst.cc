@@ -55,6 +55,16 @@ ImplementationType output_type = hfst::UNSPECIFIED_TYPE;
 bool hfst_format = true;
 std::string options = "";
 
+void set_output_type(ImplementationType type)
+{
+  if (output_type != hfst::UNSPECIFIED_TYPE)
+    {
+      error(EXIT_FAILURE, 0,
+            "Output type defined several times.");
+    }
+  output_type = type;
+}
+
 void
 print_usage()
 {
@@ -129,8 +139,8 @@ parse_options(int argc, char** argv)
 #include "inc/getopt-cases-common.h"
 #include "inc/getopt-cases-unary.h"
           // add tool-specific cases here
-                case 'f':
-          output_type = hfst_parse_format_name(optarg);
+        case 'f':
+          set_output_type(hfst_parse_format_name(optarg));
 #ifndef HAVE_XFSM
           if (output_type == hfst::XFSM_TYPE)
             error(EXIT_FAILURE, 0,
@@ -141,30 +151,30 @@ parse_options(int argc, char** argv)
           hfst_format=false;
           break;
         case 'S':
-          output_type = hfst::SFST_TYPE;
+          set_output_type(hfst::SFST_TYPE);
           break;
         case 'F':
-          output_type = hfst::FOMA_TYPE;
+          set_output_type(hfst::FOMA_TYPE);
           break;
         case 'x':
 #ifdef HAVE_XFSM
-          output_type = hfst::XFSM_TYPE;
+          set_output_type(hfst::XFSM_TYPE);
 #else
           error(EXIT_FAILURE, 0,
                 "xfsm back-end is not available");
 #endif
           break;
         case 't':
-          output_type = hfst::TROPICAL_OPENFST_TYPE;
+          set_output_type(hfst::TROPICAL_OPENFST_TYPE);
           break;
         case 'l':
-          output_type = hfst::LOG_OPENFST_TYPE;
+          set_output_type(hfst::LOG_OPENFST_TYPE);
           break;
         case 'O':
-          output_type = hfst::HFST_OL_TYPE;
+          set_output_type(hfst::HFST_OL_TYPE);
           break;
         case 'w':
-          output_type = hfst::HFST_OLW_TYPE;
+          set_output_type(hfst::HFST_OLW_TYPE);
           break;
     case 'Q':
         options = "quick";

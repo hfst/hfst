@@ -108,6 +108,9 @@ class XreCompiler
   //! @brief Remove a definition macro.
   void undefine(const std::string& name);
 
+  void add_defined_multichar_symbol(const std::string & symbol);
+  void remove_defined_multichar_symbols();
+
   //! @brief Compile a transducer defined by @a xre.
   //!        May return a pointer to @e empty transducer on non-fatal error.
   //!        A null pointer is returned on fatal error, if abort is not called.

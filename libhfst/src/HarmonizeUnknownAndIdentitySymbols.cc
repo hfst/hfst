@@ -9,8 +9,7 @@
 
 #include "HarmonizeUnknownAndIdentitySymbols.h"
 #include "HfstTransducer.h"
-// --- HfstTransitionGraph.h is enough
-#include "implementations/HfstTransitionGraph.h"
+#include "implementations/HfstBasicTransducer.h"
 #include "HfstFlagDiacritics.h"
 #include "implementations/optimized-lookup/pmatch.h"
 

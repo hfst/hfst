@@ -10,6 +10,13 @@
 #include "LogWeightTransducer.h"
 #include "HfstSymbolDefs.h"
 
+#ifdef _MSC_VER
+#include "back-ends/openfstwin/src/include/fst/fstlib.h"
+#else
+#include "back-ends/openfst/src/include/fst/fstlib.h"
+#endif // _MSC_VER
+
+
 #ifndef MAIN_TEST
 namespace hfst { namespace implementations
 {
@@ -926,7 +933,7 @@ namespace hfst { namespace implementations
       { throw e; }
   }
 
-
+  /*
   LogWeightStateIterator::LogWeightStateIterator(LogFst * t):
     iterator(new StateIterator<LogFst>(*t))
   {}
@@ -1002,7 +1009,7 @@ namespace hfst { namespace implementations
   LogWeightTransition LogWeightTransitionIterator::value()
   {
     return LogWeightTransition(arc_iterator->Value(), this->t);
-  }
+    }*/
 
 
   fst::SymbolTable LogWeightTransducer::create_symbol_table(std::string name) {
@@ -1035,6 +1042,11 @@ namespace hfst { namespace implementations
     t->SetStart(s);
     t->SetFinal(s,0);
     return t;
+  }
+
+  void LogWeightTransducer::delete_transducer(LogFst * t)
+  {
+    delete t;
   }
 
   LogFst * LogWeightTransducer::define_transducer(unsigned int number)

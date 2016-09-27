@@ -100,7 +100,7 @@ namespace hfst
         {
           fst::StdVectorFst * tropical_ofst_temp =
             tropical_ofst_funct(implementation.tropical_ofst);
-          delete implementation.tropical_ofst;
+          tropical_ofst_interface.delete_transducer(implementation.tropical_ofst);
           implementation.tropical_ofst = tropical_ofst_temp;
           break;
         }
@@ -109,7 +109,7 @@ namespace hfst
         {
           hfst::implementations::LogFst * log_ofst_temp =
             log_ofst_funct(implementation.log_ofst);
-          delete implementation.log_ofst;
+          log_ofst_interface.delete_transducer(implementation.log_ofst);
           implementation.log_ofst = log_ofst_temp;
           break;
         }
@@ -193,7 +193,7 @@ NETptr (*xfsm_funct)(NETptr, unsigned int n),
         {
           fst::StdVectorFst * tropical_ofst_temp =
             tropical_ofst_funct(implementation.tropical_ofst,n);
-          delete implementation.tropical_ofst;
+          tropical_ofst_interface.delete_transducer(implementation.tropical_ofst);
           implementation.tropical_ofst = tropical_ofst_temp;
           break;
         }
@@ -202,7 +202,7 @@ NETptr (*xfsm_funct)(NETptr, unsigned int n),
         {
           hfst::implementations::LogFst * log_ofst_temp =
             log_ofst_funct(implementation.log_ofst,n);
-          delete implementation.log_ofst;
+          log_ofst_interface.delete_transducer(implementation.log_ofst);
           implementation.log_ofst = log_ofst_temp;
           break;
         }
@@ -289,7 +289,7 @@ NETptr (*xfsm_funct)(NETptr, unsigned int n),
         {
           fst::StdVectorFst * tropical_ofst_temp =
             tropical_ofst_funct(implementation.tropical_ofst,s1,s2);
-          delete implementation.tropical_ofst;
+          tropical_ofst_interface.delete_transducer(implementation.tropical_ofst);
           implementation.tropical_ofst = tropical_ofst_temp;
           break;
         }
@@ -298,7 +298,7 @@ NETptr (*xfsm_funct)(NETptr, unsigned int n),
         {
           hfst::implementations::LogFst * log_ofst_temp =
             log_ofst_funct(implementation.log_ofst,s1,s2);
-          delete implementation.log_ofst;
+          log_ofst_interface.delete_transducer(implementation.log_ofst);
           implementation.log_ofst = log_ofst_temp;
           break;
         }
@@ -410,7 +410,7 @@ NETptr (*xfsm_funct)(NETptr, unsigned int n),
           fst::StdVectorFst * tropical_ofst_temp =
             tropical_ofst_funct(this->implementation.tropical_ofst,
                                 another_->implementation.tropical_ofst);
-          delete implementation.tropical_ofst;
+          tropical_ofst_interface.delete_transducer(implementation.tropical_ofst);
           implementation.tropical_ofst = tropical_ofst_temp;
           break;
         }
@@ -420,7 +420,7 @@ NETptr (*xfsm_funct)(NETptr, unsigned int n),
           hfst::implementations::LogFst * log_ofst_temp =
             log_ofst_funct(implementation.log_ofst,
                            another_->implementation.log_ofst);
-          delete implementation.log_ofst;
+          log_ofst_interface.delete_transducer(implementation.log_ofst);
           implementation.log_ofst = log_ofst_temp;
           break;
         }
@@ -431,7 +431,7 @@ NETptr (*xfsm_funct)(NETptr, unsigned int n),
         {
           fsm * foma_temp =
             foma_funct(implementation.foma,another_->implementation.foma);
-          delete implementation.foma;
+          this->foma_interface.delete_foma(implementation.foma);
           implementation.foma = foma_temp;
           break;
         }

@@ -23,7 +23,8 @@
 
 namespace hfst { namespace xre {
 
-    unsigned int cr=0; // chars read from xre input
+    unsigned int cr=0; // number of chars read from xre input
+    unsigned int lr=1; // number of lines read from xre input
     std::set<unsigned int> positions;
     char * position_symbol = NULL;
     std::ostream * error_(&std::cerr);
@@ -33,6 +34,7 @@ namespace hfst { namespace xre {
     bool output_to_console_(false);
 #endif
     bool verbose_(false);
+    std::set<std::string> * defined_multichar_symbols_(NULL);
 
 XreCompiler::XreCompiler() :
     definitions_(),
@@ -215,6 +217,26 @@ if (definitions_.find(name) != definitions_.end())
   }
 }
 
+void
+XreCompiler::remove_defined_multichar_symbols()
+{
+  if (defined_multichar_symbols_ != NULL)
+    {
+      delete defined_multichar_symbols_;
+      defined_multichar_symbols_ = NULL;
+    }
+}
+
+void
+XreCompiler::add_defined_multichar_symbol(const std::string & symbol)
+{
+  if (defined_multichar_symbols_ == NULL)
+    {
+      defined_multichar_symbols_ = new std::set<std::string>();
+    }
+  defined_multichar_symbols_->insert(symbol);
+}
+
 extern bool expand_definitions;
 extern bool harmonize_;
 extern bool harmonize_flags_;
@@ -249,9 +271,19 @@ XreCompiler::compile(const std::string& xre)
   //std::cerr << "XreCompiler: " << this << " : compile(\"" << xre << "\")" << std::endl;
   unsigned int cr_before = cr;
   cr = 0;
-  HfstTransducer * retval = hfst::xre::compile(xre, definitions_, function_definitions_, function_arguments_, list_definitions_, format_);
-  cr = cr_before;
-  return retval;
+  try
+    {
+      HfstTransducer * retval = hfst::xre::compile(xre, definitions_, function_definitions_, function_arguments_, list_definitions_, format_);
+      cr = cr_before;
+      return retval;
+    }
+  catch (const char * msg)
+    {
+      if (strcmp(msg, "Allocation of memory failed in Mem::add_buffer!") == 0) // sfst backend
+        HFST_THROW_MESSAGE(HfstException, "Allocation of memory failed in SFST backend.");
+      else
+        HFST_THROW_MESSAGE(HfstException, msg);
+    }
 }
 
 HfstTransducer*
@@ -261,10 +293,20 @@ XreCompiler::compile_first(const std::string& xre, unsigned int & chars_read)
   //std::cerr << "XreCompiler: " << this << " : compile_first(\"" << xre << "\"";
   unsigned int cr_before = cr;
   cr = 0;
-  HfstTransducer * retval = hfst::xre::compile_first(xre, definitions_, function_definitions_, function_arguments_, list_definitions_, format_, chars_read);
-  //std::cerr << ", " << chars_read << ")" << std::endl;
-  cr = cr_before;
-  return retval;
+  try
+    {
+      HfstTransducer * retval = hfst::xre::compile_first(xre, definitions_, function_definitions_, function_arguments_, list_definitions_, format_, chars_read);
+      //std::cerr << ", " << chars_read << ")" << std::endl;
+      cr = cr_before;
+      return retval;
+    }
+  catch (const char * msg)
+    {
+      if (strcmp(msg, "Allocation of memory failed in Mem::add_buffer!") == 0) // sfst backend
+        HFST_THROW_MESSAGE(HfstException, "Allocation of memory failed in SFST backend.");
+      else
+        HFST_THROW_MESSAGE(HfstException, msg);
+    }
 }
 
 bool XreCompiler::get_positions_of_symbol_in_xre

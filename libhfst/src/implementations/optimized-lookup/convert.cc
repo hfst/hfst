@@ -9,6 +9,21 @@
 
 #include "convert.h"
 
+#ifdef _MSC_VER
+#include "back-ends/openfstwin/src/include/fst/fstlib.h"
+#else
+#include "back-ends/openfst/src/include/fst/fstlib.h"
+#endif // _MSC_VER
+
+namespace fst
+{
+  extern template class TropicalWeightTpl<float>;
+  extern template class ArcTpl<TropicalWeight>;
+  extern template class VectorFst<StdArc>;
+  extern template class ArcIterator<StdVectorFst>;
+}
+
+
 #ifndef MAIN_TEST
 
 namespace hfst_ol {

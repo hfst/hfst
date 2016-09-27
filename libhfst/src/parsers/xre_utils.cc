@@ -39,9 +39,11 @@ extern char * xreget_text(yyscan_t);
 namespace hfst {
   namespace xre {
     extern unsigned int cr; // number of characters read, defined in XreCompiler.cc
+    extern unsigned int lr; // number of lines read, defined in XreCompiler.cc
     bool allow_extra_text_at_end = false;
     extern std::ostream * error_;
     extern bool verbose_;
+    extern std::set<std::string> * defined_multichar_symbols_;
   }
 }
 
@@ -57,25 +59,27 @@ void xreflush(std::ostream * os)
 
 int xreerror(yyscan_t scanner, const char* msg)
 {
-  char buffer [1024];
-
-  int n = sprintf(buffer, "*** xre parsing failed: %s\n", msg);
-  if (strlen(hfst::xre::data) < 60)
-    {
-      n = sprintf(buffer+n, "***    parsing %s [near %s]\n", hfst::xre::data,
-                  xreget_text(scanner));
-    }
-  else
-    {
-      n = sprintf(buffer+n, "***    parsing %60s [near %s]...\n",
-                  hfst::xre::data, xreget_text(scanner));
-    }
-
-  buffer[1023] = '\0';
   if (hfst::xre::verbose_)
     {
+      const char * scanner_msg = xreget_text(scanner);
+
+      char * buffer = (char*) malloc(strlen(msg) + strlen(hfst::xre::data) + strlen(scanner_msg) + 100);
+
+      int n = sprintf(buffer, "*** xre parsing failed: %s\n", msg);
+      if (strlen(hfst::xre::data) < 60)
+        {
+          n = sprintf(buffer+n, "***    parsing %s [near %s] on line %u\n%c", hfst::xre::data,
+                      xreget_text(scanner), hfst::xre::lr, '\0');
+        }
+      else
+        {
+          n = sprintf(buffer+n, "***    parsing %60s [near %s] on line %u...\n%c",
+                      hfst::xre::data, xreget_text(scanner), hfst::xre::lr, '\0');
+        }
+
       std::ostream * err = xreerrstr();
       *(err) << std::string(buffer);
+      free(buffer);
       xreflush(err);
     }
   return 0;
@@ -182,6 +186,34 @@ strip_newline(char *s)
   return s;
 }
 
+void 
+count_lines(const char * s)
+{
+  const char * c = s;
+  while(*c != '\0')
+    {
+      if (*c == '\n')
+        {
+          hfst::xre::lr += 1;
+        }
+      else if (*c == '\r')
+        {
+          c++;
+          if (*c == '\n')
+            {
+              hfst::xre::cr += 1;
+            }
+          else
+            {
+              c--;
+            }
+          hfst::xre::lr += 1;
+        }
+      hfst::xre::cr += 1;
+      c++;
+    }
+}
+
 char*
 strip_curly(const char *s)
 {
@@ -285,17 +317,22 @@ get_quoted(const char *s)
 }
 
 char*
-parse_quoted(const char *s)
+parse_quoted(const char *s, unsigned int & length)
 {
   std::ostream * err = xreerrstr();
 
     char* quoted = get_quoted(s);
+
     char* rv = static_cast<char*>(malloc(sizeof(char)*strlen(quoted) + 1)); // added + 1
     char* p = quoted;
     char* r = rv;
     while (*p != '\0')
       {
-        if (*p != '\\')
+        if (*p == '\n' || *p == '\r')
+          {
+            throw "Unescaped newline characters found inside quoted string.";
+          }
+        else if (*p != '\\')
           {
             *r = *p;
             r++;
@@ -399,6 +436,10 @@ parse_quoted(const char *s)
       }
     *r = '\0';
     free(quoted);
+
+    length = 
+      hfst::HfstTokenizer::check_utf8_correctness_and_calculate_length(std::string(rv));
+
     return rv;
 }
 
@@ -448,7 +489,8 @@ unescape_enclosing_angle_brackets(HfstTransducer *t)
   if (substitutions.size() == 0)
     return t;
 
-  t->substitute(substitutions).minimize();
+  t->substitute(substitutions);
+  t->optimize();
   return t;
 }
 
@@ -542,6 +584,7 @@ compile_first(const string& xre, map<string,HfstTransducer*>& defs,
     bool tmp = hfst::xre::allow_extra_text_at_end;
     hfst::xre::allow_extra_text_at_end = true;
     hfst::xre::cr = 0;
+    hfst::xre::lr = 1;
 
     int parse_retval = xreparse(scanner);
     chars_read = hfst::xre::cr;
@@ -765,7 +808,7 @@ xfst_curly_label_to_transducer(const char* input, const char* output)
       retval = new HfstTransducer(istr, ostr, tok, hfst::xre::format);
     }
 
-  retval->minimize();
+  retval->minimize(); // it should be safe to minimize
   return retval;
 }
 
@@ -808,19 +851,19 @@ xfst_label_to_transducer(const char* input, const char* output)
     {
       retval = new HfstTransducer(hfst::internal_unknown, hfst::internal_unknown, hfst::xre::format);
       HfstTransducer id(hfst::internal_identity, hfst::internal_identity, hfst::xre::format);
-      retval->disjunct(id).minimize();
+      retval->disjunct(id).minimize(); // it should be safe to minimize
     }
   else if (input_is_unknown)
     {
       retval = new HfstTransducer(hfst::internal_unknown, output, hfst::xre::format);
       HfstTransducer output_tr(output, output, hfst::xre::format);
-      retval->disjunct(output_tr).minimize();
+      retval->disjunct(output_tr).minimize(); // it should be safe to minimize
     }
   else if (output_is_unknown)
     {
       retval = new HfstTransducer(input, hfst::internal_unknown, hfst::xre::format);
       HfstTransducer input_tr(input, input, hfst::xre::format);
-      retval->disjunct(input_tr).minimize();
+      retval->disjunct(input_tr).minimize(); // it should be safe to minimize
     }
   else
     {
@@ -834,12 +877,12 @@ xfst_label_to_transducer(const char* input, const char* output)
     // marker = [0:M ?]*
     HfstTransducer marker("@_EPSILON_SYMBOL_@", "M", t->get_type());
     HfstTransducer id("@_IDENTITY_SYMBOL_@", t->get_type());
-    marker.concatenate(id).repeat_star().minimize();
+    marker.concatenate(id).repeat_star().minimize(); // it should be safe to minimize
 
     // the rule
     HfstTransducer right_context(*t);
-    right_context.insert_freely(StringPair("M", "@_EPSILON_SYMBOL_@")).minimize();
-    right_context.insert_freely(StringPair("M", "M")).minimize();
+    right_context.insert_freely(StringPair("M", "@_EPSILON_SYMBOL_@")).optimize();
+    right_context.insert_freely(StringPair("M", "M")).optimize();
     HfstTransducer left_context("@_EPSILON_SYMBOL_@", t->get_type());
     HfstTransducerPair context(left_context, right_context);
 
@@ -868,7 +911,8 @@ xfst_label_to_transducer(const char* input, const char* output)
 
     return new HfstTransducer(rule);
 
-    marker.compose(rule).minimize();
+    marker.compose(rule);
+    marker.optimize();
 
     return new HfstTransducer(marker);
   }
@@ -876,9 +920,10 @@ xfst_label_to_transducer(const char* input, const char* output)
   HfstTransducer * contains(const HfstTransducer * t)
   {
     HfstTransducer any(hfst::internal_identity, hfst::xre::format);
-    any.repeat_star().minimize();
+    any.repeat_star().minimize(); // it should be safe to minimize
     HfstTransducer * retval = new HfstTransducer(any);
-    retval->concatenate(*t).concatenate(any).minimize();
+    retval->concatenate(*t).concatenate(any);
+    retval->optimize();
     return retval;
   }
 
@@ -910,14 +955,16 @@ xfst_label_to_transducer(const char* input, const char* output)
     // noT = ?* - $[t]
     // (strings that do not contain t)
     HfstTransducer noT(hfst::internal_identity, t->get_type());
-    noT.repeat_star().minimize();
+    noT.repeat_star().minimize(); // it should be safe to minimize
     HfstTransducer * oneOrMoreT = contains(t);
-    noT.subtract(*oneOrMoreT).minimize();
+    noT.subtract(*oneOrMoreT);
+    noT.optimize();
     delete oneOrMoreT;
 
     // return [weighted_rule - noT]
     // (subtract strings that do not contain t from weighted rule)
-    weighted_rule.subtract(noT).minimize();
+    weighted_rule.subtract(noT);
+    weighted_rule.optimize();
     return new HfstTransducer(weighted_rule);
   }
 
@@ -926,31 +973,37 @@ xfst_label_to_transducer(const char* input, const char* output)
   {
     // any_star = [?*]
     HfstTransducer any_star(hfst::internal_identity, hfst::xre::format);
-    any_star.repeat_star().minimize();
+    any_star.repeat_star().minimize(); // it should be safe to minimize
 
     // any_plus = [?+]
     HfstTransducer any_plus(hfst::internal_identity, hfst::xre::format);
-    any_plus.repeat_plus().minimize();
+    any_plus.repeat_plus().minimize(); // it should be safe to minimize
 
     // t1 = [?+ c ?*]
     HfstTransducer * t1 = new HfstTransducer(any_plus);
-    t1->concatenate(*c).minimize();
-    t1->concatenate(any_star).minimize();
+    t1->concatenate(*c);
+    t1->optimize();
+    t1->concatenate(any_star);
+    t1->optimize();
 
     // t2 = [c ?*]
     HfstTransducer t2(*c);
-    t2.concatenate(any_star).minimize();
+    t2.concatenate(any_star);
+    t2.optimize();
 
     // t1 = [[?+ c ?*] & [c ?*]]
-    t1->intersect(t2).minimize();
+    t1->intersect(t2);
 
     // t3 = [[c ?+] & c]
     HfstTransducer t3(*c);
-    t3.concatenate(any_plus).minimize();
-    t3.intersect(*c).minimize();
+    t3.concatenate(any_plus);
+    t3.optimize();
+    t3.intersect(*c);
+    t3.optimize();
 
     // t1 = [t1 | t3]
-    t1->disjunct(t3).minimize();
+    t1->disjunct(t3);
+    t1->optimize();
     
     // cont_t1 = $[t1]
     HfstTransducer * cont_t1 = contains(t1);
@@ -959,7 +1012,8 @@ xfst_label_to_transducer(const char* input, const char* output)
     HfstTransducer * cont_c = contains(c);
 
     // $[c] - $[t1]
-    cont_c->subtract(*cont_t1).minimize();
+    cont_c->subtract(*cont_t1);
+    cont_c->optimize();
     delete cont_t1;
     return cont_c;
   }
@@ -969,12 +1023,15 @@ xfst_label_to_transducer(const char* input, const char* output)
     // neg_t = ~$[t]
     HfstTransducer * cont_t = contains(t);
     HfstTransducer neg_t(hfst::internal_identity, hfst::xre::format);
-    neg_t.repeat_star().minimize();
-    neg_t.subtract(*cont_t).minimize();
+    neg_t.repeat_star();
+    neg_t.optimize();
+    neg_t.subtract(*cont_t);
+    neg_t.optimize();
     delete cont_t;
     
     HfstTransducer * retval = contains_once(t);
-    retval->disjunct(neg_t).minimize();
+    retval->disjunct(neg_t);
+    retval->optimize();
     return retval;
   }
 
@@ -983,7 +1040,7 @@ xfst_label_to_transducer(const char* input, const char* output)
     // Merge operation creates an XreCompiler that needs this information below. Otherwise, it will overwrite all this.
     struct XreConstructorArguments args(hfst::xre::definitions, hfst::xre::function_definitions, hfst::xre::function_arguments, hfst::xre::symbol_lists, hfst::xre::format);
 
-    tr1->minimize();
+    tr1->optimize();
     tr2->merge(*tr1, args);
     return tr2;
   }
@@ -1070,6 +1127,20 @@ void warn_about_special_symbols_in_replace(HfstTransducer * t)
         }
     }
   xreflush(err);
+}
+
+void check_multichar_symbol(const char * symbol)
+{
+  if (defined_multichar_symbols_ == NULL)
+    return;
+  
+  if (defined_multichar_symbols_->find(std::string(symbol)) ==
+      defined_multichar_symbols_->end())
+    {
+      std::ostream * err = xreerrstr();
+      *err << "warning: multichar symbol '" << symbol << "' used but not defined" << std::endl;
+      xreflush(err);
+    }
 }
 
 bool has_non_identity_pairs(const HfstTransducer * t)

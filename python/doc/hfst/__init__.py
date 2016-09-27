@@ -180,7 +180,7 @@ def fst(arg):
 #
 # Example
 # \verbatim
-# import libhfst
+# import hfst
 # tok = hfst.HfstTokenizer()
 # tok.add_multichar_symbol('foo')
 # tok.add_multichar_symbol('bar')
@@ -2422,7 +2422,7 @@ def is_diacritic(symbol):
 #
 # test.py:
 # \verbatim
-# import libhfst
+# import hfst
 # ab = hfst.regex('a:b::2.8')
 # out = hfst.HfstOutputStream(hfst_format=False)
 # out.write(ab)
@@ -2460,7 +2460,7 @@ def is_diacritic(symbol):
 #
 # test.py:
 # \verbatim
-# import libhfst
+# import hfst
 # istr = hfst.HfstInputStream()
 # while not istr.is_eof():
 #     tr = istr.read()
@@ -2508,7 +2508,7 @@ def is_diacritic(symbol):
 # with the following piece of code:
 #
 # \verbatim
-# import libhfst
+# import hfst
 # hfst.set_default_fst_type(hfst.types.FOMA_TYPE)
 # ab = libfst.regex('a:b')
 # out = hfst.HfstOutputStream(hfst_format=False)

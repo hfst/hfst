@@ -63,7 +63,7 @@ namespace hfst
                                       StringPairSet &alphabet)
     {
 
-      t.minimize();
+      t.optimize();
 
       ImplementationType type = t.get_type();
 
@@ -76,11 +76,11 @@ namespace hfst
       tm.concatenate(tc);
       tm.concatenate(rmtr);
 
-      tm.minimize();
+      tm.optimize();
       
       HfstTransducer retval = replace(tm, repl_type, false, alphabet);
 
-      retval.minimize();
+      retval.optimize();
       return retval;
     }
 
@@ -144,7 +144,7 @@ namespace hfst
       HfstTransducer retval(pi_star);
       retval.subtract(disj);
 
-      retval.minimize();
+      retval.optimize();
       return retval;
     }
 
@@ -324,24 +324,24 @@ namespace hfst
       tmp.concatenate(pi_star);
       HfstTransducer cbt(pi_star);
       cbt.subtract(tmp);
-      cbt.minimize();
+      cbt.optimize();
 
       // left context transducer .* (<R> >> (<L> >> LEFT_CONTEXT)) || !(.*<L>)
       HfstTransducer lct = replace_context
         (context.first, leftm, rightm, alphabet);
 
-      lct.minimize();
+      lct.optimize();
 
       // right context transducer:
       // reversion( (<R> >> (<L> >> reversion(RIGHT_CONTEXT))) .* || !(<R>.*) )
       HfstTransducer right_rev(context.second);
 
       right_rev.reverse();
-      right_rev.minimize();
+      right_rev.optimize();
 
       HfstTransducer rct = replace_context(right_rev, rightm, leftm, alphabet);
       rct.reverse();
-      rct.minimize();
+      rct.optimize();
 
       // unconditional replace transducer
       HfstTransducer rt(type);
@@ -350,13 +350,13 @@ namespace hfst
         rt = replace_transducer( t, leftm, rightm, REPL_UP, alphabet );
       else
         rt = replace_transducer( t, leftm, rightm, REPL_DOWN, alphabet );
-      rt.minimize();
+      rt.optimize();
 
       // build the conditional replacement transducer
       HfstTransducer result(ibt);
 
       result.compose(cbt);
-      result.minimize(); // added
+      result.optimize(); // added
       
       if (repl_type == REPL_UP || repl_type == REPL_RIGHT)
         result.compose(rct);
@@ -364,7 +364,7 @@ namespace hfst
       if (repl_type == REPL_UP || repl_type == REPL_LEFT)
         result.compose(lct);
       
-      result.minimize();  // ADDED
+      result.optimize();  // ADDED
 
       result.compose(rt);
       
@@ -376,7 +376,7 @@ namespace hfst
       repl_type == REPL_DOWN_KARTTUNEN)
         result.compose(rct);
       
-      result.minimize();  // ADDED
+      result.optimize();  // ADDED
 
       result.compose(rbt);
 
@@ -389,7 +389,7 @@ namespace hfst
         result.disjunct(pi_star_);
       }
 
-      result.minimize();
+      result.optimize();
       return result;
     }
 

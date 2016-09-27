@@ -13,7 +13,7 @@
 
 #include "ComposeIntersectUtilities.h"
 #include "../../HfstExceptionDefs.h"
-#include "../HfstTransitionGraph.h"
+#include "../HfstBasicTransducer.h"
 
 HFST_EXCEPTION_CHILD_DECLARATION(StateNotDefined);
 

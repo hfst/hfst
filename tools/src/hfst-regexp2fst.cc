@@ -76,6 +76,7 @@ static hfst::ImplementationType output_format = hfst::UNSPECIFIED_TYPE;
 
 static bool harmonize=true;
 static bool harmonize_flags=false;
+static bool minimize_result=true;
 
 void
 print_usage()
@@ -101,10 +102,11 @@ print_usage()
 "  -x, --xerox-composition=VALUE Whether flag diacritics are treated as ordinary\n"
 "                                symbols in composition (default is false).\n"
 "  -X, --xfst=VARIABLE       Toggle xfst compatibility option VARIABLE.\n"
-"Harmonization:\n"
+"Harmonization and optimization options:\n"
 "  -H, --do-not-harmonize    Do not expand '?' symbols.\n"
 "  -F, --harmonize-flags     Harmonize flag diacritics.\n"
 "  -E, --encode-weights      Encode weights when minimizing (default is false).\n"
+"  -M, --do-not-minimize     Determinize result instead of minimizing it.\n"
                 );
         fprintf(message_out, "\n");
 
@@ -157,11 +159,12 @@ parse_options(int argc, char** argv)
           {"encode-weights", no_argument, 0, 'E'},
           {"xerox-composition", required_argument, 0, 'x'},
           {"xfst", required_argument, 0, 'X'},
+          {"do-not-minimize", no_argument, 0, 'M'},
           {0,0,0,0}
         };
         int option_index = 0;
         int c = getopt_long(argc, argv, HFST_GETOPT_COMMON_SHORT
-                             HFST_GETOPT_UNARY_SHORT "je:lSf:HFEx:X:"/*"123"*/,
+                             HFST_GETOPT_UNARY_SHORT "je:lSf:HFEx:X:M"/*"123"*/,
                              long_options, &option_index);
         if (-1 == c)
         {
@@ -204,6 +207,9 @@ parse_options(int argc, char** argv)
           break;
         case 'E':
           encode_weights=true;
+          break;
+        case 'M':
+          minimize_result=false;
           break;
         case 'x':
           {
@@ -268,6 +274,7 @@ process_stream(HfstOutputStream& outstream)
   comp.set_error_stream(&std::cerr);
   comp.set_harmonization(harmonize);
   comp.set_flag_harmonization(harmonize_flags);
+  hfst::set_minimization(minimize_result);
   HfstTransducer disjunction(output_format);
 
   char delim = (line_separated)? '\n' : ';';
@@ -283,7 +290,16 @@ process_stream(HfstOutputStream& outstream)
         {
           transducer_n++;
           verbose_printf("Compiling expression #%i\n", (int)transducer_n);
-          compiled = comp.compile_first(filebuf_, chars_read);
+          try
+            {
+              compiled = comp.compile_first(filebuf_, chars_read);
+            }
+          catch (const HfstException & e)
+            {
+              error(EXIT_FAILURE, 0, "%s: XRE parsing failed "
+                    "in expression #%u separated by semicolons:\n%s", inputfilename,
+                    (unsigned int)transducer_n, e.what().c_str());
+            }
           if (compiled == NULL)
             {
               if (comp.contained_only_comments())
@@ -298,7 +314,7 @@ process_stream(HfstOutputStream& outstream)
                 }
               else
                 {
-                  error(EXIT_FAILURE, 0, "%s: XRE parsing failed"
+                  error(EXIT_FAILURE, 0, "%s: XRE parsing failed "
                         "in expression #%u separated by semicolons", inputfilename,
                         (unsigned int)transducer_n);
                 }
@@ -358,7 +374,15 @@ process_stream(HfstOutputStream& outstream)
           transducer_n++;
           HfstTransducer* compiled;
           verbose_printf("Compiling expression %u\n", line_count);
-          compiled = comp.compile(exp);
+          try
+            {
+              compiled = comp.compile(exp);
+            }
+          catch (HfstException & e)
+            {
+              error_at_line(EXIT_FAILURE, 0, inputfilename, line_count,
+                            "XRE parsing failed");
+            }
           if (compiled == NULL)
             {
               if (!comp.contained_only_comments())
@@ -441,6 +465,7 @@ int main( int argc, char **argv )
         new HfstOutputStream(outfilename, output_format) :
         new HfstOutputStream(output_format);
   process_stream(*outstream);
+  delete outstream;
 
     if (encode_weights)
       {

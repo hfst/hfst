@@ -1636,7 +1636,7 @@ char *fsm_network_to_char(struct fsm *net) {
     for (; sigma != NULL && sigma->number != -1 ; sigma = sigma->next) {
 	sigprev = sigma;
     }
-    return(strdup(sigprev->symbol));
+    return(xxstrdup(sigprev->symbol));
 }
 
 struct fsm *fsm_substitute_label(struct fsm *net, char *original, struct fsm *substitute) {
@@ -3103,7 +3103,7 @@ struct fsm *fsm_flatten(struct fsm *net, struct fsm *epsilon) {
 	fsm_destroy(epsilon);
 	return NULL;
     }
-    epssym = strdup(fsm_get_arc_in(eps));
+    epssym = xxstrdup(fsm_get_arc_in(eps));
     fsm_read_done(eps);
 
     outh = fsm_construct_init(net->name);

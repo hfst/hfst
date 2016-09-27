@@ -12,8 +12,24 @@
 #endif
 
 #include "ConvertTransducerFormat.h"
-#include "HfstTransitionGraph.h"
+#include "HfstBasicTransducer.h"
 #include "HfstTransducer.h"
+
+#ifdef _MSC_VER
+#include "back-ends/openfstwin/src/include/fst/fstlib.h"
+#else
+#include "back-ends/openfst/src/include/fst/fstlib.h"
+#endif // _MSC_VER
+
+namespace fst
+{
+  extern template class TropicalWeightTpl<float>;
+  extern template class ArcTpl<TropicalWeight>;
+  extern template class VectorFst<StdArc>;
+  extern template class ArcIterator<StdVectorFst>;
+  extern template class StateIterator<StdVectorFst>;
+}
+
 
 #ifndef MAIN_TEST
 namespace hfst { namespace implementations
@@ -228,7 +244,7 @@ namespace hfst { namespace implementations
     st.AddSymbol(internal_identity, 2);
     
     // Copy the alphabet
-    for (HfstBasicTransducer::HfstTransitionGraphAlphabet::iterator it
+    for (HfstBasicTransducer::HfstAlphabet::iterator it
            = net->alphabet.begin();
          it != net->alphabet.end(); it++) {
       assert(! it->empty());

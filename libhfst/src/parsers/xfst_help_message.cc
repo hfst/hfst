@@ -430,7 +430,7 @@ bool handle_case(const std::string & names, const std::string & arguments,
   COMMAND("variable compose-tristate", "", "use the tristate composition algorithm");
   COMMAND("variable show-flags", "", "show flag diacritics in `apply'");
   COMMAND("variable obey-flags", "", "obey flag diacritics in `apply'");
-  COMMAND("variable minimal", "", "minimize resulting FSMs");
+  COMMAND("variable minimal", "", "ON = minimize resulting FSMs, OFF = remove epsilons and determinize");
   COMMAND("variable print-pairs", "", "always print both sides when applying");
   COMMAND("variable print-space", "", "print spaces between symbols");
   COMMAND("variable print-sigma", "", "print the alphabet when printing network");

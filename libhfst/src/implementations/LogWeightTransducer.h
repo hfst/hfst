@@ -18,18 +18,44 @@
   #include "../../../config.h"
 #endif
 
-#ifdef _MSC_VER
- #include "back-ends/openfstwin/src/include/fst/fstlib.h"
-#else
- #include "back-ends/openfst/src/include/fst/fstlib.h"
-#endif // _MSC_VER
+//#ifdef _MSC_VER
+// #include "back-ends/openfstwin/src/include/fst/fstlib.h"
+//#else
+// #include "back-ends/openfst/src/include/fst/fstlib.h"
+//#endif // _MSC_VER
 
 #include "HfstExtractStrings.h"
 #include <cstdio>
 #include <string>
 #include <sstream>
 #include <iostream>
+#include <fstream>
 //#include "HfstAlphabet.h"
+
+#ifdef OPENFST_VERSION_1_5_4
+  #include "back-ends/openfst/src/include/fst/fst-decl.h"
+#else
+namespace fst
+{
+  template <class W> class TropicalWeightTpl;
+  typedef TropicalWeightTpl<float> TropicalWeight;
+
+  template <class W> class LogWeightTpl;
+  typedef LogWeightTpl<float> LogWeight;
+
+  template <class W> class ArcTpl;
+  typedef ArcTpl<TropicalWeight> StdArc;
+  typedef ArcTpl<LogWeight> LogArc;
+
+  template <class A> class VectorFst;
+  typedef VectorFst<StdArc> StdVectorFst;
+  typedef VectorFst<LogArc> LogFst;
+
+  class SymbolTable;
+}
+#endif
+
+typedef int64_t int64;
 
 /** @file LogWeightTransducer.h
     \brief Declarations of functions and datatypes that form a bridge between
@@ -40,7 +66,8 @@ namespace implementations
 {
   using namespace fst;
   ;
-  typedef LogArc::StateId StateId;
+  //typedef LogArc::StateId StateId;
+  typedef unsigned int StateId;
   typedef VectorFst<LogArc> LogFst;
 
   typedef std::vector<LogArc> LogArcVector;
@@ -57,8 +84,8 @@ namespace implementations
   {
   private:
     std::string filename;
-    ifstream i_stream;
-    istream &input_stream;
+    std::ifstream i_stream;
+    std::istream &input_stream;
     void skip_identifier_version_3_0(void);
     void skip_hfst_header(void);
   public:
@@ -78,15 +105,15 @@ namespace implementations
     void stream_unget(char c);
     
     static bool is_fst(FILE * f);
-    static bool is_fst(istream &s);
+    static bool is_fst(std::istream &s);
   };
 
   class LogWeightOutputStream
   {
   private:
     std::string filename;
-    ofstream o_stream;
-    ostream &output_stream;
+    std::ofstream o_stream;
+    std::ostream &output_stream;
     //void write_3_0_library_header(std::ostream &out);
   public:
     LogWeightOutputStream(void);
@@ -96,7 +123,7 @@ namespace implementations
     void write_transducer(LogFst * transducer);
   };
 
-  class LogWeightTransitionIterator;
+  /*  class LogWeightTransitionIterator;
 
   typedef StateId LogWeightState;
 
@@ -140,13 +167,14 @@ namespace implementations
       bool done(void);
       LogWeightTransition value(void);
     };
-  
+  */
 
   class LogWeightTransducer
     {
     public:
       static LogFst * create_empty_transducer(void);
       static LogFst * create_epsilon_transducer(void);
+      void delete_transducer(LogFst * t);
 
       // string versions
       static LogFst * define_transducer(const std::string &symbol);
@@ -281,9 +309,9 @@ namespace implementations
         (LogFst *t, int state_number, StateMap &state_map);
 
       static int has_arc(LogFst &t,
-                  LogArc::StateId sourcestate,
-                  LogArc::Label ilabel,
-                  LogArc::Label olabel);
+                         /*LogArc::StateId*/ int sourcestate,
+                         /*LogArc::Label*/ int ilabel,
+                         /*LogArc::Label*/ int olabel);
       static void disjunct_as_tries(LogFst &t1,
                              StateId t1_state,
                              const LogFst * t2,

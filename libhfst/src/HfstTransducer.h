@@ -18,7 +18,6 @@
 
 #include "HfstDataTypes.h"
 #include "HfstSymbolDefs.h"
-#include "implementations/HfstTransitionGraph.h"
 #include "parsers/LexcCompiler.h"
 
 #if HAVE_SFST
@@ -69,10 +68,7 @@
 namespace hfst
 {
   namespace implementations {
-    template <class T> class HfstTransitionGraph;
-    class HfstTropicalTransducerTransitionData;
-    typedef HfstTransitionGraph<HfstTropicalTransducerTransitionData>
-      HfstBasicTransducer;
+    class HfstBasicTransducer;
   }
   class HfstCompiler;
   class HfstTransducer;
@@ -93,8 +89,6 @@ namespace hfst
 
 #if HAVE_OPENFST
   using hfst::implementations::TropicalWeightTransducer;
-  using hfst::implementations::TropicalWeightState;
-  using hfst::implementations::TropicalWeightStateIterator;
 #if HAVE_OPENFST_LOG
   using hfst::implementations::LogWeightTransducer;
 #endif // #if HAVE_OPENFST_LOG
@@ -137,6 +131,9 @@ namespace hfst
 
   HFSTDLL void set_minimize_even_if_already_minimal(bool);
   HFSTDLL bool get_minimize_even_if_already_minimal();
+
+  HFSTDLL void set_minimization(bool);
+  HFSTDLL bool get_minimization();
 
   HFSTDLL void set_xerox_composition(bool);
   HFSTDLL bool get_xerox_composition();
@@ -1232,6 +1229,12 @@ ccc : ddd
         @bug OpenFst's minimization algorithm seems to add epsilon
         transitions to weighted transducers? */
     HFSTDLL HfstTransducer &minimize();
+
+    /** \brief Minimize or determinize the transducer.
+
+        If hfst::set_minimization(false) has been called, determinize the transducer.
+        Else, minimize it. */
+    HFSTDLL HfstTransducer &optimize();
 
     /** \brief Extract \a n best paths of the transducer.
 

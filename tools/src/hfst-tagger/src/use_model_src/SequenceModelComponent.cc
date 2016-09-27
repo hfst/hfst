@@ -7,7 +7,7 @@
 
 const State SequenceModelComponent::START_STATE = 0;
 
-typedef HfstBasicTransducer::HfstTransitionGraphAlphabet
+typedef HfstBasicTransducer::HfstAlphabet
 HfstTransitionGraphAlphabet;
 
 using hfst::internal_epsilon;

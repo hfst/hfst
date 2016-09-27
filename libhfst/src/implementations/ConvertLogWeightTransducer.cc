@@ -12,8 +12,24 @@
 #endif
 
 #include "ConvertTransducerFormat.h"
-#include "HfstTransitionGraph.h"
+#include "HfstBasicTransducer.h"
 #include "HfstTransducer.h"
+
+#ifdef _MSC_VER
+#include "back-ends/openfstwin/src/include/fst/fstlib.h"
+#else
+#include "back-ends/openfst/src/include/fst/fstlib.h"
+#endif // _MSC_VER
+
+namespace fst
+{
+  extern template class LogWeightTpl<float>;
+  extern template class ArcTpl<LogWeight>;
+  extern template class VectorFst<LogArc>;
+  extern template class ArcIterator<LogFst>;
+  extern template class StateIterator<LogFst>;
+}
+
 
 #ifndef MAIN_TEST
 namespace hfst { namespace implementations
@@ -267,7 +283,7 @@ namespace hfst { namespace implementations
       }
     
     // Add also symbols that do not occur in transitions
-    for (HfstBasicTransducer::HfstTransitionGraphAlphabet::iterator it
+    for (HfstBasicTransducer::HfstAlphabet::iterator it
            = net->alphabet.begin();
          it != net->alphabet.end(); it++) {
         st.AddSymbol(*it);

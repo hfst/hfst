@@ -41,7 +41,7 @@
 #include "parsers/XreCompiler.h"
 #include "parsers/LexcCompiler.h"
 #include "parsers/XfstCompiler.h"
-#include "implementations/HfstTransitionGraph.h"
+#include "implementations/HfstBasicTransducer.h"
 #include "implementations/optimized-lookup/pmatch.h"
 
 // Most of C++ extension code is located in separate files.
@@ -1436,8 +1436,12 @@ namespace xfst {
       XfstCompiler();
       XfstCompiler(hfst::ImplementationType impl);
       XfstCompiler& setOutputToConsole(bool value);
+      XfstCompiler& setReadInteractiveTextFromStdin(bool Value);
       XfstCompiler& setVerbosity(bool verbosity);
       XfstCompiler& set(const char* name, const char* text);
+      char * get_prompt() const;
+      int parse_line(std::string line);
+      bool quit_requested() const;
   };
 }
 
@@ -1958,6 +1962,8 @@ def start_xfst(**kvargs):
     import sys
     while True:
         expression += input(comp.get_prompt()).rstrip()
+        if len(expression) == 0:
+           continue
         if expression[-1] == '\\':
            expression = expression[:-2] + '\n'
            continue
@@ -2262,7 +2268,7 @@ def tokenized_fst(arg, weight=0):
 
     Example
 
-       import libhfst
+       import hfst
        tok = hfst.HfstTokenizer()
        tok.add_multichar_symbol('foo')
        tok.add_multichar_symbol('bar')

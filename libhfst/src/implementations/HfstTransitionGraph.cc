@@ -6,7 +6,7 @@
 // version 3 of the License, or (at your option) any later version.
 // See the file COPYING included with this distribution for more
 // information.
-#include "HfstTransitionGraph.h"
+#include "HfstBasicTransducer.h"
 
 #ifndef MAIN_TEST
 

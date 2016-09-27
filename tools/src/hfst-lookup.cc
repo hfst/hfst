@@ -54,7 +54,7 @@ using hfst::hfst_fprintf_console;
 #include "HfstTransducer.h"
 #include "HfstInputStream.h"
 #include "HfstOutputStream.h"
-#include "implementations/HfstTransitionGraph.h"
+#include "implementations/HfstBasicTransducer.h"
 
 #include "inc/globals-common.h"
 #include "inc/globals-unary.h"
@@ -1432,7 +1432,7 @@ lookup_simple(const HfstOneLevelPath& s, HfstBasicTransducer& t, bool* infinity,
 
 
 HfstOneLevelPaths*
-lookup_cascading(const HfstOneLevelPath& s, vector<HfstTransducer> cascade,
+lookup_cascading(const HfstOneLevelPath& s, vector<HfstTransducer> & cascade,
                  bool* infinity)
 {
   HfstOneLevelPaths* results = new HfstOneLevelPaths;
@@ -1527,7 +1527,7 @@ lookup_cascading(const HfstOneLevelPath& s, vector<HfstTransducer> cascade,
 
 
 HfstOneLevelPaths*
-lookup_cascading(const HfstOneLevelPath& s, vector<HfstBasicTransducer> cascade,
+lookup_cascading(const HfstOneLevelPath& s, vector<HfstBasicTransducer> & cascade,
                  bool* infinity)
 {
   HfstOneLevelPaths* results = new HfstOneLevelPaths;

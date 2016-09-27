@@ -857,6 +857,9 @@ compile(const string& pmatch, map<string,HfstTransducer*>& defs,
 
 void print_size_info(HfstTransducer * net)
 {
+    if (!hfst::pmatch::verbose) {
+        return;
+    }
     HfstBasicTransducer tmp(*net);
     size_t states = 0;
     size_t arcs = 0;

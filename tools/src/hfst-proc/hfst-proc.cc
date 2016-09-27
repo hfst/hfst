@@ -60,7 +60,7 @@ static bool handle_hfst3_header(std::istream& is)
       HFST_THROW(HfstException);
       return false;
       }
-      char * headervalue = new char[remaining_header_len];
+      char * headervalue = (char*) malloc(remaining_header_len);
       while(remaining_header_len > 0) {
       is.getline(headervalue, remaining_header_len + 1, '\0');
       remaining_header_len -= strlen(headervalue) + 1;
@@ -69,13 +69,13 @@ static bool handle_hfst3_header(std::istream& is)
           remaining_header_len -= strlen(headervalue) + 1;
           if (strcmp(headervalue, "HFST_OL") &&
           strcmp(headervalue, "HFST_OLW")) {
-          delete headervalue;
+          free((void*)headervalue);
           HFST_THROW(TransducerHasWrongTypeException);
           return false;
           }
       }
       }
-      delete headervalue;
+      free((void*)headervalue);
       if (remaining_header_len == 0) {
       return true;
       } else {

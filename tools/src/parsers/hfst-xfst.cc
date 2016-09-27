@@ -458,7 +458,7 @@ int main(int argc, char** argv)
 #else
       char line [MAX_LINE_LENGTH];
       insert_zeroes(line, MAX_LINE_LENGTH);
-      while (cin.getline(line, MAX_LINE_LENGTH))
+      while (std::cin.getline(line, MAX_LINE_LENGTH))
         {
           std::string linestr(line);
           expression += linestr;

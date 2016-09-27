@@ -10,12 +10,13 @@
 #ifndef _HFST_OL_CONVERT_H_
 #define _HFST_OL_CONVERT_H_
 
-#if HAVE_OPENFST
-#include "fst/fstlib.h"
-#endif // HAVE_OPENFST
-
 #include "transducer.h"
 #include "pmatch.h"
+
+#ifdef OPENFST_VERSION_1_5_4
+  #include "back-ends/openfst/src/include/fst/fst-decl.h"
+  namespace fst { template <class F> class ArcIterator; }
+#endif
 
 namespace hfst_ol {
     
@@ -283,7 +284,7 @@ void add_transitions_with(SymbolNumber symbol,
               std::set<SymbolNumber> & flag_symbols);
 
 #if HAVE_OPENFST // Covers remainder of file
-typedef fst::StdArc::StateId StateId;
+typedef /*fst::StdArc::StateId*/ int StateId;
 typedef fst::StdArc StdArc;
 typedef fst::StdVectorFst TransduceR;
 typedef fst::ArcIterator<TransduceR> ArcIterator;

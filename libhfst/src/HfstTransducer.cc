@@ -87,7 +87,10 @@ MinimizationAlgorithm minimization_algorithm=HOPCROFT;
 bool minimize_even_if_already_minimal=false;
 /* By default, weights are not encoded in minimization. */
 bool encode_weights=false;
-/* By default, harmonization is not optimized. */
+/* Allow minimization of intermediary results, used in some more complex functions. 
+   A false value indicates that only epsilon removal and determinization is allowed. */
+bool can_minimize=true;
+/* By default, harmonization is optimized. */
 bool harmonize_smaller=true;
 /* By default, unknown symbols are used. */
 bool unknown_symbols_in_use=true;
@@ -103,6 +106,14 @@ bool flag_is_epsilon_in_composition=false;
 
   bool get_xerox_composition() {
     return xerox_composition;
+  }
+
+  void set_minimization(bool value) {
+    can_minimize=value;
+  }
+
+  bool get_minimization() {
+    return can_minimize;
   }
 
   void set_minimize_even_if_already_minimal(bool value) {
@@ -170,7 +181,7 @@ void set_minimization_algorithm(MinimizationAlgorithm a) {
     hfst::implementations::openfst_log_set_hopcroft(false);
 #endif
 #endif
-    // in foma, Hopcroft is always used
+   // in foma, Hopcroft is always used
 }
 
 MinimizationAlgorithm get_minimization_algorithm() {
@@ -424,23 +435,6 @@ unsigned int HfstTransducer::get_symbol_number(const std::string &symbol)
 */
 HfstTransducer * HfstTransducer::harmonize_symbol_encodings(const HfstTransducer &another)
 {
-  /*
-  std::cerr << "== 1 ==" << std::endl;
-  HfstBasicTransducer * another_basic = another.get_basic_transducer();
-  std::cerr << "== 2 ==" << std::endl;
-  HfstBasicTransducer * this_basic = this->convert_to_basic_transducer(); // OpenFst fails
-  
-  std::cerr << "== 3 ==" << std::endl;
-  this->convert_to_hfst_transducer(this_basic);
-  std::cerr << "== 4 ==" << std::endl;
-  HfstTransducer * another_harmonized
-    = new HfstTransducer(*another_basic, this->type);
-  std::cerr << "== 5 ==" << std::endl;
-  delete another_basic;
-  std::cerr << "== 6 ==" << std::endl;
-  
-  return another_harmonized;  */
-
   HfstBasicTransducer another_basic(another);
   HfstBasicTransducer this_basic(*this);
   *this = HfstTransducer(this_basic, this->get_type());
@@ -1346,11 +1340,11 @@ HfstTransducer::~HfstTransducer(void)
 #endif
 #if HAVE_OPENFST
     case TROPICAL_OPENFST_TYPE:
-        delete implementation.tropical_ofst;
+        tropical_ofst_interface.delete_transducer(implementation.tropical_ofst);
         break;
 #if HAVE_OPENFST_LOG
     case LOG_OPENFST_TYPE:
-        delete implementation.log_ofst;
+        log_ofst_interface.delete_transducer(implementation.log_ofst);
         break;
 #endif
 #endif
@@ -1563,7 +1557,8 @@ bool HfstTransducer::compare(const HfstTransducer &another, bool harmonize) cons
         delete tmp;
       }
 
-    one_copy.minimize();
+    one_copy.determinize();
+    another_copy.determinize();
 
     switch (one_copy.type)
     {
@@ -1961,7 +1956,7 @@ static HfstTransducer * get_flag_filter
   if (filter != NULL)
     {
       substitute_escaped_flags(filter);  // unescape the flags
-      filter->minimize();
+      filter->optimize();
     }
 
   return filter;
@@ -2015,7 +2010,7 @@ HfstTransducer &HfstTransducer::eliminate_flags()
       flag_purge(*this, "");
     }
 
-  return this->minimize();
+  return this->optimize();
 }
 
 HfstTransducer &HfstTransducer::eliminate_flag(const std::string & flag)
@@ -2070,7 +2065,7 @@ HfstTransducer &HfstTransducer::eliminate_flag(const std::string & flag)
       flag_purge(*this, "");
     }
 
-  return this->minimize();
+  return this->optimize();
 }
 
 HfstTransducer &HfstTransducer::remove_epsilons()
@@ -2104,7 +2099,7 @@ HfstTransducer &HfstTransducer::prune()
   this->convert(TROPICAL_OPENFST_TYPE);
   fst::StdVectorFst * temp = hfst::implementations::TropicalWeightTransducer::prune
     (this->implementation.tropical_ofst);
-  delete this->implementation.tropical_ofst;
+  this->tropical_ofst_interface.delete_transducer(this->implementation.tropical_ofst);
   this->implementation.tropical_ofst = temp;
   return *this;
 #endif
@@ -2158,7 +2153,13 @@ HfstTransducer &HfstTransducer::minimize()
     false );
 }
 
-
+HfstTransducer &HfstTransducer::optimize()
+{
+  if (can_minimize)
+    return this->minimize();
+  else
+    return this->determinize();
+}
 
 // -----------------------------------------------------------------------
 //
@@ -2541,7 +2542,6 @@ void HfstTransducer::extract_paths_fd(ExtractStringsCb& callback,
 class ExtractStringsCb_ : public ExtractStringsCb
 {
 public:
-    //WeightedPaths<float>::Set& paths;
     HfstTwoLevelPaths& paths;
     int max_num;
       
@@ -2628,7 +2628,7 @@ bool HfstTransducer::extract_longest_paths
 
       // filter out the paths of current length and extract them
       length_tr->compose(*this);
-      length_tr->minimize();
+      length_tr->optimize();
       if (obey_flags)
         {
           length_tr->extract_paths_fd(results);
@@ -2810,7 +2810,7 @@ HfstTransducer &HfstTransducer::n_best(unsigned int n)
     fst::StdVectorFst * temp =
             hfst::implementations::TropicalWeightTransducer::n_best
             (implementation.tropical_ofst,(int)n);
-    delete implementation.tropical_ofst;
+    tropical_ofst_interface.delete_transducer(implementation.tropical_ofst);
     implementation.tropical_ofst = temp;
     break;
     }
@@ -2820,7 +2820,7 @@ HfstTransducer &HfstTransducer::n_best(unsigned int n)
     hfst::implementations::LogFst * temp =
             hfst::implementations::LogWeightTransducer::n_best
             (implementation.log_ofst,(int)n);
-    delete implementation.log_ofst;
+    log_ofst_interface.delete_transducer(implementation.log_ofst);
     implementation.log_ofst = temp;
     break;
     }
@@ -3297,14 +3297,10 @@ static bool substitute_input_flag_with_epsilon(const StringPair &sp, StringPairS
 {
   if (FdOperation::is_diacritic(sp.first))
     {
-      //if (sp.second != sp.first)
-      //  throw "Error: flags must be identities";
       StringPair new_pair(hfst::internal_epsilon, sp.second);
       sps.insert(new_pair);
       return true;
     }
-  //if (FdOperation::is_diacritic(sp.second))
-  //  throw "Error: flags must be identities";
   return false;
 }
 
@@ -3312,14 +3308,10 @@ static bool substitute_output_flag_with_epsilon(const StringPair &sp, StringPair
 {
   if (FdOperation::is_diacritic(sp.second))
     {
-      //if (sp.first != sp.second)
-      //  throw "Error: flags must be identities";
       StringPair new_pair(sp.first, hfst::internal_epsilon);
       sps.insert(new_pair);
       return true;
     }
-  //if (FdOperation::is_diacritic(sp.first))
-  //  throw "Error: flags must be identities";
   return false;
 }
 
@@ -3402,7 +3394,7 @@ HfstTransducer &HfstTransducer::insert_freely
     hfst::implementations::HfstBasicTransducer * net =
             ConversionFunctions::tropical_ofst_to_hfst_basic_transducer
             (implementation.tropical_ofst);
-    delete implementation.tropical_ofst;
+    tropical_ofst_interface.delete_transducer(implementation.tropical_ofst);
           
     hfst::implementations::HfstBasicTransducer * substituting_net =
             ConversionFunctions::tropical_ofst_to_hfst_basic_transducer
@@ -3423,7 +3415,7 @@ HfstTransducer &HfstTransducer::insert_freely
     hfst::implementations::HfstBasicTransducer * net =
             ConversionFunctions::log_ofst_to_hfst_basic_transducer
             (implementation.log_ofst);
-    delete implementation.log_ofst;
+    log_ofst_interface.delete_transducer(implementation.log_ofst);
           
     hfst::implementations::HfstBasicTransducer * substituting_net =
             ConversionFunctions::log_ofst_to_hfst_basic_transducer
@@ -3557,7 +3549,7 @@ HfstTransducer &HfstTransducer::substitute
     fst::StdVectorFst * tmp =
       this->tropical_ofst_interface.substitute
       (implementation.tropical_ofst, old_symbol, new_symbol);
-    delete implementation.tropical_ofst;
+    tropical_ofst_interface.delete_transducer(implementation.tropical_ofst);
     implementation.tropical_ofst = tmp;
     return *this;
       }
@@ -3567,7 +3559,7 @@ HfstTransducer &HfstTransducer::substitute
     hfst::implementations::LogFst * tmp =
       this->log_ofst_interface.substitute
       (implementation.log_ofst, old_symbol, new_symbol);
-    delete implementation.log_ofst;
+    log_ofst_interface.delete_transducer(implementation.log_ofst);
     implementation.log_ofst = tmp;
     return *this;
       }
@@ -3826,7 +3818,7 @@ HfstTransducer &HfstTransducer::push_weights(PushType push_type)
         hfst::implementations::StdVectorFst * tmp  =
         this->tropical_ofst_interface.push_weights
         (this->implementation.tropical_ofst, to_initial_state);
-        delete this->implementation.tropical_ofst;
+        this->tropical_ofst_interface.delete_transducer(this->implementation.tropical_ofst);
         this->implementation.tropical_ofst = tmp;
         return *this;
     }
@@ -3836,7 +3828,7 @@ HfstTransducer &HfstTransducer::push_weights(PushType push_type)
         hfst::implementations::LogFst * tmp =
         this->log_ofst_interface.push_weights
         (this->implementation.log_ofst, to_initial_state);
-        delete this->implementation.log_ofst;
+        this->log_ofst_interface.delete_transducer(this->implementation.log_ofst);
         this->implementation.log_ofst = tmp;
         return *this;
     }
@@ -3929,7 +3921,7 @@ HfstTransducer &HfstTransducer::merge
   std::set<std::string> markers_added;
   HfstBasicTransducer result = hfst::implementations::HfstBasicTransducer::merge(this_basic, another_basic, args.list_definitions, markers_added);
   HfstTransducer initial_merge(result, this->get_type());
-  initial_merge.minimize();
+  initial_merge.optimize();
 
   // filter non-optimal paths
   // [ ? | #V ?:? ]* %#V:V ?:0 [ ? | #V ?:? | %#V:V ?:0 ]*
@@ -3944,12 +3936,12 @@ HfstTransducer &HfstTransducer::merge
 
       HfstTransducer * worsener = xre_.compile(worsener_string);
       assert(worsener != NULL);
-      worsener->minimize();
+      worsener->optimize();
       HfstTransducer cp(initial_merge);
-      cp.compose(*worsener).output_project().minimize();
+      cp.compose(*worsener).output_project().optimize();
       delete worsener;
 
-      initial_merge.subtract(cp).minimize();
+      initial_merge.subtract(cp).optimize();
       initial_merge.substitute(marker, internal_epsilon);
 
       HfstBasicTransducer fsm(initial_merge);
@@ -3973,10 +3965,6 @@ HfstTransducer &HfstTransducer::compose
     HFST_THROW(TransducerTypeMismatchException);
 
     HfstTransducer * another_copy = new HfstTransducer(another);
-
-    //if (this->type != another_copy->type) {
-    //    another_copy->convert(this->type);
-    //}
 
     /* If we want flag diacritcs to be handled in the same way as epsilons
        in composition, we substitute output flags of first transducer with
@@ -4085,7 +4073,7 @@ HfstTransducer &HfstTransducer::compose
             this->tropical_ofst_interface.compose
         (this->implementation.tropical_ofst,
          another_copy->implementation.tropical_ofst);
-    delete implementation.tropical_ofst;
+    tropical_ofst_interface.delete_transducer(implementation.tropical_ofst);
     implementation.tropical_ofst = tropical_ofst_temp;
     break;
     }
@@ -4096,7 +4084,7 @@ HfstTransducer &HfstTransducer::compose
             this->log_ofst_interface.compose
       (implementation.log_ofst,
        another_copy->implementation.log_ofst);
-    delete implementation.log_ofst;
+    log_ofst_interface.delete_transducer(implementation.log_ofst);
     implementation.log_ofst = log_ofst_temp;
     break;
     }
@@ -4338,7 +4326,7 @@ HfstTransducer &HfstTransducer::lenient_composition( const HfstTransducer &anoth
 
     HfstTransducer retval(*this);
     // true is a dummy variable, false means do not encode epsilons
-    retval.compose(another).minimize().priority_union(*this).minimize();
+    retval.compose(another).optimize().priority_union(*this).optimize();
 
     *this = retval;
     return *this;
@@ -4393,19 +4381,19 @@ HfstTransducer &HfstTransducer::cross_product( const HfstTransducer &another, bo
     HfstTransducer MarkToEpsilon(EpsilonToMark);
     MarkToEpsilon.invert();
 
-    UnknownToMark.repeat_star().minimize();
-    EpsilonToMark.repeat_star().minimize();
-    MarkToUnknown.repeat_star().minimize();
-    MarkToEpsilon.repeat_star().minimize();
+    UnknownToMark.repeat_star().minimize(); // minimization is safe
+    EpsilonToMark.repeat_star().minimize(); // minimization is safe
+    MarkToUnknown.repeat_star().minimize(); // minimization is safe
+    MarkToEpsilon.repeat_star().minimize(); // minimization is safe
 
     HfstTransducer a1(automata1);
-    a1.compose(UnknownToMark).minimize().concatenate(EpsilonToMark).minimize();
+    a1.compose(UnknownToMark).optimize().concatenate(EpsilonToMark).optimize();
 
     HfstTransducer b1(MarkToUnknown);
-    b1.compose(automata2).minimize().concatenate(MarkToEpsilon).minimize();
+    b1.compose(automata2).optimize().concatenate(MarkToEpsilon).optimize();
 
     HfstTransducer retval(a1);
-    retval.compose(b1).minimize();
+    retval.compose(b1).optimize();
 
     // Expand ?:? transitions to ?:?|?
     StringPairSet id_or_unk;
@@ -4554,7 +4542,7 @@ HfstTransducer &HfstTransducer::shuffle(const HfstTransducer &another, bool)
   HfstTransducer another1(another_basic, another.get_type());
 
   this1.intersect(another1);
-  this1.minimize();
+  this1.optimize();
   
   // We use HfstBasicTransducers again
   HfstBasicTransducer this1_basic(this1);
@@ -4594,16 +4582,16 @@ HfstTransducer &HfstTransducer::priority_union (const HfstTransducer &another)
     HfstTransducer t2(another);
 
     HfstTransducer t1upper(t1);
-    t1upper.input_project().minimize();
+    t1upper.input_project().optimize();
     
     HfstTransducer complement = HfstTransducer::identity_pair( this->type );
-    complement.repeat_star().minimize();
+    complement.repeat_star().optimize();
     complement.subtract(t1upper).prune_alphabet(false);
 
-    complement.compose(t2).minimize();
+    complement.compose(t2).optimize();
 
     HfstTransducer retval(t1);
-    retval.disjunct(complement).minimize();
+    retval.disjunct(complement).optimize();
     
     *this = retval;
     return *this;
@@ -4651,7 +4639,7 @@ HfstTransducer &HfstTransducer::compose_intersect
       basic_this.add_symbol_to_alphabet("@#@");
       *this = HfstTransducer(basic_this,this->get_type());
 
-      wb.concatenate(*this).concatenate(wb_copy).minimize();
+      wb.concatenate(*this).concatenate(wb_copy).optimize();
       *this = wb;
     }
 
@@ -5011,7 +4999,7 @@ convert_to_basic_transducer()
         hfst::implementations::HfstBasicTransducer * net =
       ConversionFunctions::tropical_ofst_to_hfst_basic_transducer
       (implementation.tropical_ofst);
-        delete implementation.tropical_ofst;
+        tropical_ofst_interface.delete_transducer(implementation.tropical_ofst);
     return net;
       }
 #if HAVE_OPENFST_LOG
@@ -5020,7 +5008,7 @@ convert_to_basic_transducer()
         hfst::implementations::HfstBasicTransducer * net =
       ConversionFunctions::log_ofst_to_hfst_basic_transducer
       (implementation.log_ofst);
-        delete implementation.log_ofst;
+        log_ofst_interface.delete_transducer(implementation.log_ofst);
     return net;
       }
 #endif
@@ -5204,14 +5192,14 @@ HfstTransducer &HfstTransducer::convert(ImplementationType type,
         ConversionFunctions::tropical_ofst_to_hfst_basic_transducer
         (implementation.tropical_ofst);
       assert(internal != NULL);
-      delete implementation.tropical_ofst;
+      tropical_ofst_interface.delete_transducer(implementation.tropical_ofst);
       break;
 #if HAVE_OPENFST_LOG
     case LOG_OPENFST_TYPE:
         internal =
         ConversionFunctions::log_ofst_to_hfst_basic_transducer
           (implementation.log_ofst);
-        delete implementation.log_ofst;
+        log_ofst_interface.delete_transducer(implementation.log_ofst);
         break;
 #endif
       case HFST_OL_TYPE:
@@ -5399,9 +5387,9 @@ HfstTransducer::HfstTransducer(FILE * ifile,
 
     // Implemented only for internal transducer format.
     hfst::implementations::HfstBasicTransducer net =
-    hfst::implementations::HfstTransitionGraph<hfst::implementations::
-    HfstTropicalTransducerTransitionData>::
-      read_in_att_format(ifile, std::string(epsilon_symbol), linecount);
+      /*hfst::implementations::HfstTransitionGraph<hfst::implementations::
+        HfstTropicalTransducerTransitionData>::*/
+      HfstBasicTransducer::read_in_att_format(ifile, std::string(epsilon_symbol), linecount);
 
     // Conversion is done here.
     switch (type)
@@ -5475,9 +5463,9 @@ HfstTransducer::HfstTransducer(FILE * ifile,
 
     // Implemented only for internal transducer format.
     hfst::implementations::HfstBasicTransducer net =
-    hfst::implementations::HfstTransitionGraph<hfst::implementations::
-    HfstTropicalTransducerTransitionData>::
-      read_in_att_format(ifile, std::string(epsilon_symbol), linecount);
+      /*hfst::implementations::HfstTransitionGraph<hfst::implementations::
+        HfstTropicalTransducerTransitionData>::*/
+      HfstBasicTransducer::read_in_att_format(ifile, std::string(epsilon_symbol), linecount);
 
     // Conversion is done here.
     switch (type)
@@ -5565,9 +5553,9 @@ HfstTransducer &HfstTransducer::read_in_att_format
 
     unsigned int foo = 0;
     hfst::implementations::HfstBasicTransducer net =
-    hfst::implementations::HfstTransitionGraph<hfst::implementations::
-    HfstTropicalTransducerTransitionData>
-      ::read_in_att_format(ifile, std::string(epsilon_symbol), foo);
+      /*hfst::implementations::HfstTransitionGraph<hfst::implementations::
+        HfstTropicalTransducerTransitionData>*/
+      HfstBasicTransducer::read_in_att_format(ifile, std::string(epsilon_symbol), foo);
     HfstTransducer *retval = new HfstTransducer(net,type);
     (void)foo;
     return *retval;
@@ -5650,18 +5638,16 @@ HfstTransducer &HfstTransducer::operator=(const HfstTransducer &another)
 #endif
 #if HAVE_OPENFST
     case TROPICAL_OPENFST_TYPE:
-    delete implementation.tropical_ofst;
+    tropical_ofst_interface.delete_transducer(implementation.tropical_ofst);
     break;
 #if HAVE_OPENFST_LOG
     case LOG_OPENFST_TYPE:
-    delete implementation.log_ofst;
+    log_ofst_interface.delete_transducer(implementation.log_ofst);
     break;
 #endif
 #endif
     case HFST_OL_TYPE:
     case HFST_OLW_TYPE:
-      //HFST_THROW_MESSAGE(FunctionNotImplementedException,
-      //               "HfstTransducer::operator= for type HFST_OL(W)_TYPE");
       delete implementation.hfst_ol;
       break;
     /* Add here your implementation. */
@@ -5807,25 +5793,6 @@ HfstTransducer * HfstTransducer::read_lexc_ptr(const std::string &filename,
         compiler.setVerbosity(verbose);
         compiler.parse(filename.c_str());
         retval = compiler.compileLexical();
-
-        /*
-        std::map<std::string,hfst::HfstTransducer> stringTriesPrint_;
-        stringTriesPrint_ = compiler.getStringTries();
-
-        cout << "\n size: " << stringTriesPrint_.size() << endl;
-
-
-        std::map<std::string,hfst::HfstTransducer>:: iterator it;
-
-        for ( std::map<std::string,hfst::HfstTransducer>::iterator it=stringTriesPrint_.begin(); it!=stringTriesPrint_.end(); ++it )
-        {
-            std::cout << "string" << it->first << " => tr:" <<  '\n';
-        it->second.minimize().write_in_att_format(stdout, 1);
-        }
-         */
-
-
-
         return retval;
         break;
       }

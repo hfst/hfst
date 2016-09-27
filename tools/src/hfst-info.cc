@@ -255,15 +255,15 @@ int main (int argc, char * argv[])
         }
     }
   verbose_printf("HFST info version: %s\n"
-          "HFST packaging: %s\n"
-          "HFST version: %s\n"
-          "HFST long version: %ld\n"
-          "HFST configuration revision: %s\n",
-          hfst_tool_version,
-          PACKAGE_STRING,
-          PACKAGE_VERSION,
-          HFST_LONGVERSION,
-          HFST_REVISION);
+                 "HFST packaging: %s\n"
+                 "HFST version: %s\n"
+                 "HFST long version: %ld\n",
+                 //          "HFST configuration revision: %s\n",
+                 hfst_tool_version,
+                 PACKAGE_STRING,
+                 PACKAGE_VERSION,
+                 HFST_LONGVERSION);
+  //                 HFST_REVISION);
 #if HAVE_OPENFST
   verbose_printf("OpenFst supported\n");
 #endif

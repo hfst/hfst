@@ -111,18 +111,18 @@ namespace hfst
   namespace implementations {
     template <class C> class HfstTransitionGraph;
     class HfstTropicalTransducerTransitionData;
-    typedef HfstTransitionGraph<HfstTropicalTransducerTransitionData>
-      HfstBasicTransducer;
-    class HfstFastTransitionData;
-    typedef HfstTransitionGraph<HfstFastTransitionData>
-      HfstFastTransducer;
+    //typedef HfstTransitionGraph<HfstTropicalTransducerTransitionData>
+    class HfstBasicTransducer;
+      //class HfstFastTransitionData;
+      //typedef HfstTransitionGraph<HfstFastTransitionData>
+      //HfstFastTransducer;
     typedef unsigned int HfstState;
 
     template <class C> class HfstTransition;
-    typedef HfstTransition<HfstTropicalTransducerTransitionData>
-      HfstBasicTransition;
-    typedef HfstTransition<HfstFastTransitionData>
-      HfstFastTransition;
+    //typedef HfstTransition<HfstTropicalTransducerTransitionData>
+    class  HfstBasicTransition;
+    //typedef HfstTransition<HfstFastTransitionData>
+    //  HfstFastTransition;
 
   }
 

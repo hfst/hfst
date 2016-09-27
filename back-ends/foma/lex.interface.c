@@ -7821,7 +7821,7 @@ char *rep_func_arg(char *s) {
         return(argstr);
     }
   }
-  return(strdup(s));
+  return(xxstrdup(s));
 }
 
 void my_interfaceparse(char *my_string) {
@@ -8920,7 +8920,7 @@ YY_DO_BEFORE_ACTION; /* set up interfacetext again */
 YY_RULE_SETUP
 #line 266 "interface.l"
 {
-   tempstr = trim(strdup(interfacetext));
+   tempstr = trim(xxstrdup(interfacetext));
    BEGIN(APPLY_FILE_EATUP);
 }
 	YY_BREAK
@@ -9283,7 +9283,7 @@ case 171:
 YY_RULE_SETUP
 #line 461 "interface.l"
 {
-  tempstr = strdup(trim(interfacetext));
+  tempstr = xxstrdup(trim(interfacetext));
   BEGIN(PRINT_NET_NAME_FILE2);
 }
 	YY_BREAK

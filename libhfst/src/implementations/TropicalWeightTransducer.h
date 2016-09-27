@@ -18,18 +18,48 @@
   #include "../../../config.h"
 #endif
 
-#ifdef _MSC_VER
-#include "back-ends/openfstwin/src/include/fst/fstlib.h"
-#else
-#include "back-ends/openfst/src/include/fst/fstlib.h"
-#endif // _MSC_VER
+//#ifdef _MSC_VER
+//#include "back-ends/openfstwin/src/include/fst/fstlib.h"
+//#else
+//#include "back-ends/openfst/src/include/fst/fstlib.h"
+//#endif // _MSC_VER
 
 #include "HfstExtractStrings.h"
 #include <cstdio>
 #include <string>
 #include <sstream>
 #include <iostream>
+#include <fstream>
+
 //#include "HfstAlphabet.h"
+
+#ifdef OPENFST_VERSION_1_5_4
+  #include "back-ends/openfst/src/include/fst/fst-decl.h"
+#else
+namespace fst
+{
+  template <class W> class TropicalWeightTpl;
+  typedef TropicalWeightTpl<float> TropicalWeight;
+
+  template <class W> class LogWeightTpl;
+  typedef LogWeightTpl<float> LogWeight;
+
+  template <class W> class ArcTpl;
+  typedef ArcTpl<TropicalWeight> StdArc;
+  typedef ArcTpl<LogWeight> LogArc;
+
+  template <class A> class VectorFst;
+  typedef VectorFst<StdArc> StdVectorFst;
+  typedef VectorFst<LogArc> LogFst;
+
+  template <class F> class StateIterator;
+  template <class F> class ArcIterator;
+
+  class SymbolTable;
+}
+#endif
+
+typedef int64_t int64;
 
 /** @file TropicalWeightTransducer.h
     \brief Declarations of functions and datatypes that form a bridge between
@@ -40,7 +70,8 @@ namespace implementations
 {
   using namespace fst;
   ;
-  typedef StdArc::StateId StateId;
+  typedef unsigned int StateId;
+  //typedef StdArc::StateId StateId;
 
   typedef std::vector<StdArc> StdArcVector;
   struct StdArcLessThan {
@@ -56,8 +87,8 @@ namespace implementations
   {
   private:
     std::string filename;
-    ifstream i_stream;
-    istream &input_stream;
+    std::ifstream i_stream;
+    std::istream &input_stream;
     void skip_identifier_version_3_0(void);
     void skip_hfst_header(void);
   public:
@@ -77,15 +108,15 @@ namespace implementations
     void stream_unget(char c);
     
     static bool is_fst(FILE * f);
-    static bool is_fst(istream &s);
+    static bool is_fst(std::istream &s);
   };
 
   class TropicalWeightOutputStream
   {
   private:
     std::string filename;
-    ofstream o_stream;
-    ostream &output_stream;
+    std::ofstream o_stream;
+    std::ostream &output_stream;
     bool hfst_format;
     //void write_3_0_library_header(std::ostream &out);
   public:
@@ -97,24 +128,24 @@ namespace implementations
     void write_transducer(StdVectorFst * transducer);
   };
 
-  class TropicalWeightTransitionIterator;
+  /*class TropicalWeightTransitionIterator;
 
   typedef StateId TropicalWeightState;
 
   class TropicalWeightStateIterator
     {
     protected:
-      StateIterator<StdVectorFst> * iterator;
+      fst::StateIterator<fst::StdVectorFst> * iterator;
     public:
       TropicalWeightStateIterator(StdVectorFst * t);
       ~TropicalWeightStateIterator(void);
       void next(void);
       bool done(void);
       TropicalWeightState value(void);
-    };
+      };*/
  
 
-  class TropicalWeightTransition
+  /*  class TropicalWeightTransition
     {
     protected:
       StdArc arc;
@@ -132,15 +163,15 @@ namespace implementations
   class TropicalWeightTransitionIterator
     {
     protected:
-      ArcIterator<StdVectorFst> * arc_iterator;
-      StdVectorFst * t;
+      fst::ArcIterator<fst::StdVectorFst> * arc_iterator;
+      fst::StdVectorFst * t;
     public:
       TropicalWeightTransitionIterator(StdVectorFst * t, StateId state);
       ~TropicalWeightTransitionIterator(void);
       void next(void);
       bool done(void);
       TropicalWeightTransition value(void);
-    };
+      };*/
   
 
   class TropicalWeightTransducer
@@ -148,6 +179,7 @@ namespace implementations
     public:
       static StdVectorFst * create_empty_transducer(void);
       static StdVectorFst * create_epsilon_transducer(void);
+      static void delete_transducer(StdVectorFst * t);
 
       // string versions
       static StdVectorFst * define_transducer(const std::string &symbol);
@@ -328,9 +360,9 @@ namespace implementations
                                        StateMap &state_map);
 
       static int has_arc(StdVectorFst &t,
-                  StdArc::StateId sourcestate,
-                  StdArc::Label ilabel,
-                  StdArc::Label olabel);
+                         /*StdArc::StateId*/ int sourcestate,
+                         /*StdArc::Label*/ int ilabel,
+                         /*StdArc::Label*/ int olabel);
       static void disjunct_as_tries(fst::StdVectorFst &t1,
                              StateId t1_state,
                                     const fst::StdVectorFst * t2,

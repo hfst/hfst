@@ -13,9 +13,9 @@ AUTOMAKE_OPTIONS=subdir-objects
 noinst_LTLIBRARIES=libhfstimplementations.la
 
 # HFST bridge specific stuff
-IMPLEMENTATION_SRCS=HfstTransitionGraph.cc \
-		    ConvertTransducerFormat.cc \
+IMPLEMENTATION_SRCS=ConvertTransducerFormat.cc \
 		    HfstTropicalTransducerTransitionData.cc \
+		    HfstBasicTransition.cc HfstBasicTransducer.cc \
 		    ConvertSfstTransducer.cc ConvertTropicalWeightTransducer.cc \
 		    ConvertLogWeightTransducer.cc ConvertFomaTransducer.cc \
 	  	    ConvertOlTransducer.cc ConvertXfsmTransducer.cc \
@@ -90,6 +90,7 @@ implinclude_HEADERS = \
 		SfstTransducer.h TropicalWeightTransducer.h \
 		XfsmTransducer.h \
 		HfstOlTransducer.h HfstTransitionGraph.h HfstTransition.h \
+		HfstBasicTransition.h HfstBasicTransducer.h\
 		HfstTropicalTransducerTransitionData.h \
 		compose_intersect/ComposeIntersectRulePair.h \
 		compose_intersect/ComposeIntersectLexicon.h \
@@ -136,7 +137,7 @@ if WANT_XFSM
 XFSM_TSTS=XfsmTransducer
 endif
 
-LIBHFST_TSTS=HfstTransitionGraph ConvertTransducerFormat \
+LIBHFST_TSTS=HfstBasicTransducer ConvertTransducerFormat \
 		ConvertSfstTransducer ConvertTropicalWeightTransducer \
 		ConvertLogWeightTransducer ConvertFomaTransducer \
 		ConvertXfsmTransducer ConvertOlTransducer \
@@ -167,9 +168,9 @@ TropicalWeightTransducer_LDADD=../libhfst.la
 SfstTransducer_SOURCES=SfstTransducer.cc
 SfstTransducer_CXXFLAGS=-DMAIN_TEST -Wno-deprecated
 SfstTransducer_LDADD=../libhfst.la
-HfstTransitionGraph_SOURCES=HfstTransitionGraph.cc
-HfstTransitionGraph_CXXFLAGS=-DMAIN_TEST -Wno-deprecated
-HfstTransitionGraph_LDADD=../libhfst.la
+HfstBasicTransducer_SOURCES=HfstBasicTransducer.cc
+HfstBasicTransducer_CXXFLAGS=-DMAIN_TEST -Wno-deprecated
+HfstBasicTransducer_LDADD=../libhfst.la
 ConvertTransducerFormat_SOURCES=ConvertTransducerFormat.cc
 ConvertTransducerFormat_CXXFLAGS=-DMAIN_TEST -Wno-deprecated -Wno-deprecated
 ConvertTransducerFormat_LDADD=../libhfst.la

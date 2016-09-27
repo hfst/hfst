@@ -13,7 +13,7 @@
 
 #include "ConvertTransducerFormat.h"
 #include "optimized-lookup/convert.h"
-#include "HfstTransitionGraph.h"
+#include "HfstBasicTransducer.h"
 #include "HfstTransducer.h"
 
 #ifndef MAIN_TEST

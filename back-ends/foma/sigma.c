@@ -311,7 +311,7 @@ int sigma_substitute(char *symbol, char *sub, struct sigma *sigma) {
     for (; sigma != NULL && sigma->number != -1 ; sigma = sigma->next) {
         if (strcmp(sigma->symbol, symbol) == 0) {
 	    xxfree(sigma->symbol);
-	    sigma->symbol = strdup(sub);
+	    sigma->symbol = xxstrdup(sub);
             return(sigma->number);
         }
     }

@@ -128,7 +128,7 @@ int xrelex ( YYSTYPE * , yyscan_t );
 %type <label> FUNCTION                 // function call
 
 %nonassoc <weight> WEIGHT
-%nonassoc <label> SYMBOL CURLY_BRACKETS
+%nonassoc <label> SYMBOL MULTICHAR_SYMBOL CURLY_BRACKETS
 
 %left  CROSS_PRODUCT COMPOSITION LENIENT_COMPOSITION INTERSECTION MERGE_RIGHT_ARROW MERGE_LEFT_ARROW
 %left  CENTER_MARKER MARKUP_MARKER
@@ -168,7 +168,7 @@ int xrelex ( YYSTYPE * , yyscan_t );
 %token LEXER_ERROR
 %token END_OF_EXPRESSION
 %token PAIR_SEPARATOR
-%nonassoc <label> QUOTED_LITERAL
+%nonassoc <label> QUOTED_LITERAL QUOTED_MULTICHAR_LITERAL
 %%
 
 XRE: REGEXP1 { }
@@ -180,23 +180,14 @@ XRE: REGEXP1 { }
      }
      ;
 REGEXP1: REGEXP2 END_OF_EXPRESSION {
-      // std::cerr << "regexp1:regexp2 end of expr \n"<< std::endl;
-       // Symbols of form <foo> are not harmonized in xfst, that is why
-       // they are escaped as @_<foo>_@ and need to be unescaped finally.
-       // hfst::xre::last_compiled = & hfst::xre::unescape_enclosing_angle_brackets($1)->minimize();
-       hfst::xre::last_compiled = & $1->minimize();
+       hfst::xre::last_compiled = & $1->optimize();
        $$ = hfst::xre::last_compiled;
        if (hfst::xre::allow_extra_text_at_end) {
          return 0;
        }
    }
    | REGEXP2 {
-   
-        //std::cerr << "regexp1:regexp2\n"<< *$1 << std::endl;
-       // Symbols of form <foo> are not harmonized in xfst, that is why
-       // they are escaped as @_<foo>_@ and need to be unescaped finally.
-        // hfst::xre::last_compiled = & hfst::xre::unescape_enclosing_angle_brackets($1)->minimize();
-        hfst::xre::last_compiled = & $1->minimize();
+        hfst::xre::last_compiled = & $1->optimize();
         $$ = hfst::xre::last_compiled;
    }
 ;
@@ -204,8 +195,7 @@ REGEXP1: REGEXP2 END_OF_EXPRESSION {
 
 REGEXP2: REPLACE
          {
-            $$ = & $1->minimize();
-          //  std::cerr << "regexp2:replace \n"<< std::endl;
+            $$ = & $1->optimize();
          }
        | REGEXP2 COMPOSITION REPLACE
        {
@@ -220,7 +210,7 @@ REGEXP2: REPLACE
           }
 
          try {
-            $$ = & $1->compose(*$3, harmonize_).minimize();
+            $$ = & $1->compose(*$3, harmonize_).optimize();
          }
          catch (const FlagDiacriticsAreNotIdentitiesException & e)
              {
@@ -236,7 +226,7 @@ REGEXP2: REPLACE
             delete $3;
         }
        | REGEXP2 LENIENT_COMPOSITION REPLACE {
-            $$ = & $1->lenient_composition(*$3).minimize();
+            $$ = & $1->lenient_composition(*$3).optimize();
             delete $3;
         }
        | REGEXP2 MERGE_RIGHT_ARROW REPLACE {
@@ -322,9 +312,9 @@ REGEXP2: REPLACE
                             replaceTr.insert_freely(StringPair(*it, *it), false);
                           }
                         }
-                        replaceTr.minimize();
+                        replaceTr.optimize();
 
-                        tmpTr->compose(replaceTr).minimize();
+                        tmpTr->compose(replaceTr).optimize();
                         tmpTr->invert().compose(replaceTr).invert();
 	        }
             
@@ -332,7 +322,7 @@ REGEXP2: REPLACE
                 {
                   tmpTr->remove_from_alphabet($2);
                 }
-                tmpTr->minimize();
+                tmpTr->optimize();
                 $$ = tmpTr;
                 delete($1, $2, $3);
             }
@@ -579,14 +569,14 @@ CONTEXT: REPLACE CENTER_MARKER REPLACE
                hfst::xre::has_weight_been_zeroed=false;
                t1.transform_weights(&hfst::xre::zero_weights);
              }
-             t1.minimize().prune_alphabet(false);
+             t1.optimize().prune_alphabet(false);
 
              if (hfst::xre::is_weighted())
              {
                t2.transform_weights(&hfst::xre::zero_weights);
                hfst::xre::has_weight_been_zeroed=false;
              }
-             t2.minimize().prune_alphabet(false);
+             t2.optimize().prune_alphabet(false);
 
             $$ = new HfstTransducerPair(t1, t2);
             delete $1, $3;
@@ -607,7 +597,7 @@ CONTEXT: REPLACE CENTER_MARKER REPLACE
               t1.transform_weights(&hfst::xre::zero_weights);
               hfst::xre::has_weight_been_zeroed=false;
             }
-            t1.minimize().prune_alphabet(false);
+            t1.optimize().prune_alphabet(false);
 
             HfstTransducer epsilon(hfst::internal_epsilon, hfst::xre::format);
             $$ = new HfstTransducerPair(t1, epsilon);
@@ -630,7 +620,7 @@ CONTEXT: REPLACE CENTER_MARKER REPLACE
               t1.transform_weights(&hfst::xre::zero_weights);
               hfst::xre::has_weight_been_zeroed=false;
             }
-            t1.minimize().prune_alphabet(false);
+            t1.optimize().prune_alphabet(false);
              
             HfstTransducer epsilon(hfst::internal_epsilon, hfst::xre::format);
             $$ = new HfstTransducerPair(epsilon, t1);
@@ -791,7 +781,7 @@ REGEXP5: REGEXP6 { }
         }
        | REGEXP5 INTERSECTION REGEXP6 {
         // std::cerr << "Intersection: \n"  << std::endl;
-            $$ = & $1->intersect(*$3, harmonize_).minimize().prune_alphabet(false);
+            $$ = & $1->intersect(*$3, harmonize_).optimize().prune_alphabet(false);
             delete $3;
         }
        | REGEXP5 MINUS REGEXP6 {
@@ -856,7 +846,7 @@ REGEXP8: REGEXP9 { }
        | COMPLEMENT REGEXP8 {
        		// TODO: forbid pair complement (ie ~a:b)
        		HfstTransducer complement = HfstTransducer::identity_pair( hfst::xre::format );
-       		complement.repeat_star().minimize();
+       		complement.repeat_star().optimize();
        		complement.subtract(*$2).prune_alphabet(false);
        		$$ = new HfstTransducer(complement);
    			delete $2;
@@ -949,7 +939,7 @@ REGEXP10: REGEXP11 { }
 
 REGEXP11: REGEXP12 { }
         | LEFT_BRACKET REGEXP2 RIGHT_BRACKET {
-            $$ = & $2->minimize();
+            $$ = & $2->optimize();
         }
         // [foo]:[bar]
         | LEFT_BRACKET REGEXP2 RIGHT_BRACKET PAIR_SEPARATOR LEFT_BRACKET REGEXP2 RIGHT_BRACKET {
@@ -985,7 +975,7 @@ REGEXP11: REGEXP12 { }
             delete $4;
         }
         | LEFT_BRACKET REGEXP2 RIGHT_BRACKET WEIGHT {
-            $$ = & $2->set_final_weights($4, true).minimize();
+            $$ = & $2->set_final_weights($4, true).optimize();
         }
         | LEFT_PARENTHESIS REGEXP2 RIGHT_PARENTHESIS {
             $$ = & $2->optionalize();
@@ -1016,7 +1006,7 @@ SYMBOL_LIST: HALFARC {
               }
 
             $1->disjunct(*tmp, false); // do not harmonize
-            $$ = & $1->minimize();
+            $$ = & $1->optimize();
             delete $2, tmp;
             }
         ;
@@ -1060,7 +1050,7 @@ REGEXP12: LABEL { }
               }
               fclose(f);
               HfstTransducer * retval = new HfstTransducer(tmp, hfst::xre::format);
-              retval->minimize();
+              retval->optimize();
               $$ = retval;
             }
         }
@@ -1084,7 +1074,7 @@ REGEXP12: LABEL { }
               }
               fclose(f);
               HfstTransducer * retval = new HfstTransducer(tmp, hfst::xre::format);
-              retval->minimize();
+              retval->optimize();
               $$ = retval;
             }
         }
@@ -1101,7 +1091,7 @@ REGEXP12: LABEL { }
                 HfstBasicTransducer tmp = HfstBasicTransducer::read_in_prolog_format(f, linecount);
                 fclose(f);
                 HfstTransducer * retval = new HfstTransducer(tmp, hfst::xre::format);
-                retval->minimize();
+                retval->optimize();
                 $$ = retval;
               }
               catch (const HfstException & e) {
@@ -1248,6 +1238,14 @@ LABEL: HALFARC {
      ;
 
 SYMBOL_OR_QUOTED: SYMBOL
+     | MULTICHAR_SYMBOL {
+       hfst::xre::check_multichar_symbol($1);
+       $$ = $1;
+     }
+     | QUOTED_MULTICHAR_LITERAL {
+       hfst::xre::check_multichar_symbol($1);
+       $$ = $1;
+     }
      | QUOTED_LITERAL
      ;
 
