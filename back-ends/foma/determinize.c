@@ -31,7 +31,7 @@
 
 static int fsm_linecount, num_states, num_symbols, epsilon_symbol, *single_sigma_array, *double_sigma_array, limit, num_start_states, op;
 
-static _Bool *finals, deterministic, numss;
+static Boolean *finals, deterministic, numss;
 
 struct e_closure_memo {
     int state;
@@ -528,7 +528,7 @@ static int initial_e_closure(struct fsm *net) {
     struct fsm_state *fsm;
     int i,j;
 
-    finals = xxcalloc(num_states, sizeof(_Bool));
+    finals = xxcalloc(num_states, sizeof(Boolean));
 
     num_start_states = 0;
     fsm = net->states;

@@ -707,11 +707,11 @@ struct fsm *rewrite_cp_to_fst(struct fsm *net, char *lower_symbol, char *zero_sy
         int in;
         int out;
         struct fsm_state *outptr; /* This points to where the target state is */
-        _Bool crowded;
+        Boolean crowded;
     } *state_link;
     
     int i, j, t, lower, zero, *targets, linecount, in, out, has_unk;
-    _Bool *useless_states;
+    Boolean *useless_states;
     struct fsm_state *fsm, *fsm2, *tempfsm;
 
     has_unk = 0;
@@ -721,7 +721,7 @@ struct fsm *rewrite_cp_to_fst(struct fsm *net, char *lower_symbol, char *zero_sy
     if ((zero = sigma_find(zero_symbol, net->sigma)) == -1)
         zero = 0;
     state_link = xxmalloc(sizeof(struct state_link) * net->statecount);
-    useless_states = xxcalloc(net->statecount, sizeof(_Bool));
+    useless_states = xxcalloc(net->statecount, sizeof(Boolean));
     targets = xxmalloc(net->statecount * sizeof(int));
     fsm = net->states;
     for (i=0; i < net->statecount ; i++) {

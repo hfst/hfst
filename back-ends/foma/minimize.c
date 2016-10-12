@@ -27,7 +27,7 @@ static struct fsm *rebuild_machine(struct fsm *net);
 
 static int *single_sigma_array, *double_sigma_array, *memo_table, *temp_move, *temp_group, maxsigma, epsilon_symbol, num_states, num_symbols, num_finals, mainloop, total_states;
 
-static _Bool *finals;
+static Boolean *finals;
 
 struct statesym {
     int target;
@@ -63,7 +63,7 @@ struct e {
 struct agenda {
   struct p *p;
   struct agenda *next;
-  _Bool index;
+  Boolean index;
 };
 
 // HFST MODIFICATIONS: struct trans_list -> struct trans_list_struct
@@ -642,7 +642,7 @@ static void sigma_to_pairs(struct fsm *net) {
 
   /* Table for checking whether a state is final */
 
-  finals = xxcalloc(num_states, sizeof(_Bool));
+  finals = xxcalloc(num_states, sizeof(Boolean));
   x = 0; num_finals = 0;
   net->arity = 1;
   for (i=0; (fsm+i)->state_no != -1; i++) {

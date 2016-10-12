@@ -16,10 +16,12 @@
 #include "HfstFlagDiacritics.h"
 #include <stdlib.h>
 
-#ifndef _FOMALIB_H_
-#define _FOMALIB_H_
-#include "back-ends/foma/fomalib.h"
-#endif
+//#ifndef _FOMALIB_H_
+//#define _FOMALIB_H_
+//#include "back-ends/foma/fomalib.h"
+//#endif
+
+struct fsm;
 
 #include <cstdio>
 #include <string>

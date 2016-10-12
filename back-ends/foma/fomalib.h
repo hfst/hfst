@@ -448,17 +448,6 @@ int sh_get_value(struct sh_handle *sh);
 /* Trie construction */
 /*********************/
 
-#ifndef ORIGINAL
-  #ifndef __cplusplus
-  #ifndef bool
-    #define bool int
-    #define false((bool)0)
-    #define true((bool)1)
-    #define _Bool bool
-  #endif
-  #endif
-#endif // #ifndef ORIGINAL
-
 struct trie_hash {
     char *insym;
     char *outsym;
@@ -468,7 +457,7 @@ struct trie_hash {
 };
 
 struct trie_states {
-    _Bool is_final;
+    Boolean is_final;
 };
 
 struct fsm_trie_handle {
@@ -504,7 +493,7 @@ struct fsm_read_handle {
     int sigma_list_size;
     struct fsm *net;
     unsigned char *lookuptable;
-    _Bool has_unknowns;
+    Boolean has_unknowns;
 };
 
 FEXPORT struct fsm_read_handle *fsm_read_init(struct fsm *net);

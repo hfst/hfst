@@ -21,6 +21,7 @@
 #endif
 
 
+#include <iterator>
 #include <iostream>
 #include <fstream>
 #include <iterator>
@@ -75,7 +76,7 @@ enum OutputFormat {
     xerox,
     cg,
     finnpos,
-    gtd,
+    giellacg,
     conllu
 };
 OutputFormat output_format = tokenize;
@@ -88,7 +89,7 @@ void
 print_usage()
 {
     // c.f. http://www.gnu.org/prep/standards/standards.html#g_t_002d_002dhelp
-    fprintf(message_out, "Usage: %s [--segment | --xerox | --cg | --gtd] [OPTIONS...] RULESET\n"
+    fprintf(message_out, "Usage: %s [--segment | --xerox | --cg | --giella-cg] [OPTIONS...] RULESET\n"
             "perform matching/lookup on text streams\n"
             "\n", program_name);
     print_common_program_options(message_out);
@@ -106,7 +107,9 @@ print_usage()
             "  -z, --segment            Segmenting / tokenization mode (default)\n"
             "  -x, --xerox              Xerox output\n"
             "  -c, --cg                 Constraint Grammar output\n"
-            "  -g, --gtd                Giellatekno/Divvun CG output (implies -l2)\n"
+            "  -g, --giella-cg          CG format used in Giella infrastructe (implies -l2,\n"
+            "                           treats @PMATCH_INPUT_MARK@ as subreading separator,\n"
+            "                           and expects tags to start or end with +)\n"
             "  -C  --conllu             CoNLL-U format\n"
             "  -f, --finnpos            FinnPos output\n");
     fprintf(message_out,
@@ -126,7 +129,7 @@ void print_no_output(std::string const & input, std::ostream & outstream)
         outstream << input;
     } else if (output_format == xerox) {
         outstream << input << "\t" << input << "+?";
-    } else if (output_format == cg || output_format == gtd) {
+    } else if (output_format == cg || output_format == giellacg) {
 	    outstream << "\"<" << input << ">\"" << std::endl << "\t\"" << input << "\" ?";
     }
 //    std::cerr << "from print_no_output\n";
@@ -152,7 +155,7 @@ void print_nonmatching_sequence(std::string const & str, std::ostream & outstrea
         outstream << str << "\t" << str << "+?";
     } else if (output_format == cg) {
         outstream << "\"<" << str << ">\"" << std::endl << "\t\"" << str << "\" ?";
-    } else if (output_format == gtd) {
+    } else if (output_format == giellacg) {
         outstream << ":";
         print_escaping_newlines(str, outstream);
     } else if (output_format == conllu) {
@@ -392,10 +395,10 @@ void print_cg_subreading(size_t const & indent,
 
 typedef std::set<size_t> SplitPoints;
 
-SplitPoints print_reading_gtd(const Location *loc,
-                              size_t indent,
-                              const bool always_wftag,
-                              std::ostream & outstream)
+SplitPoints print_reading_giellacg(const Location *loc,
+                                   size_t indent,
+                                   const bool always_wftag,
+                                   std::ostream & outstream)
 {
     SplitPoints bt_its;
     if(loc->output.empty()) {
@@ -532,9 +535,9 @@ const LocationVector locate_fullmatch(hfst_ol::PmatchContainer & container,
     return loc_filtered;
 }
 
-void print_location_vector_gtd(hfst_ol::PmatchContainer & container,
-                               LocationVector const & locations,
-                               std::ostream & outstream)
+void print_location_vector_giellacg(hfst_ol::PmatchContainer & container,
+                                    LocationVector const & locations,
+                                    std::ostream & outstream)
 {
     outstream << "\"<" << locations.at(0).input << ">\"" << std::endl;
     if(locations.size() == 1 && locations.at(0).output.empty()) {
@@ -546,7 +549,7 @@ void print_location_vector_gtd(hfst_ol::PmatchContainer & container,
     std::set<SplitPoints> backtrack;
     for (LocationVector::const_iterator loc_it = locations.begin();
          loc_it != locations.end(); ++loc_it) {
-        SplitPoints bt_points = print_reading_gtd(&(*loc_it), 1, false, outstream);
+        SplitPoints bt_points = print_reading_giellacg(&(*loc_it), 1, false, outstream);
         if(!bt_points.empty()) {
             backtrack.insert(bt_points);
         }
@@ -599,7 +602,7 @@ void print_location_vector_gtd(hfst_ol::PmatchContainer & container,
             const size_t indent = depth + stack.back().second;
             out.at(depth).clear();
             out.at(depth).str(string());
-            SplitPoints _no_recursive_backtrack = print_reading_gtd(&loc, indent, true, out.at(depth));
+            SplitPoints _no_recursive_backtrack = print_reading_giellacg(&loc, indent, true, out.at(depth));
             if(depth == bottom) {
                 for(vector<std::ostringstream>::const_iterator it = out.begin(); it != out.end(); it++) {
                     outstream << it->str();
@@ -719,8 +722,8 @@ void print_location_vector(hfst_ol::PmatchContainer & container,
             outstream << std::endl;
         }
         outstream << std::endl;
-    } else if (output_format == gtd && locations.size() != 0) {
-        print_location_vector_gtd(container, locations, outstream);
+    } else if (output_format == giellacg && locations.size() != 0) {
+        print_location_vector_giellacg(container, locations, outstream);
     } else if (output_format == xerox) {
         for (LocationVector::const_iterator loc_it = locations.begin();
              loc_it != locations.end(); ++loc_it) {
@@ -897,6 +900,7 @@ int parse_options(int argc, char** argv)
                 {"segment", no_argument, 0, 'z'},
                 {"xerox", no_argument, 0, 'x'},
                 {"cg", no_argument, 0, 'c'},
+                {"giella-cg", no_argument, 0, 'g'},
                 {"gtd", no_argument, 0, 'g'},
                 {"conllu", no_argument, 0, 'C'},
                 {"finnpos", no_argument, 0, 'f'},
@@ -962,7 +966,7 @@ int parse_options(int argc, char** argv)
             output_format = conllu;
             break;
         case 'g':
-            output_format = gtd;
+            output_format = giellacg;
             print_weights = true;
             print_all = true;
             dedupe = true;

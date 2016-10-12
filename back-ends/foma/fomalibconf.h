@@ -26,21 +26,21 @@ struct fsm_trans_list {
     struct fsm_trans_list *next;
 };
 
-#ifndef ORIGINAL
-  #ifndef __cplusplus
-    #ifndef bool
-      #define bool int
-      #define false ((bool)0)
-      #define true  ((bool)1)
-    #endif
+#ifndef __cplusplus
+  #ifndef bool
+    #define bool int
+    #define false ((bool)0)
+    #define true  ((bool)1)
   #endif
-#define _Bool bool
-#endif // #ifndef ORIGINAL
+#endif // __cplusplus
+
+// _Bool changed to Boolean in HFST
+#define Boolean bool
 
 struct fsm_state_list {
-    _Bool used;
-    _Bool is_final;
-    _Bool is_initial;
+    Boolean used;
+    Boolean is_final;
+    Boolean is_initial;
     short num_trans;
     int state_number;
     struct fsm_trans_list *fsm_trans_list;
@@ -119,7 +119,7 @@ struct apply_med_handle {
     struct state_array *state_array;
     struct fsm *net;
     struct fsm_state *curr_ptr;
-    _Bool hascm;
+    Boolean hascm;
 };
 
 struct apply_handle {

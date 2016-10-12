@@ -1335,7 +1335,7 @@ HfstTransducer::~HfstTransducer(void)
     {
 #if HAVE_SFST
     case SFST_TYPE:
-        delete implementation.sfst;
+        sfst_interface.delete_transducer(implementation.sfst);
         break;
 #endif
 #if HAVE_OPENFST
@@ -2415,7 +2415,7 @@ std::vector<HfstTransducer*> HfstTransducer::extract_path_transducers()
          = sfst_paths.begin(); it != sfst_paths.end(); it++)
     {
         HfstTransducer *tr = new HfstTransducer(SFST_TYPE);
-        delete tr->implementation.sfst;
+        sfst_interface.delete_transducer(tr->implementation.sfst);
         tr->implementation.sfst = *it;
         hfst_paths.push_back(tr);
     }
@@ -3469,7 +3469,7 @@ HfstTransducer &HfstTransducer::insert_freely
     hfst::implementations::HfstBasicTransducer * net =
             ConversionFunctions::sfst_to_hfst_basic_transducer
             (implementation.sfst);
-    delete implementation.sfst;
+    sfst_interface.delete_transducer(implementation.sfst);
           
     hfst::implementations::HfstBasicTransducer * substituting_net =
             ConversionFunctions::sfst_to_hfst_basic_transducer
@@ -3537,7 +3537,7 @@ HfstTransducer &HfstTransducer::substitute
       hfst::implementations::Transducer * tmp =
     this->sfst_interface.substitute
     (implementation.sfst, old_symbol, new_symbol);
-      delete implementation.sfst;
+      sfst_interface.delete_transducer(implementation.sfst);
       implementation.sfst = tmp;
       return *this;
     }
@@ -4061,7 +4061,7 @@ HfstTransducer &HfstTransducer::compose
     SFST::Transducer * sfst_temp =
       this->sfst_interface.compose
       (implementation.sfst,another_copy->implementation.sfst);
-    delete implementation.sfst;
+    sfst_interface.delete_transducer(implementation.sfst);
     implementation.sfst = sfst_temp;
     break;
     }
@@ -4989,7 +4989,7 @@ convert_to_basic_transducer()
         hfst::implementations::HfstBasicTransducer * net =
       ConversionFunctions::sfst_to_hfst_basic_transducer
       (implementation.sfst);
-        delete implementation.sfst;
+        sfst_interface.delete_transducer(implementation.sfst);
     return net;
       }
 #endif
@@ -5183,7 +5183,7 @@ HfstTransducer &HfstTransducer::convert(ImplementationType type,
       internal =
         ConversionFunctions::sfst_to_hfst_basic_transducer
         (implementation.sfst);
-      delete implementation.sfst;
+      sfst_interface.delete_transducer(implementation.sfst);
       break;
 #endif
 #if HAVE_OPENFST
@@ -5633,7 +5633,7 @@ HfstTransducer &HfstTransducer::operator=(const HfstTransducer &another)
 #endif
 #if HAVE_SFST
     case SFST_TYPE:
-    delete implementation.sfst;
+      sfst_interface.delete_transducer(implementation.sfst);
     break;
 #endif
 #if HAVE_OPENFST

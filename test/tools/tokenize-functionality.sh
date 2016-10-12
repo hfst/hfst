@@ -42,14 +42,14 @@ if ! diff test.strings $srcdir/tokenize-dog-out-cg.strings ; then
     exit 1
 fi
 
-# --gtd
-if ! echo "test dog be dog catdog собака" | $TOOLDIR/hfst-tokenize --gtd $srcdir/tokenize-dog.pmhfst > test.strings ; then
-    echo tokenize --gtd fail:
+# --giella-cg
+if ! echo "test dog be dog catdog собака" | $TOOLDIR/hfst-tokenize --giella-cg $srcdir/tokenize-dog.pmhfst > test.strings ; then
+    echo tokenize --giella-cg fail:
     cat test.strings
     exit 1
 fi
-if ! diff test.strings $srcdir/tokenize-dog-out-gtd.strings ; then
-    echo diff test.strings $srcdir/tokenize-dog-out-gtd.strings 
+if ! diff test.strings $srcdir/tokenize-dog-out-giella-cg.strings ; then
+    echo diff test.strings $srcdir/tokenize-dog-out-giella-cg.strings 
     exit 1
 fi
 

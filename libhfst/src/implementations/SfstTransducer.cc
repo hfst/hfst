@@ -7,6 +7,8 @@
 // See the file COPYING included with this distribution for more
 // information.
 
+#include "back-ends/sfst/interface.h"
+#include "back-ends/sfst/fst.h"
 #include "SfstTransducer.h"
 #include "HfstSymbolDefs.h"
 #include <time.h>
@@ -15,6 +17,32 @@ using namespace SFST;
 
 #ifndef MAIN_TEST
 namespace hfst { namespace implementations {
+
+    class HfstNode2Int {
+
+      struct hashf {
+        size_t operator()(const SFST::Node *node) const {
+          return (size_t)node;
+        }
+      };
+      struct equalf {
+        int operator()(const SFST::Node *n1, const SFST::Node *n2) const {
+          return (n1 == n2);
+        }
+      };
+      typedef SFST::hash_map<SFST::Node*, int, hashf, equalf> NL;
+
+    private:
+      NL number;
+
+    public:
+      int &operator[]( SFST::Node *node ) {
+        NL::iterator it=number.find(node);
+        if (it == number.end())
+          return number.insert(NL::value_type(node, 0)).first->second;
+        return it->second;
+      };
+    };
 
     float sfst_seconds_in_harmonize=0;
 
@@ -537,6 +565,9 @@ namespace hfst { namespace implementations {
       }
     n->set_final(1);
     return t; }
+
+    void SfstTransducer::delete_transducer(Transducer * t)
+    { delete t; }
 
   Transducer * SfstTransducer::copy(Transducer * t)
   { return &t->copy(); }

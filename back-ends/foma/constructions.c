@@ -549,7 +549,7 @@ struct fsm *fsm_compose(struct fsm *net1, struct fsm *net2) {
     struct state_arr *point_a, *point_b;
     struct triplethash *th;
     int mode;
-    _Bool *is_flag = NULL;
+    Boolean *is_flag = NULL;
 
 
     net1 = fsm_minimize(net1);
@@ -605,7 +605,7 @@ struct fsm *fsm_compose(struct fsm *net1, struct fsm *net2) {
     if (g_flag_is_epsilon) {
         /* Create lookup table for quickly checking if a symbol is a flag */
         struct sigma *sig1;
-        is_flag = xxmalloc(sizeof(_Bool)*(sigma_max(net1->sigma)+1));
+        is_flag = xxmalloc(sizeof(Boolean)*(sigma_max(net1->sigma)+1));
         for (sig1 = net1->sigma; sig1 != NULL; sig1=sig1->next) {
             if (flag_check(sig1->symbol)) {
                 *(is_flag+(sig1->number)) = 1;
@@ -2487,13 +2487,13 @@ void fsm_compact(struct fsm *net) {
 
     struct fsm_state *fsm;
     struct sigma *sig, *sigprev, *sign;
-    _Bool *potential;
+    Boolean *potential;
     int i, j, prevstate, numsymbols, in, out, state, target, removable;
 
     fsm = net->states;
     numsymbols = sigma_max(net->sigma);
     
-    potential = xxmalloc(sizeof(_Bool)*(numsymbols+1));
+    potential = xxmalloc(sizeof(Boolean)*(numsymbols+1));
     checktable = xxmalloc(sizeof(struct checktable)*(numsymbols+1));
 
     for (i=0; i <= numsymbols; i++) {

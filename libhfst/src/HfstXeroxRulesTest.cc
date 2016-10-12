@@ -1118,7 +1118,7 @@ void test9b( ImplementationType type )
     Rule rule1(mappingPairVector1);
     Rule rule2(mappingPairVector2);
 
-    vector<Rule> ruleVector;
+    std::vector<Rule> ruleVector;
 
     ruleVector.push_back(rule1);
     ruleVector.push_back(rule2);
@@ -2607,7 +2607,7 @@ void test7a( ImplementationType type )
     Rule rule1(mappingPairVector1);
     Rule rule2(mappingPairVector2);
 
-    vector<Rule> ruleVector;
+    std::vector<Rule> ruleVector;
 
     ruleVector.push_back(rule1);
     ruleVector.push_back(rule2);
@@ -2664,7 +2664,7 @@ void test7b( ImplementationType type )
     Rule rule1(mappingPairVector1);
     Rule rule2(mappingPairVector2);
 
-    vector<Rule> ruleVector;
+    std::vector<Rule> ruleVector;
 
     ruleVector.push_back(rule1);
     ruleVector.push_back(rule2);
@@ -2733,7 +2733,7 @@ void test7c( ImplementationType type )
     Rule rule1(mappingPairVector1);
     Rule rule2(mappingPairVector2);
 
-    vector<Rule> ruleVector;
+    std::vector<Rule> ruleVector;
 
     ruleVector.push_back(rule1);
     ruleVector.push_back(rule2);
@@ -2803,7 +2803,7 @@ void test7c( ImplementationType type )
     Rule rule2aUp(mappingPairVector1, ContextVector1, REPL_UP);
     Rule rule2bUp(mappingPairVector2, ContextVector2, REPL_UP);
 
-    vector<Rule> ruleVector2;
+    std::vector<Rule> ruleVector2;
     ruleVector2.push_back(rule2aUp);
     ruleVector2.push_back(rule2bUp);
 
@@ -2828,7 +2828,7 @@ void test7c( ImplementationType type )
     Rule rule2aDown(mappingPairVector1, ContextVector1, REPL_DOWN);
     Rule rule2bDown(mappingPairVector2, ContextVector2, REPL_DOWN);
 
-    vector<Rule> ruleVector3;
+    std::vector<Rule> ruleVector3;
     ruleVector3.push_back(rule2aDown);
     ruleVector3.push_back(rule2bDown);
 
@@ -2895,7 +2895,7 @@ void test7d( ImplementationType type )
     Rule rule1(mappingPairVector1, ContextVector1, REPL_DOWN);
     Rule rule2(mappingPairVector2, ContextVector2, REPL_DOWN);
 
-    vector<Rule> ruleVector;
+    std::vector<Rule> ruleVector;
 
     ruleVector.push_back(rule1);
     ruleVector.push_back(rule2);
@@ -2949,7 +2949,7 @@ void test7e( ImplementationType type )
     Rule rule1(mappingPairVector1);
     Rule rule2(mappingPairVector2);
 
-    vector<Rule> ruleVector;
+    std::vector<Rule> ruleVector;
 
     ruleVector.push_back(rule1);
     ruleVector.push_back(rule2);
@@ -3058,7 +3058,7 @@ void test7f( ImplementationType type )
     Rule rule1(mappingPairVector1);
     Rule rule2(mappingPairVector2);
 
-    vector<Rule> ruleVector;
+    std::vector<Rule> ruleVector;
 
     ruleVector.push_back(rule1);
     ruleVector.push_back(rule2);
@@ -3113,7 +3113,7 @@ void test7g( ImplementationType type )
     Rule rule1(mappingPairVector1);
     Rule rule2(mappingPairVector2);
 
-    vector<Rule> ruleVector;
+    std::vector<Rule> ruleVector;
 
     ruleVector.push_back(rule1);
     ruleVector.push_back(rule2);

@@ -2361,7 +2361,7 @@
                // (all transitions in a state gone through)
 
                // Remove the substituted transitions
-               for (std::vector<typename
+               for (std::vector<
                       HfstBasicTransducer::HfstTransitions::iterator>::iterator IT =
                       old_transitions.begin();
                     IT != old_transitions.end(); IT++) {
@@ -2403,7 +2403,7 @@
        for (const_iterator it = graph->begin();
             it != graph->end(); it++)
          {
-           for (typename HfstTransitions::const_iterator tr_it
+           for (HfstTransitions::const_iterator tr_it
                   = it->begin();
                 tr_it != it->end(); tr_it++)
              {
@@ -2421,7 +2421,7 @@
          }
 
        // Epsilon transitions from final states of \a graph
-       for (typename FinalWeightMap::const_iterator it
+       for (FinalWeightMap::const_iterator it
               = graph->final_weight_map.begin();
             it != graph->final_weight_map.end(); it++)
          {
@@ -3229,9 +3229,9 @@
            state_weights[state] = total_weight;
            
            // Go through all transitions in this state
-           const HfstBasicTransducer::HfstBasicTransducer::HfstTransitions &transitions
+           const HfstBasicTransducer::HfstTransitions &transitions
              = this->operator[](state);
-           for (HfstBasicTransducer::HfstBasicTransducer::HfstTransitions::const_iterator it
+           for (HfstBasicTransducer::HfstTransitions::const_iterator it
                   = transitions.begin();
                 it != transitions.end(); it++)
              {
@@ -3285,9 +3285,9 @@
              return false;
 
            // Go through all transitions in this state
-           const HfstBasicTransducer::HfstBasicTransducer::HfstTransitions &transitions
+           const HfstBasicTransducer::HfstTransitions &transitions
              = this->operator[](state);
-           for (HfstBasicTransducer::HfstBasicTransducer::HfstTransitions::const_iterator it
+           for (HfstBasicTransducer::HfstTransitions::const_iterator it
                   = transitions.begin();
                 it != transitions.end(); it++)
              {
@@ -3361,9 +3361,9 @@
              }
            
            // Go through all transitions in this state
-           const HfstBasicTransducer::HfstBasicTransducer::HfstTransitions &transitions
+           const HfstBasicTransducer::HfstTransitions &transitions
              = this->operator[](state);
-           for (HfstBasicTransducer::HfstBasicTransducer::HfstTransitions::const_iterator it
+           for (HfstBasicTransducer::HfstTransitions::const_iterator it
                   = transitions.begin();
                 it != transitions.end(); it++)
              {
@@ -3599,9 +3599,9 @@
            
            // Whether there are more symbols in lookup_path or not,
            // go through all transitions in the current state.
-           const HfstBasicTransducer::HfstBasicTransducer::HfstTransitions &transitions
+           const HfstBasicTransducer::HfstTransitions &transitions
              = this->operator[](state);
-           for (HfstBasicTransducer::HfstBasicTransducer::HfstTransitions::const_iterator it
+           for (HfstBasicTransducer::HfstTransitions::const_iterator it
                   = transitions.begin();
                 it != transitions.end(); it++)
              {
@@ -3759,9 +3759,9 @@
              states_visited.insert(s);
 
              // go through all transitions
-             const HfstBasicTransducer::HfstBasicTransducer::HfstTransitions &transitions
+             const HfstBasicTransducer::HfstTransitions &transitions
                = this->operator[](s);
-             for (HfstBasicTransducer::HfstBasicTransducer::HfstTransitions::const_iterator it
+             for (HfstBasicTransducer::HfstTransitions::const_iterator it
                     = transitions.begin();
                   it != transitions.end(); it++)
                {
@@ -3807,9 +3807,9 @@
             bool input_side)
          {
            // go through all transitions
-           const HfstBasicTransducer::HfstBasicTransducer::HfstTransitions &transitions
+           const HfstBasicTransducer::HfstTransitions &transitions
              = this->operator[](s);
-             for (HfstBasicTransducer::HfstBasicTransducer::HfstTransitions::const_iterator it
+             for (HfstBasicTransducer::HfstTransitions::const_iterator it
                     = transitions.begin();
                   it != transitions.end(); it++)
                {

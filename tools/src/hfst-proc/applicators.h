@@ -13,6 +13,7 @@
 #ifndef _HFST_PROC_APPLICATORS_H_
 #define _HFST_PROC_APPLICATORS_H_
 
+#include "lookup-path.h"
 #include "tokenizer.h"
 #include "transducer.h"
 
@@ -68,6 +69,9 @@ class GenerationApplicator: public Applicator
   std::vector<TokenVector> split(const TokenVector& tokens) const;
 
   bool lookup(const TokenVector& tokens, bool generate_on_fail);
+
+  LookupPathSet preprocess_finals(const LookupPathSet& finals) const ;
+
 
  public:
   GenerationApplicator(const ProcTransducer& t, TokenIOStream& ts,

@@ -52,7 +52,8 @@ HfstPrintDot.cpp ^
 HfstPrintPCKimmo.cpp ^
 hfst-string-conversions.cpp ^
 string-utils.cpp ^
-implementations\HfstTransitionGraph.cpp ^
+implementations\HfstBasicTransducer.cpp ^
+implementations\HfstBasicTransition.cpp ^
 implementations\ConvertTransducerFormat.cpp ^
 implementations\HfstTropicalTransducerTransitionData.cpp ^
 implementations\ConvertTropicalWeightTransducer.cpp ^

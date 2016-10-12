@@ -427,7 +427,7 @@ int fsm_isidentity(struct fsm *net) {
     struct discrepancy {
         short *string;
         short length;
-        _Bool visited;
+        Boolean visited;
     };
 
     struct state_array *state_array;
@@ -649,7 +649,7 @@ struct fsm *fsm_extract_nonidentity(struct fsm *net) {
     struct discrepancy {
         short *string;
         short length;
-        _Bool visited;
+        Boolean visited;
     };
 
     struct state_array *state_array;

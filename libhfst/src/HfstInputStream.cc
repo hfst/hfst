@@ -347,7 +347,7 @@ namespace hfst
                 ConversionFunctions::
                   sfst_to_hfst_basic_transducer
                 (t.implementation.sfst);
-              delete t.implementation.sfst;
+              hfst::implementations::SfstTransducer::delete_transducer(t.implementation.sfst);
               t.implementation.sfst =
                 ConversionFunctions::
                   hfst_basic_transducer_to_sfst(net);

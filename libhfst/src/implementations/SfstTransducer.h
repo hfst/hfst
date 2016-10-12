@@ -14,8 +14,11 @@
 #include "HfstFlagDiacritics.h"
 #include "HfstSymbolDefs.h"
 #include "HfstExtractStrings.h"
-#include "back-ends/sfst/interface.h"
-#include "back-ends/sfst/fst.h"
+//#include "back-ends/sfst/interface.h"
+//#include "back-ends/sfst/fst.h"
+
+namespace SFST { class Transducer; typedef short unsigned int Character; class Alphabet; class Label; }
+
 #include <cstdio>
 #include <string>
 #include <sstream>
@@ -85,6 +88,7 @@ namespace implementations
     void write_transducer(SFST::Transducer * transducer);
   };
 
+  /*
   class HfstNode2Int {
     
     struct hashf {
@@ -109,7 +113,7 @@ namespace implementations
     return number.insert(NL::value_type(node, 0)).first->second;
       return it->second;
     };
-  };
+    };*/
   
   
   class SfstTransducer
@@ -121,6 +125,8 @@ namespace implementations
       static SFST::Transducer * define_transducer(unsigned int number);
       static SFST::Transducer * define_transducer
         (unsigned int inumber, unsigned int onumber);
+
+      static void delete_transducer(SFST::Transducer * t);
 
       static SFST::Transducer * define_transducer(const std::string &symbol);
       static SFST::Transducer * define_transducer

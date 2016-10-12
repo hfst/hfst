@@ -13,6 +13,7 @@
 #include <sstream>
 #include "applicators.h"
 #include "lookup-state.h"
+#include "lookup-path.h"
 #include "formatter.h"
 
 //////////Function definitions for TokenizationApplicator
@@ -311,6 +312,54 @@ GenerationApplicator::split(const TokenVector& tokens) const
   return res;
 }
 
+
+LookupPathSet
+GenerationApplicator::preprocess_finals(const LookupPathSet& finals) const
+{
+  LookupPathSet goodcmp_finals(LookupPathW::compare_weights);
+  // insertion sort :)
+  for (LookupPathSet::const_iterator it = finals.begin(); it != finals.end(); ++it)
+  {
+      goodcmp_finals.insert(*it);
+  }
+  
+  // Keep only the N best weight classes
+  int classes_found = -1;
+  Weight last_weight_class = 0.0;
+  LookupPathSet goodweight_finals(LookupPathW::compare_weights); 
+  for(LookupPathSet::const_iterator it = goodcmp_finals.begin(); it != goodcmp_finals.end(); it++)
+  {
+          LookupPathW* pw = dynamic_cast<LookupPathW*>(*it);
+    if(pw != NULL) {
+      Weight current_weight = pw->get_weight();
+      if (classes_found == -1) // we're just starting
+      {
+        classes_found = 1;
+        last_weight_class = current_weight;
+      }
+      else if (last_weight_class != current_weight) // we might want to ignore the rest due to weight classes
+      {
+        last_weight_class = current_weight;
+        ++classes_found;
+      }
+      if (classes_found > maxWeightClasses)
+      {
+        break;
+      }
+    }
+    goodweight_finals.insert(*it);
+  }
+  // Keep no more than maxAnalyses
+  LookupPathSet clipped_finals(LookupPathW::compare_weights);
+  LookupPathSet::const_iterator it = goodweight_finals.begin();
+  for(int i=0; i < maxAnalyses && it != goodweight_finals.end(); i++, it++)
+  {
+          clipped_finals.insert(*it);
+  }
+  return clipped_finals;
+}
+
+
 bool
 GenerationApplicator::lookup(const TokenVector& tokens, bool generate_on_fail)
 {
@@ -332,12 +381,14 @@ GenerationApplicator::lookup(const TokenVector& tokens, bool generate_on_fail)
     if(printDebuggingInformationFlag)
             std::cout << "Generated " << finals.size() << " forms" << std::endl;
 
-    token_stream.put_symbols((*finals.begin())->get_output_symbols(),caps_change);
-    if(finals.size() > 1)
+    LookupPathSet new_finals = preprocess_finals(finals);
+
+    token_stream.put_symbols((*new_finals.begin())->get_output_symbols(),caps_change);
+    if(new_finals.size() > 1)
     {
-      LookupPathSet::const_iterator it=finals.begin();
+      LookupPathSet::const_iterator it=new_finals.begin();
       it++; // start from begin+1
-      for(;it!=finals.end();it++)
+      for(;it!=new_finals.end();it++)
       {
         token_stream.ostream() << '/';
         token_stream.put_symbols((*it)->get_output_symbols(),caps_change);

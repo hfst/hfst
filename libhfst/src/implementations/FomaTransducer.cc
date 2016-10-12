@@ -7,6 +7,11 @@
 // See the file COPYING included with this distribution for more
 // information.
 
+#ifndef _FOMALIB_H_
+#define _FOMALIB_H_
+#include "back-ends/foma/fomalib.h"
+#endif
+
 #include "FomaTransducer.h"
 
 #ifndef MAIN_TEST
@@ -132,7 +137,7 @@ namespace hfst { namespace implementations {
   {
     if (is_eof())
       return NULL;
-    struct fsm * t = FomaTransducer::read_net(input_file);
+    fsm * t = FomaTransducer::read_net(input_file);
     if (t == NULL) {
       HFST_THROW(NotTransducerStreamException);
     }
@@ -169,7 +174,7 @@ namespace hfst { namespace implementations {
     fputc(c,ofile);
   }
     
-    void FomaOutputStream::write_transducer(struct fsm * transducer)
+    void FomaOutputStream::write_transducer(fsm * transducer)
   {
     if (1 != FomaTransducer::write_net(transducer, ofile)) {
       HFST_THROW_MESSAGE
@@ -181,7 +186,7 @@ namespace hfst { namespace implementations {
   
   fsm * FomaTransducer::create_empty_transducer(void)
   {
-    struct fsm * retval = fsm_empty_set();
+    fsm * retval = fsm_empty_set();
     return retval;
   }
   
@@ -190,12 +195,12 @@ namespace hfst { namespace implementations {
     return fsm_empty_string();
   }
   
-  void FomaTransducer::harmonize(struct fsm *net1, struct fsm *net2)
+  void FomaTransducer::harmonize(fsm *net1, fsm *net2)
   {
     fsm_merge_sigma(net1, net2);
   }
 
-  void FomaTransducer::delete_foma(struct fsm * net)
+  void FomaTransducer::delete_foma(fsm * net)
   {
     fsm_destroy(net);
   }
@@ -230,7 +235,7 @@ namespace hfst { namespace implementations {
     int state_number=0;
 
     struct fsm_construct_handle *h;
-    struct fsm *net;
+    fsm *net;
     h = fsm_construct_init(strdup(std::string("").c_str()));
     
     for (StringPairVector::const_iterator it = spv.begin();
@@ -264,7 +269,7 @@ namespace hfst { namespace implementations {
     int target = (cyclic) ? 0 : 1;
 
     struct fsm_construct_handle *h;
-    struct fsm *net;
+    fsm *net;
     h = fsm_construct_init(strdup(std::string("").c_str()));
     
     for (StringPairSet::const_iterator it = sps.begin(); it != sps.end(); it++)
@@ -292,7 +297,7 @@ namespace hfst { namespace implementations {
     int state_number=0;
 
     struct fsm_construct_handle *h;
-    struct fsm *net;
+    fsm *net;
     h = fsm_construct_init(strdup(std::string("").c_str()));
     
     for (std::vector<StringPairSet>::const_iterator it = spsv.begin();
@@ -822,15 +827,15 @@ namespace hfst { namespace implementations {
   }
 #endif
 
-  struct fsm * FomaTransducer::eliminate_flags(struct fsm * t)
+  fsm * FomaTransducer::eliminate_flags(fsm * t)
   {
     return flag_eliminate(t, NULL);
   }
 
-  struct fsm * FomaTransducer::eliminate_flag(struct fsm * t, const std::string & flag)
+  fsm * FomaTransducer::eliminate_flag(fsm * t, const std::string & flag)
   {
     char * flag_ = strdup(flag.c_str());
-    struct fsm * retval = flag_eliminate(t, flag_);
+    fsm * retval = flag_eliminate(t, flag_);
     free(flag_);
     return retval;
   }
@@ -846,12 +851,12 @@ namespace hfst { namespace implementations {
     static inline int explode_line (char *buf, int *values);
 
     /* Read foma transducer . */
-    struct fsm * FomaTransducer::read_net(FILE *infile) {
+    fsm * FomaTransducer::read_net(FILE *infile) {
       
     const unsigned int READ_BUF_SIZE=4096;
     char buf[READ_BUF_SIZE];
-    struct fsm *net;
-    struct fsm_state *fsm;
+    fsm *net;
+    struct fsm_state * fsm_;
     
     char *new_symbol;
     int i, items, new_symbol_number, laststate, lineint[5], *cm;
@@ -919,7 +924,7 @@ namespace hfst { namespace implementations {
     net->states = (fsm_state*) malloc(net->linecount*sizeof(struct fsm_state)); // error
     // DEBUG
     //fprintf(stderr, "Reserved space for %i state lines\n", net->linecount);
-    fsm = net->states;
+    fsm_ = net->states;
     laststate = -1;
     for (i=0; ;i++) {
       io_gets(infile, buf);
@@ -933,34 +938,34 @@ namespace hfst { namespace implementations {
 
         switch (items) {
         case 2:
-            (fsm+i)->state_no = laststate;
-            (fsm+i)->in = lineint[0];
-            (fsm+i)->out = lineint[0];
-            (fsm+i)->target = lineint[1];
-            (fsm+i)->final_state = last_final;
+            (fsm_+i)->state_no = laststate;
+            (fsm_+i)->in = lineint[0];
+            (fsm_+i)->out = lineint[0];
+            (fsm_+i)->target = lineint[1];
+            (fsm_+i)->final_state = last_final;
             break;
         case 3:
-            (fsm+i)->state_no = laststate;
-            (fsm+i)->in = lineint[0];
-            (fsm+i)->out = lineint[1];
-            (fsm+i)->target = lineint[2];
-            (fsm+i)->final_state = last_final;
+            (fsm_+i)->state_no = laststate;
+            (fsm_+i)->in = lineint[0];
+            (fsm_+i)->out = lineint[1];
+            (fsm_+i)->target = lineint[2];
+            (fsm_+i)->final_state = last_final;
             break;
         case 4:
-            (fsm+i)->state_no = lineint[0];
-            (fsm+i)->in = lineint[1];
-            (fsm+i)->out = lineint[1];
-            (fsm+i)->target = lineint[2];
-            (fsm+i)->final_state = lineint[3];
+            (fsm_+i)->state_no = lineint[0];
+            (fsm_+i)->in = lineint[1];
+            (fsm_+i)->out = lineint[1];
+            (fsm_+i)->target = lineint[2];
+            (fsm_+i)->final_state = lineint[3];
             laststate = lineint[0];
             last_final = lineint[3];
             break;
         case 5:
-          (fsm+i)->state_no = lineint[0]; // error
-            (fsm+i)->in = lineint[1];
-            (fsm+i)->out = lineint[2];
-            (fsm+i)->target = lineint[3];
-            (fsm+i)->final_state = lineint[4];
+          (fsm_+i)->state_no = lineint[0]; // error
+            (fsm_+i)->in = lineint[1];
+            (fsm_+i)->out = lineint[2];
+            (fsm_+i)->target = lineint[3];
+            (fsm_+i)->final_state = lineint[4];
             laststate = lineint[0];
             last_final = lineint[4];
             break;
@@ -969,11 +974,11 @@ namespace hfst { namespace implementations {
             return NULL;
         }
         if (laststate > 0) {
-            (fsm+i)->start_state = 0;
+            (fsm_+i)->start_state = 0;
         } else if (laststate == -1) {
-            (fsm+i)->start_state = -1;
+            (fsm_+i)->start_state = -1;
         } else {
-            (fsm+i)->start_state = 1;
+            (fsm_+i)->start_state = 1;
         }
 
     }
@@ -1037,7 +1042,7 @@ static inline int explode_line (char *buf, int *values) {
     int FomaTransducer::write_net(fsm * net, FILE * outfile) {
 
     struct sigma *sigma;
-    struct fsm_state *fsm;
+    struct fsm_state * fsm_;
     int i, maxsigma, laststate, *cm;
 
     // If this is not done, linecount can return a false value.
@@ -1072,27 +1077,27 @@ static inline int explode_line (char *buf, int *values) {
 
     /* State array */
     laststate = -1;
-    fsm = net->states;
+    fsm_ = net->states;
     fprintf(outfile, "%s","##states##\n");
 
-    for (fsm = net->states; fsm->state_no !=-1; fsm++) {
-        if (fsm->state_no != laststate) {
-            if (fsm->in != fsm->out) {
+    for (fsm_ = net->states; fsm_->state_no !=-1; fsm_++) {
+        if (fsm_->state_no != laststate) {
+            if (fsm_->in != fsm_->out) {
                 fprintf(outfile, "%i %i %i %i %i\n",
-                        fsm->state_no, fsm->in, fsm->out, fsm->target,
-                        fsm->final_state);
+                        fsm_->state_no, fsm_->in, fsm_->out, fsm_->target,
+                        fsm_->final_state);
             } else {
-                fprintf(outfile, "%i %i %i %i\n",fsm->state_no, fsm->in,
-                        fsm->target, fsm->final_state);
+                fprintf(outfile, "%i %i %i %i\n",fsm_->state_no, fsm_->in,
+                        fsm_->target, fsm_->final_state);
             }
         } else {
-            if (fsm->in != fsm->out) {
-                fprintf(outfile, "%i %i %i\n", fsm->in, fsm->out, fsm->target);
+            if (fsm_->in != fsm_->out) {
+                fprintf(outfile, "%i %i %i\n", fsm_->in, fsm_->out, fsm_->target);
             } else {
-                fprintf(outfile, "%i %i\n", fsm->in, fsm->target);
+                fprintf(outfile, "%i %i\n", fsm_->in, fsm_->target);
             }
         }
-        laststate = fsm->state_no;
+        laststate = fsm_->state_no;
     }
     /* Sentinel for states */
     fprintf(outfile, "-1 -1 -1 -1 -1\n");

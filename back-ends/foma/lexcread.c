@@ -85,7 +85,7 @@ static struct lexc_hashtable *hashtable;
 static struct fsm *current_regex_network;
 
 static int cwordin[1000], cwordout[1000], medcwordin[2000], medcwordout[2000], carity, lexc_statecount, maxlen, hasfinal, current_entry, net_has_unknown;
-static _Bool *mchash;
+static Boolean *mchash;
 static struct lexstates *clexicon, *ctarget;
 
 static char *mystrncpy(char *dest, char *src, int len);
@@ -173,7 +173,7 @@ void lexc_init() {
 
     maxlen = 0;
 
-    mchash = xxcalloc(256*256, sizeof(_Bool));
+    mchash = xxcalloc(256*256, sizeof(Boolean));
     for (i=0; i< SIGMA_HASH_TABLESIZE; i++) {
         (hashtable+i)->symbol = NULL;
         (hashtable+i)->sigma_number = -1;

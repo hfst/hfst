@@ -71,7 +71,7 @@ namespace hfst
 #endif
 #endif
 #if HAVE_FOMA
- fsm * (*foma_funct)(fsm *),
+ struct fsm * (*foma_funct)(struct fsm *),
 #endif
 #if HAVE_XFSM
  NETptr (*xfsm_funct)(NETptr),
@@ -90,7 +90,7 @@ namespace hfst
         {
           SFST::Transducer * sfst_temp =
             sfst_funct(implementation.sfst);
-          delete implementation.sfst;
+          sfst_interface.delete_transducer(implementation.sfst);
           implementation.sfst = sfst_temp;
           break;
         }
@@ -120,7 +120,7 @@ namespace hfst
         {
       fsm * foma_temp =
             foma_funct(implementation.foma);
-          this->foma_interface.delete_foma(implementation.foma);
+      this->foma_interface.delete_foma(implementation.foma);
           implementation.foma = foma_temp;
           break;
         }
@@ -183,7 +183,7 @@ NETptr (*xfsm_funct)(NETptr, unsigned int n),
         {
           SFST::Transducer * sfst_temp =
             sfst_funct(implementation.sfst,n);
-          delete implementation.sfst;
+          sfst_interface.delete_transducer(implementation.sfst);
           implementation.sfst = sfst_temp;
           break;
         }
@@ -213,7 +213,7 @@ NETptr (*xfsm_funct)(NETptr, unsigned int n),
         {
       fsm * foma_temp =
             foma_funct(implementation.foma,n);
-          this->foma_interface.delete_foma(implementation.foma);
+      this->foma_interface.delete_foma(implementation.foma);
           implementation.foma = foma_temp;
           break;
     }
@@ -279,7 +279,7 @@ NETptr (*xfsm_funct)(NETptr, unsigned int n),
         {
           SFST::Transducer * sfst_temp =
             sfst_funct(implementation.sfst,s1,s2);
-          delete implementation.sfst;
+          sfst_interface.delete_transducer(implementation.sfst);
           implementation.sfst = sfst_temp;
           break;
         }
@@ -309,7 +309,7 @@ NETptr (*xfsm_funct)(NETptr, unsigned int n),
         {
       fsm * foma_temp =
             foma_funct(implementation.foma,s1,s2);
-          this->foma_interface.delete_foma(implementation.foma);
+      this->foma_interface.delete_foma(implementation.foma);
           implementation.foma = foma_temp;
       break;
         }
@@ -399,7 +399,7 @@ NETptr (*xfsm_funct)(NETptr, unsigned int n),
           SFST::Transducer * sfst_temp =
             sfst_funct(implementation.sfst,
                another_->implementation.sfst);
-          delete implementation.sfst;
+          sfst_interface.delete_transducer(implementation.sfst);
           implementation.sfst = sfst_temp;
           break;
         }

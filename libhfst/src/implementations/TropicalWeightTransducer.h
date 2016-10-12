@@ -59,7 +59,11 @@ namespace fst
 }
 #endif
 
+#ifdef _MSC_VER
+typedef __int64 int64;
+#else
 typedef int64_t int64;
+#endif // _MSC_VER
 
 /** @file TropicalWeightTransducer.h
     \brief Declarations of functions and datatypes that form a bridge between

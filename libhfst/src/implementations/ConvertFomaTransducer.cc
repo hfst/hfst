@@ -11,6 +11,11 @@
 #  include <config.h>
 #endif
 
+#ifndef _FOMALIB_H_
+#define _FOMALIB_H_
+#include "back-ends/foma/fomalib.h"
+#endif
+
 #include "ConvertTransducerFormat.h"
 #include "HfstBasicTransducer.h"
 #include "HfstTransducer.h"
@@ -59,17 +64,17 @@ namespace hfst { namespace implementations
                               at some point.
     */
   static void handle_start_state
-      (struct fsm_state * fsm,
+      (struct fsm_state * fsm_,
        int &start_state_id,
        bool &start_state_found)
     {
         // If the start state has not yet been encountered.
       if (! start_state_found) {
-        start_state_id = (fsm)->state_no; // define the start state
+        start_state_id = (fsm_)->state_no; // define the start state
         start_state_found=true;           // define that it is found
       }
       // If the start state is encountered again,
-      else if ((fsm)->state_no == start_state_id) {
+      else if ((fsm_)->state_no == start_state_id) {
         // do nothing.
       }
       // If there are several initial states in foma transducer,
@@ -83,7 +88,7 @@ namespace hfst { namespace implementations
 
   /* Copy the alphabet of foma transducer \a t to HFST basic transducer
      \a net. */
-  static void copy_alphabet(const struct fsm * t, HfstBasicTransducer * net)
+  static void copy_alphabet(const fsm * t, HfstBasicTransducer * net)
   {
     struct sigma * p = t->sigma;
     while (p != NULL) {
@@ -122,7 +127,7 @@ namespace hfst { namespace implementations
      ---------------------------------------------------------------------- */
 
   HfstBasicTransducer * ConversionFunctions::
-  foma_to_hfst_basic_transducer(struct fsm * t) {
+  foma_to_hfst_basic_transducer(fsm * t) {
 
 #ifdef DEBUG_CONVERSION
     StringSet alphabet_before;
@@ -246,7 +251,7 @@ namespace hfst { namespace implementations
 
      ------------------------------------------------------------------------ */
 
-  struct fsm * ConversionFunctions::
+  fsm * ConversionFunctions::
     hfst_basic_transducer_to_foma(const HfstBasicTransducer * hfst_fsm) {
 
 #ifdef DEBUG_CONVERSION
@@ -257,7 +262,7 @@ namespace hfst { namespace implementations
 #endif // DEBUG_CONVERSION
 
     struct fsm_construct_handle *h;
-    struct fsm *net;
+    fsm *net;
     const char * emptystr = "";
     h = fsm_construct_init(const_cast<char*>(emptystr));
     //free(emptystr);

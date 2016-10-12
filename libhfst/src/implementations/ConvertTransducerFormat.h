@@ -42,7 +42,7 @@ namespace fst
 #endif // OPENFST_VERSION_1_5_4
 #endif // HAVE_OPENFST
 
-#if HAVE_SFST
+/*#if HAVE_SFST
 #include "back-ends/sfst/fst.h"
 #endif // HAVE_SFST
 
@@ -51,7 +51,7 @@ namespace fst
 #define _FOMALIB_H_
 #include "back-ends/foma/fomalib.h"
 #endif // _FOMALIB_H_
-#endif // HAVE_FOMA
+#endif // HAVE_FOMA*/
 
 #if HAVE_XFSM
 #include "xfsm/xfsm_api.h"
@@ -69,6 +69,7 @@ namespace fst
 #include "optimized-lookup/transducer.h"
 //#include "HfstConstantTransducer.h"
 
+namespace SFST { class Node; class Transducer; }
 struct fsm;
 
 #include "../HfstDataTypes.h"
@@ -151,9 +152,9 @@ namespace implementations {
 #endif // HAVE_SFST
   
 #if HAVE_FOMA
-  static HfstBasicTransducer * foma_to_hfst_basic_transducer(struct fsm * t);
+  static HfstBasicTransducer * foma_to_hfst_basic_transducer(fsm * t);
 
-  static struct fsm * hfst_basic_transducer_to_foma
+  static fsm * hfst_basic_transducer_to_foma
     (const HfstBasicTransducer * t);
 
 

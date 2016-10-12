@@ -36,7 +36,7 @@ struct foma_reserved_symbols {
 
 static size_t current_fsm_size;
 static unsigned int current_fsm_linecount, current_state_no, current_final, current_start, current_trans, num_finals, num_initials, arity, statecount;
-static _Bool is_deterministic, is_epsilon_free;
+static Boolean is_deterministic, is_epsilon_free;
 static struct fsm_state *current_fsm_head;
 
 static unsigned int mainloop, ssize, arccount;

@@ -360,7 +360,7 @@ TOKENIZE_FILES=tokenize-dog-gen.hfst \
 tokenize-dog.hfst \
 tokenize-dog-in.lexc \
 tokenize-dog-out-cg.strings \
-tokenize-dog-out-gtd.strings \
+tokenize-dog-out-giella-cg.strings \
 tokenize-dog-out.strings \
 tokenize-dog-out-xerox.strings \
 tokenize-dog.pmscript \
