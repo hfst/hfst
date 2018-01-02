@@ -1196,7 +1196,7 @@ manual_autogen ( ) {
     need_libtoolize=no
     for feature in AC_PROG_LIBTOOL LT_INIT ; do
 	$VERBOSE_ECHO "Searching for $feature in $CONFIGURE"
-	found="`grep \"^$feature.*\" $CONFIGURE`"
+	found="$(grep "\"^$feature.*\"" $CONFIGURE)"
 	if [ ! "x$found" = "x" ] ; then
 	    need_libtoolize=yes
 	    break
@@ -1280,7 +1280,7 @@ manual_autogen ( ) {
 	configure_ac_macros=__none__
 	for feature in $macros_to_search ; do
 	    $VERBOSE_ECHO "Searching for $feature in $CONFIGURE"
-	    found="`grep \"^$feature.*\" $CONFIGURE`"
+	    found="$(grep "\"^$feature.*\"" $CONFIGURE)"
 	    if [ ! "x$found" = "x" ] ; then
 		if [ "x$configure_ac_macros" = "x__none__" ] ; then
 		    configure_ac_macros="$feature"
@@ -1350,7 +1350,7 @@ EOF
     need_autoheader=no
     for feature in AM_CONFIG_HEADER AC_CONFIG_HEADER ; do
 	$VERBOSE_ECHO "Searching for $feature in $CONFIGURE"
-	found="`grep \"^$feature.*\" $CONFIGURE`"
+	found="$(grep "\"^$feature.*\"" $CONFIGURE)"
 	if [ ! "x$found" = "x" ] ; then
 	    need_autoheader=yes
 	    break
@@ -1370,7 +1370,7 @@ EOF
     need_automake=no
     for feature in AM_INIT_AUTOMAKE ; do
 	$VERBOSE_ECHO "Searching for $feature in $CONFIGURE"
-	found="`grep \"^$feature.*\" $CONFIGURE`"
+	found="$(grep "\"^$feature.*\"" $CONFIGURE)"
 	if [ ! "x$found" = "x" ] ; then
 	    need_automake=yes
 	    break
