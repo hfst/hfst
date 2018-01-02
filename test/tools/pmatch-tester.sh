@@ -108,7 +108,7 @@ EOF
     exit 0
 }
 
-cmdline="$0 ""$@"
+cmdline="$0 $*"
 
 # Test if GNU getopt
 getopt -T > /dev/null
@@ -478,11 +478,11 @@ echo_log 3 meta "Command line: $cmdline
 
 
 set_compiler_opts() {
-    compiler_opts="$@"
+    compiler_opts="$*"
 }
 
 set_runner_opts() {
-    runner_opts="$@"
+    runner_opts="$*"
 }
 
 common_preamble () {
