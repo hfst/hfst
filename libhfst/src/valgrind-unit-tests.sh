@@ -7,6 +7,6 @@ if test -z "$srcdir" ; then
     srcdir=./
 fi
 shift
-for p in $@ ; do
+for p in "$@" ; do
     $VALGRIND --log-file="valgrind-logs/${p}.log" $p
 done

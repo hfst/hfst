@@ -19,7 +19,7 @@ fi
 
 python="false"
 pythonpath="false"
-for arg in $@;
+for arg in "$@";
 do
     if [ "$python" = "true" ]; then
 	PYTHON=$arg

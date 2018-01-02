@@ -57,7 +57,7 @@ if [ x$verbose != x-v -a x$quiet != x-q ] ; then
     hfstopts=-v
 fi
 shift $(($OPTIND-1))
-if [ -z $@ ] ; then
+if [ -z "$@" ] ; then
     if [ "x$verbose" == "x-v" ] ; then
         echo "running $foma_exec $fomaopts"
     fi
@@ -66,7 +66,7 @@ if [ -z $@ ] ; then
         exit 1
     fi
 fi
-for f in $@ ; do
+for f in "$@" ; do
     if [ "x$verbose" == "x-v" ] ; then
         echo "running $foma_exec $fomaopts -f $f"
     fi
@@ -79,7 +79,7 @@ done
 
 if [ -z $files ] ; then
     scripts="$(echo $fomaopts | sed 's/ -f //') $scripts"
-    for f in $@ $scripts; do
+    for f in "$@" $scripts; do
         if test -f ./"$f" ; then
             if egrep -q '^(save stack|ss)' ./"$f" ; then
                 files="$(egrep '^(save stack|ss)' < "$f" | sed -e 's/^save stack //' -e 's/^ss //') $files"
