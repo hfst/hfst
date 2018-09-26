@@ -32,7 +32,10 @@ PmatchAlphabet::PmatchAlphabet(std::istream & inputstream,
         if (is_special(symbol_table[i])) {
             add_special_symbol(symbol_table[i], i);
         } else {
-            if (!is_flag_diacritic(i)) {
+            if(symbol_table[i]=="@PMATCH_INPUT_MARK@") {
+                input_mark_symbol = i;
+            }
+            else if (!is_flag_diacritic(i)) {
                 printable_vector[i] = true;
             } else {
                 if (is_global_flag(symbol_table[i])) {
@@ -140,8 +143,6 @@ void PmatchAlphabet::add_special_symbol(const std::string & str,
         special_symbols[NRC_exit] = symbol_number;
     } else if (str == "@PMATCH_PASSTHROUGH@") {
         special_symbols[Pmatch_passthrough] = symbol_number;
-    } else if (str == "@PMATCH_INPUT_MARK@") {
-        special_symbols[Pmatch_input_mark] = symbol_number;
     } else if (str == "@BOUNDARY@") {
         special_symbols[boundary] = symbol_number;
     } else if (is_end_tag(str)) {
@@ -668,6 +669,9 @@ bool PmatchAlphabet::is_special(const std::string & symbol)
     if (symbol.size() < 3) {
         return false;
     }
+    if (symbol == "@PMATCH_INPUT_MARK@") { // seems like is_special symbols can't be referred to in pmatch scripts
+        return false;
+    }
     if (is_insertion(symbol) || symbol == "@BOUNDARY@") {
 //        || symbol == "@_UNKNOWN_SYMBOL_@" || symbol == "@_IDENTITY_SYMBOL_@"
         return true;
@@ -703,7 +707,7 @@ bool PmatchAlphabet::is_counter(const SymbolNumber symbol) const
 
 bool PmatchAlphabet::is_input_mark(const SymbolNumber symbol) const
 {
-    return get_special(Pmatch_input_mark) == symbol;
+    return input_mark_symbol == symbol;
 }
 
 std::string PmatchAlphabet::name_from_insertion(const std::string & symbol)

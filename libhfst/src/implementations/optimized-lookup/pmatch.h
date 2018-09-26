@@ -63,6 +63,7 @@ namespace hfst_ol {
     class PmatchAlphabet: public TransducerAlphabet {
     protected:
         RtnVector rtns;
+        SymbolNumber input_mark_symbol;
         SymbolNumberVector special_symbols;
         std::map<SymbolNumber, std::string> end_tag_map;
         std::map<std::string, SymbolNumber> capture_tag_map;
