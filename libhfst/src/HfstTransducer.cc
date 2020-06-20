@@ -3767,6 +3767,35 @@ HfstTransducer &HfstTransducer::set_final_weights(float weight, bool increment)
     return *this;
 }
 
+HfstTransducer &HfstTransducer::push_labels(PushType push_type)
+{
+#if HAVE_OPENFST
+    bool to_initial_state = (push_type == TO_INITIAL_STATE);
+    if (this->type == TROPICAL_OPENFST_TYPE)
+    {
+        hfst::implementations::StdVectorFst * tmp  =
+        this->tropical_ofst_interface.push_labels
+        (this->implementation.tropical_ofst, to_initial_state);
+        this->tropical_ofst_interface.delete_transducer(this->implementation.tropical_ofst);
+        this->implementation.tropical_ofst = tmp;
+        return *this;
+    }
+#if HAVE_OPENFST_LOG
+    if (this->type == LOG_OPENFST_TYPE)
+    {
+        hfst::implementations::LogFst * tmp =
+        this->log_ofst_interface.push_labels
+        (this->implementation.log_ofst, to_initial_state);
+        this->log_ofst_interface.delete_transducer(this->implementation.log_ofst);
+        this->implementation.log_ofst = tmp;
+        return *this;
+    }
+#endif
+#endif
+    (void)push_type;
+    return *this;
+}
+
 HfstTransducer &HfstTransducer::push_weights(PushType push_type)
 {
 #if HAVE_OPENFST

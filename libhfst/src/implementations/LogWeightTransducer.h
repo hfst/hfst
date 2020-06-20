@@ -186,6 +186,7 @@ namespace implementations
       static LogFst * set_weight(LogFst * t,float f);
       static LogFst * set_final_weights(LogFst * t, float weight);
       static LogFst * transform_weights(LogFst * t,float (*func)(float f));
+      static LogFst * push_labels(LogFst * t, bool to_initial_state);
       static LogFst * push_weights(LogFst * t, bool to_initial_state);
 
       static std::pair<LogFst*, LogFst*> harmonize

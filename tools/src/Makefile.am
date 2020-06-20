@@ -208,7 +208,8 @@ bin_PROGRAMS= \
 			 $(MAYBE_OPTIMIZED_LOOKUP) $(MAYBE_PMATCH)                  \
 			 $(MAYBE_PMATCH2FST) $(MAYBE_TOKENIZE)                         \
 			 $(MAYBE_PROJECT) $(MAYBE_PRUNE_ALPHABET)                   \
-			 $(MAYBE_PUSH_WEIGHTS) $(MAYBE_REGEXP2FST)                  \
+			 $(MAYBE_PUSH_LABELS) $(MAYBE_PUSH_WEIGHTS) $(MAYBE_REALIGN) \
+			 $(MAYBE_REGEXP2FST)                  \
 			 $(MAYBE_REMOVE_EPSILONS) $(MAYBE_REPEAT) $(MAYBE_REVERSE)  \
 			 $(MAYBE_REWEIGHT) $(MAYBE_SHUFFLE)                         \
 			 $(MAYBE_SPLIT) $(MAYBE_STRINGS2FST) $(MAYBE_STRIP_HEADER)  \
@@ -258,9 +259,9 @@ hfst_pmatch_SOURCES=hfst-pmatch.cc $(HFST_COMMON_SRC)
 hfst_tokenize_SOURCES=hfst-tokenize.cc $(HFST_COMMON_SRC)
 hfst_project_SOURCES=hfst-project.cc $(HFST_COMMON_SRC)
 hfst_prune_alphabet_SOURCES=hfst-prune-alphabet.cc $(HFST_COMMON_SRC)
-hfst_push_labels_SOURCES=hfst-push-weights.cc $(HFST_COMMON_SRC)
+hfst_push_labels_SOURCES=hfst-push-labels.cc $(HFST_COMMON_SRC)
 hfst_push_weights_SOURCES=hfst-push-weights.cc $(HFST_COMMON_SRC)
-hfst_realign_SOURCES=hfst-push-weights.cc $(HFST_COMMON_SRC)
+hfst_realign_SOURCES=hfst-realign.cc $(HFST_COMMON_SRC)
 hfst_regexp2fst_SOURCES=hfst-regexp2fst.cc hfst-file-to-mem.cc $(HFST_COMMON_SRC)
 hfst_pmatch2fst_SOURCES=hfst-pmatch2fst.cc $(HFST_COMMON_SRC)
 hfst_remove_epsilons_SOURCES=hfst-remove-epsilons.cc $(HFST_COMMON_SRC)

@@ -323,6 +323,18 @@ namespace hfst { namespace implementations
     return t;
   }
 
+  LogFst * LogWeightTransducer::push_labels(LogFst * t, bool to_initial_state)
+  {
+    assert (t->InputSymbols() != NULL);
+    LogFst * retval = new LogFst();
+    if (to_initial_state)
+      fst::Push<LogArc, REWEIGHT_TO_INITIAL>(*t, retval, fst::kPushLabels);
+    else
+      fst::Push<LogArc, REWEIGHT_TO_FINAL>(*t, retval, fst::kPushLabels);
+    retval->SetInputSymbols(t->InputSymbols());
+    return retval;
+  }
+
   LogFst * LogWeightTransducer::push_weights(LogFst * t, bool to_initial_state)
   {
     assert (t->InputSymbols() != NULL);
