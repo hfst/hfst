@@ -64,7 +64,25 @@ namespace hfst {
     {
       warning_stream = os;
     }
-    
+ 
+    // This function can be moved to its own file if TropicalWeightTransducer.o
+    // yields a 'File too big' error.
+    StdVectorFst * TropicalWeightTransducer::push_labels
+    (StdVectorFst * t, bool to_initial_state)
+    {
+      assert (t->InputSymbols() != NULL);
+
+      CHECK_EPSILON_CYCLES(t, "push_labels");
+      
+      fst::StdVectorFst * retval = new fst::StdVectorFst();
+      if (to_initial_state)
+        fst::Push<StdArc, REWEIGHT_TO_INITIAL>(*t, retval, fst::kPushLabels);
+      else
+        fst::Push<StdArc, REWEIGHT_TO_FINAL>(*t, retval, fst::kPushLabels);
+      retval->SetInputSymbols(t->InputSymbols());
+      return retval;
+    }
+
     // This function can be moved to its own file if TropicalWeightTransducer.o
     // yields a 'File too big' error.
     StdVectorFst * TropicalWeightTransducer::push_weights

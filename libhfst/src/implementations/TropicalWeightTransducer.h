@@ -204,6 +204,9 @@ namespace implementations
         (StdVectorFst * t,float (*func)(float f));
       static StdVectorFst * push_weights
         (StdVectorFst * t, bool to_initial_state);
+      static StdVectorFst * push_labels
+        (StdVectorFst * t, bool to_initial_state);
+
       static bool has_weights(const StdVectorFst * t);
 
       static std::pair<StdVectorFst*, StdVectorFst*> harmonize
