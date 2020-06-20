@@ -161,10 +161,10 @@ process_stream(HfstInputStream& instream, HfstOutputStream& outstream)
         }
 */
 
-        trans.push_weights(hfst::TO_INITIAL_STATE);
         trans.invert();
-        trans.push_weights(hfst::TO_INITIAL_STATE);
+        trans.push_labels(hfst::TO_INITIAL_STATE);
         trans.invert();
+        trans.push_labels(hfst::TO_INITIAL_STATE);
         hfst_set_name(trans, trans, "realign");
         hfst_set_formula(trans, trans, "Id");
         
