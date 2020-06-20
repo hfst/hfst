@@ -46,6 +46,9 @@ endif
 if WANT_DISJUNCT
 MAYBE_DISJUNCT=hfst-disjunct$(EXEEXT)
 endif
+if WANT_PRIORITY_DISJUNCT
+MAYBE_PRIORITY_DISJUNCT=hfst-priority-disjunct$(EXEEXT)
+endif
 if WANT_MULTIPLY
 MAYBE_MULTIPLY=hfst-multiply$(EXEEXT)
 endif
@@ -193,7 +196,7 @@ bin_PROGRAMS= \
 			 $(MAYBE_AFFIX_GUESSIFY)              \
 			 $(MAYBE_COMPARE) $(MAYBE_COMPOSE) $(MAYBE_CONCATENATE)     \
 			 $(MAYBE_CONJUNCT) $(MAYBE_DETERMINIZE) $(MAYBE_DISJUNCT)   \
-			 $(MAYBE_MULTIPLY) $(MAYBE_EDIT_METADATA)                  \
+			 $(MAYBE_PRIORITY_DISJUNCT) $(MAYBE_MULTIPLY) $(MAYBE_EDIT_METADATA)                  \
 			 $(MAYBE_FORMAT) $(MAYBE_ELIMINATE_FLAGS) $(MAYBE_FST2FST) \
 			 $(MAYBE_FST2STRINGS)      \
 			 $(MAYBE_FST2TXT) $(MAYBE_GREP) $(MAYBE_HEAD)               \
@@ -226,6 +229,7 @@ hfst_concatenate_SOURCES=hfst-concatenate.cc $(HFST_COMMON_SRC)
 hfst_conjunct_SOURCES=hfst-conjunct.cc $(HFST_COMMON_SRC)
 hfst_determinize_SOURCES=hfst-determinize.cc $(HFST_COMMON_SRC)
 hfst_disjunct_SOURCES=hfst-disjunct.cc $(HFST_COMMON_SRC)
+hfst_priority_disjunct_SOURCES=hfst-priority-disjunct.cc $(HFST_COMMON_SRC)
 hfst_multiply_SOURCES=hfst-multiply.cc $(HFST_COMMON_SRC)
 hfst_expand_equivalences_SOURCES=hfst-expand-equivalences.cc $(HFST_COMMON_SRC)
 hfst_edit_metadata_SOURCES=hfst-edit-metadata.cc $(HFST_COMMON_SRC)
@@ -282,6 +286,7 @@ install-exec-hook:
 		$(LN_S) -f hfst-calculate$(EXEEXT) hfst-sfstpl2fst$(EXEEXT) && \
 		$(LN_S) -f hfst-summarize$(EXEEXT) hfst-summarise$(EXEEXT) && \
 		$(LN_S) -f hfst-disjunct$(EXEEXT) hfst-union$(EXEEXT) && \
+		$(LN_S) -f hfst-priority-disjunct$(EXEEXT) hfst-priority-union$(EXEEXT) && \
 		$(LN_S) -f hfst-tokenize$(EXEEXT) hfst-proc2$(EXEEXT) && \
 		$(LN_S) -f hfst-tokenize$(EXEEXT) hfst-tokenise$(EXEEXT)
 

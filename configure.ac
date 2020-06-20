@@ -245,6 +245,12 @@ AC_ARG_ENABLE([determinize],
 			  [enable_determinize=$enableval],
 			  [if test x$enable_no_tools != xno; then enable_determinize=no; else enable_determinize=yes; fi])
 AM_CONDITIONAL([WANT_DETERMINIZE], [test x$enable_determinize != xno])
+AC_ARG_ENABLE([priority-disjunct],
+			  [AS_HELP_STRING([--enable-priority-disjunct],
+							  [build priority disjunct tool @<:@default=yes@:>@])],
+			  [enable_priority_disjunct=$enableval],
+			  [if test x$enable_no_tools != xno; then enable_priority_disjunct=no; else enable_priority_disjunct=yes; fi])
+AM_CONDITIONAL([WANT_PRIORITY_DISJUNCT], [test x$enable_priority_disjunct != xno])
 AC_ARG_ENABLE([disjunct],
 			  [AS_HELP_STRING([--enable-disjunct],
 							  [build disjunct tool @<:@default=yes@:>@])],
@@ -822,6 +828,7 @@ cat <<EOF
     *                 conjunct: $enable_conjunct (intersect)
     *                 determinize: $enable_determinize (determinise)
     *                 disjunct: $enable_disjunct (union)
+    *                 priority-disjunct: $enable_priority_disjunct (priority union)
     *                 eliminate-flags: $enable_eliminate_flags
     *                 foma: $enable_foma_wrapper
     *                 format: $enable_format
