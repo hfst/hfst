@@ -431,12 +431,24 @@ AC_ARG_ENABLE([proc],
 			  [enable_proc=$enableval],
 			  [enable_proc=$enable_all_tools])
 AM_CONDITIONAL([WANT_PROC], [test x$enable_proc != xno])
+AC_ARG_ENABLE([push_labels],
+			  [AS_HELP_STRING([--enable-push-labels],
+							  [build push-labels tool @<:@default=yes@:>@])],
+			  [enable_push_labels=$enableval],
+			  [if test x$enable_no_tools != xno; then enable_push_labels=no; else enable_push_labels=yes; fi])
+AM_CONDITIONAL([WANT_PUSH_LABELS], [test x$enable_push_labels != xno])
 AC_ARG_ENABLE([push_weights],
 			  [AS_HELP_STRING([--enable-push-weights],
 							  [build push-weights tool @<:@default=yes@:>@])],
 			  [enable_push_weights=$enableval],
 			  [if test x$enable_no_tools != xno; then enable_push_weights=no; else enable_push_weights=yes; fi])
 AM_CONDITIONAL([WANT_PUSH_WEIGHTS], [test x$enable_push_weights != xno])
+AC_ARG_ENABLE([realign],
+			  [AS_HELP_STRING([--enable-realign],
+							  [build realign tool @<:@default=yes@:>@])],
+			  [enable_realign=$enableval],
+			  [if test x$enable_no_tools != xno; then enable_realign=no; else enable_realign=yes; fi])
+AM_CONDITIONAL([WANT_REALIGN], [test x$enable_realign != xno])
 AC_ARG_ENABLE([regexp2fst],
 			  [AS_HELP_STRING([--enable-regexp2fst],
 							  [build regexp2fst tool @<:@default=yes@:>@])],
@@ -843,7 +855,9 @@ cat <<EOF
     *                 proc: $enable_proc
     *                 project: $enable_project
     *                 prune-alphabet: $enable_prune_alphabet
+    *                 push-labels: $enable_push_labels
     *                 push-weights: $enable_push_weights
+    *                 realign: $enable_realign
     *                 regexp2fst: $enable_regexp2fst
     *                 pmatch2fst: $enable_pmatch2fst
     *                 remove-epsilons: $enable_remove_epsilons

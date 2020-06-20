@@ -127,8 +127,14 @@ endif
 if WANT_PRUNE_ALPHABET
 MAYBE_PRUNE_ALPHABET=hfst-prune-alphabet$(EXEEXT)
 endif
+if WANT_PUSH_LABELS
+MAYBE_PUSH_LABELS=hfst-push-labels$(EXEEXT)
+endif
 if WANT_PUSH_WEIGHTS
 MAYBE_PUSH_WEIGHTS=hfst-push-weights$(EXEEXT)
+endif
+if WANT_REALIGN
+MAYBE_REALIGN=hfst-realign$(EXEEXT)
 endif
 if WANT_REGEXP2FST
 MAYBE_REGEXP2FST=hfst-regexp2fst$(EXEEXT)
@@ -252,7 +258,9 @@ hfst_pmatch_SOURCES=hfst-pmatch.cc $(HFST_COMMON_SRC)
 hfst_tokenize_SOURCES=hfst-tokenize.cc $(HFST_COMMON_SRC)
 hfst_project_SOURCES=hfst-project.cc $(HFST_COMMON_SRC)
 hfst_prune_alphabet_SOURCES=hfst-prune-alphabet.cc $(HFST_COMMON_SRC)
+hfst_push_labels_SOURCES=hfst-push-weights.cc $(HFST_COMMON_SRC)
 hfst_push_weights_SOURCES=hfst-push-weights.cc $(HFST_COMMON_SRC)
+hfst_realign_SOURCES=hfst-push-weights.cc $(HFST_COMMON_SRC)
 hfst_regexp2fst_SOURCES=hfst-regexp2fst.cc hfst-file-to-mem.cc $(HFST_COMMON_SRC)
 hfst_pmatch2fst_SOURCES=hfst-pmatch2fst.cc $(HFST_COMMON_SRC)
 hfst_remove_epsilons_SOURCES=hfst-remove-epsilons.cc $(HFST_COMMON_SRC)
