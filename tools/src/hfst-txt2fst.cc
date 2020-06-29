@@ -63,6 +63,8 @@ static const unsigned int EPSILON_KEY=0;
 // check if there are epsilon cycles with a negative weight
 bool check_negative_epsilon_cycles = false;
 
+bool disjunct_multiple_transducers = false;
+
 void
 print_usage()
 {
@@ -79,7 +81,8 @@ print_usage()
             "  -p, --prolog        Read prolog format instead of att\n");
     fprintf(message_out, "Other options:\n"
             "  -C, --check-negative-epsilon-cycles  Issue a warning if there are epsilon cycles\n"
-            "                                       with a negative weight in the transducer\n");
+            "                                       with a negative weight in the transducer\n"
+            "  -j, --disjunct                       Disjunct transducers\n");
     fprintf(message_out, "\n");
     fprintf(message_out,
         "If OUTFILE or INFILE is missing or -, standard streams will be used.\n"
@@ -113,13 +116,14 @@ parse_options(int argc, char** argv)
             {"number", no_argument, 0, 'n'},
             {"format", required_argument, 0, 'f'},
             {"prolog", no_argument, 0, 'p'},
+            {"disjunct", no_argument, 0, 'j'},
             {"check-negative-epsilon-cycles", no_argument, 0, 'C'},
             {0,0,0,0}
         };
         int option_index = 0;
         // add tool-specific options here
         int c = getopt_long(argc, argv, HFST_GETOPT_COMMON_SHORT
-                             HFST_GETOPT_UNARY_SHORT "e:nf:pC",
+                             HFST_GETOPT_UNARY_SHORT "e:nf:pjC",
                              long_options, &option_index);
         if (-1 == c)
         {
@@ -133,6 +137,9 @@ break;
           // add tool-specific cases here
         case 'e':
             epsilonname = hfst_strdup(optarg);
+            break;
+        case 'j':
+            disjunct_multiple_transducers = true;
             break;
         case 'n':
             use_numbers = true;
@@ -241,6 +248,29 @@ process_stream(HfstOutputStream& outstream)
             error(EXIT_FAILURE, 0, "Error in processing transducer text file (prolog) on line %u\n", linecount);
             return EXIT_FAILURE;
           }
+        }
+      else if(disjunct_multiple_transducers) 
+        {
+            std::vector<HfstTransducer> transducers;
+            try {
+
+              while (!feof(inputfile)) 
+                {
+                  HfstTransducer t(inputfile, output_format,  std::string(epsilonname));
+                  transducers.push_back(t);
+                }
+
+            } catch (NotValidAttFormatException e) {
+                printf("Error reading transducer: not valid AT&T format.\n"); 
+            }
+            HfstTransducer joined(output_format); 
+            std::vector<HfstTransducer>::iterator it;
+            for(it = transducers.begin(); it != transducers.end(); it++)
+              {
+                joined.disjunct(*it);
+              }
+            // joined.remove_epsilons(); // remove epsilons from the unioned transducers
+            outstream << joined;
         }
       else
         {
