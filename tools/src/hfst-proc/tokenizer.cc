@@ -184,9 +184,30 @@ TokenIOStream::read_escaped()
 std::string
 TokenIOStream::read_delimited(const char delim)
 {
+  wcerr << "\n\n##TEST##\n\n";
   std::string result;
   int c = EOF;
-
+  bool is_wblank = false;
+  
+  if(is && c != delim) //Check if wblank is being read
+  {
+    c = is.get();
+    if(c == EOF || c != '[')
+      break;
+    
+    result += c;
+    if(c == '\\')
+      result += read_escaped();
+    else if(null_flush && c == '\0')
+      do_null_flush();
+    else
+    {
+      int next_char = is.peek();
+      if(next_char == '[')
+        is_wblank = true;
+    }
+  }
+  
   while(is && c != delim)
   {
     c = is.get();
@@ -198,6 +219,22 @@ TokenIOStream::read_delimited(const char delim)
       result += read_escaped();
     if(null_flush && c == '\0')
       do_null_flush();
+  }
+  
+  if(is_wblank)
+  {
+    c = is.get();
+    if(c == EOF)
+      break;
+    
+    if(c != delim)
+    {
+      stream_error(std::string("Error in parsing a wordbound blank"));
+    }
+    else
+    {
+      result += c;
+    }
   }
 
   if(c != delim)

@@ -187,6 +187,7 @@ class TokenIOStream
    * Read into the the stream until the delimiting character is found. The
    * delimiting character is read and included in the string. Charater escaping
    * is handled. Fails on stream error
+   * If a wblank is being parsed, then the parsing happens till ]] is reached.
    * @return the string from the stream's current point up to and including
    *         the delimiting character
    */
