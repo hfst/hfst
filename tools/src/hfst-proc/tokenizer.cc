@@ -188,20 +188,20 @@ TokenIOStream::read_delimited(const char delim)
   int c = EOF;
   bool is_wblank = false;
   
-  if(is && c != delim) //Check if wblank is being read
+  if(is && c != delim)
   {
     c = is.get();
-    if(c == '[')
+    if(c != EOF)
     {
       result += c;
       if(c == '\\')
         result += read_escaped();
       else if(null_flush && c == '\0')
         do_null_flush();
-      else
+      else if(c == '[')
       {
         int next_char = is.peek();
-        if(next_char == '[')
+        if(next_char == '[') //Check if wblank is being read
           is_wblank = true;
       }
     }
