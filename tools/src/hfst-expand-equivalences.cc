@@ -49,12 +49,11 @@ using hfst::HfstOutputStream;
 #include "hfst-tool-metadata.h"
 #include "hfst-program-options.h"
 #include "inc/globals-common.h"
+#include "inc/globals-unary.h"
 
 
 static char* only_from_label = 0;
 static char* only_to_label = 0;
-char* inputfilename = 0;
-FILE* inputfile = 0;
 static char* acx_file_name = 0;
 static FILE* acx_file = 0;
 static char* tsv_file_name = 0;
@@ -77,7 +76,7 @@ print_usage()
            "Extend transducer arcs for equivalence classes\n"
         "\n", program_name);
 
-    print_common_program_options(stdout);
+    print_common_program_options(message_out);
     fprintf(message_out, "Eqv. class extension options:\n"
             "  -f, --from=ISYM     convert single symbol ISYM to allow OSYM\n"
             "  -t, --to=OSYM       convert to OSYM\n"
@@ -173,6 +172,7 @@ parse_options(int argc, char** argv)
         }
     }
 #include "inc/check-params-common.h"
+#include "inc/check-params-unary.h"
     return EXIT_CONTINUE;
   }
 
