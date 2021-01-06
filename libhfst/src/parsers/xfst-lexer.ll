@@ -742,7 +742,7 @@ LWSP [\t ]*
     return REGEX;
 }
 
-<SOURCE_STATE>[A-Za-z]{NAMECHAR}* {
+<SOURCE_STATE>[A-Za-z\/]{NAMECHAR}* {
   // ^ include directive
 
   FILE * tmp = NULL;
