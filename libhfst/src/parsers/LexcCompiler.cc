@@ -716,6 +716,14 @@ LexcCompiler::addXreEntry(const string& regexp, const string& continuation,
     //char* xre_encoded = hfst::xre::add_percents(encodedCont.c_str());
 
     HfstTransducer* newPaths = xre_.compile(regexp);
+    if (newPaths == NULL)
+    {
+        std::ostream * err = get_stream(error_);
+        *err << "Unable to parse regular expression" << std::endl;
+        flush(err);
+        parseErrors_ = true;
+        return *this;
+    }
 
     newPaths->optimize();
 
