@@ -3972,6 +3972,7 @@ namespace xfst {
           tmp.pop();
         }
       outstream->close();
+      delete outstream;
       PROMPT_AND_RETURN_THIS;
     }
   XfstCompiler&
