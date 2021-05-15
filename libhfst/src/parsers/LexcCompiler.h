@@ -54,6 +54,8 @@ class LexcCompiler
   // as indicator as the trasnducer should be build with or without flags
   LexcCompiler(hfst::ImplementationType impl, bool withFlags, bool alignStrings);
 
+  ~LexcCompiler();
+
   void reset();
 
   //! @brief compile lexc description from @c infile into current compiler
@@ -171,8 +173,6 @@ class LexcCompiler
   hfst::HfstTokenizer tokenizer_;
   hfst::xre::XreCompiler xre_;
   std::string initialLexiconName_;
-  std::map<std::string,hfst::HfstTransducer*> stringTries_;
-  std::map<std::string,HfstBasicTransducer*> stringVectors_;
   HfstBasicTransducer stringsTrie_;
 
 

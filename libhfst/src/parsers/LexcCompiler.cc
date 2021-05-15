@@ -168,6 +168,15 @@ LexcCompiler::LexcCompiler(ImplementationType impl, bool withFlags, bool alignSt
     xre_.set_verbosity(!quiet_);
 }
 
+
+LexcCompiler::~LexcCompiler()
+{
+  for(const auto &it: regexps_)
+  {
+    delete it.second;
+  }
+}
+
     void LexcCompiler::reset()
     {
       tokenizer_ = hfst::HfstTokenizer();
@@ -186,8 +195,10 @@ LexcCompiler::LexcCompiler(ImplementationType impl, bool withFlags, bool alignSt
       string hash("#");
       lexiconNames_.insert(hash);
       stringsTrie_ =hfst::implementations::HfstBasicTransducer(); // ?
-      stringTries_.clear();
-      stringVectors_.clear();
+      for(const auto &it: regexps_)
+      {
+        delete it.second;
+      }
       regexps_.clear();
     }
 
@@ -741,6 +752,7 @@ LexcCompiler::addXreEntry(const string& regexp, const string& continuation,
                                                    new HfstTransducer(format_)));
       }
     regexps_[regex_key]->disjunct(*newPaths).optimize();
+    delete newPaths;
     if (!quiet_)
       {
         if ((currentEntries_ % 10000) == 0)
@@ -1245,6 +1257,7 @@ LexcCompiler::compileLexical()
         HfstTransducer filtered_lexicons(*inverted_flag_filter);
         filtered_lexicons.compose(*rv, true);
         filtered_lexicons.compose(*flag_filter, true).optimize();
+        delete inverted_flag_filter;
          
         rv->assign(filtered_lexicons);
     }
@@ -1319,6 +1332,7 @@ using hfst::lexc::LexcCompiler;
 int
 main(int argc, char** argv)
   {
+    HfstTransducer* compiled;
     std::cout << "Unit tests for " __FILE__ ":";
     std::cout << std::endl << "constructors: ";
     std::cout << " (default)...";
@@ -1476,15 +1490,21 @@ main(int argc, char** argv)
     std::cout << std::endl << "compile:";
 #if HAVE_SFST
     std::cout << " sfst compile...";
-    assert(lexcSfst.compileLexical() != NULL);
+    compiled = lexcSfst.compileLexical();
+    assert(compiled != NULL);
+    delete compiled;
 #endif
 #if HAVE_OFST
     std::cout << " ofst compile...";
-    assert(lexcOfst.compileLexical() != NULL);
+    compiled = lexcOfst.compileLexical();
+    assert(compiled != NULL);
+    delete compiled;
 #endif
 #if HAVE_FOMA
     std::cout << " foma compile...";
-    assert(lexcFoma.compileLexical() != NULL);
+    compiled = lexcFoma.compileLexical();
+    assert(compiled != NULL);
+    delete compiled;
 #endif
     return EXIT_SUCCESS;
   }
