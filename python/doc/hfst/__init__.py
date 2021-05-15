@@ -2529,7 +2529,7 @@ class ImplementationType:
 #
 # \section using_hfst Using HFST in your own code
 #
-# After <a href="https://github.com/hfst/hfst/wiki/HfstPython">installing</a> HFST on your computer, start python and execute <code>import hfst</code>.
+# After <a href="https://github.com/hfst/python/wiki">installing</a> HFST on your computer, start python and execute <code>import hfst</code>.
 #
 # For example, the following simple program
 #
@@ -2663,7 +2663,7 @@ class ImplementationType:
 ## @page HfstWithSFSTOpenFstAndFoma.html Using HFST with SFST, OpenFst and foma
 #
 # A binary HfstTransducer consists of an HFST header (more on HFST headers on the
-# <a href="https://github.com/hfst/hfst/wiki/HfstTransducerHeader">
+# <a href="https://github.com/hfst/hfst/wiki/TransducerHeader">
 # wiki pages</a>) and the transducer of the backend implementation.
 # If you want to write backend transducers as such, you can specify it with
 # the <i>hfst_format</i> keyword argument of HfstOutputStream constructor:
@@ -2740,7 +2740,7 @@ class ImplementationType:
 # \endverbatim
 #
 # For more information on HFST transducer formats and conversions, see the
-# <a href="https://github.com/hfst/hfst/wiki/HfstTransducerFormats">
+# <a href="https://github.com/hfst/hfst/wiki/TransducerFormats">
 # wiki pages</a>.
 #
 #

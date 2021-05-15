@@ -553,7 +553,7 @@ An example:
 
         For more information on transducer conversions and the HFST header
         structure, see
-        <a href="https://github.com/hfst/hfst/wiki/HfstTransducerHeader">here</a>.
+        <a href="https://github.com/hfst/hfst/wiki/TransducerHeader">here</a>.
 
         @pre ( in.is_eof() == in.is_bad() == false && in.is_fst() ).
         Otherwise, an exception is thrown.

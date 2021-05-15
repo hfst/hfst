@@ -2,7 +2,7 @@
 /** \page HfstWithSFSTOpenFstAndFoma.html Using HFST with SFST, OpenFst and foma
 
 A binary HfstTransducer consists of an HFST header (more on HFST headers on the
-<a href="https://github.com/hfst/hfst/wiki/HfstTransducerHeader">
+<a href="https://github.com/hfst/hfst/wiki/TransducerHeader">
 wiki pages</a>) and the transducer of the backend implementation.
 If you want to write backend transducers as such, you can specify it with
 the <i>hfst_format</i> argument of HfstOutputStream constructor:
@@ -34,7 +34,7 @@ included).
 \endverbatim
 
 For more information on HFST transducer formats and conversions, see the
-<a href="https://github.com/hfst/hfst/wiki/HfstTransducerFormats">
+<a href="https://github.com/hfst/hfst/wiki/TransducerFormats">
 wiki pages</a>.
 
 
@@ -919,7 +919,7 @@ The examples given in this documentation use
 
 \section links Links
 
-   - <a href="https://github.com/hfst/hfst/wiki/HfstCommandLineToolFunctionalities">Examples</a> of programs implemented using the HFST interface
+   - <a href="https://github.com/hfst/hfst/wiki/Command-Line-Tools">Examples</a> of programs implemented using the HFST interface
 
    - <a href="https://github.com/hfst/hfst/wiki">Documentation</a> of the HFST project
 
