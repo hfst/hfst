@@ -219,10 +219,11 @@ XreCompiler::is_function_definition(const std::string & name)
 void
 XreCompiler::undefine(const std::string& name)
 {
-if (definitions_.find(name) != definitions_.end())
+  auto const it = definitions_.find(name);
+  if (it != definitions_.end())
   {
-    delete definitions[name];
-    definitions_.erase(name);
+    delete it->second;
+    definitions_.erase(it);
   }
 }
 

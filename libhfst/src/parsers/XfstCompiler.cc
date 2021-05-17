@@ -1595,9 +1595,11 @@ namespace xfst {
       char* name = strtok(s, " ");
       while (name != NULL)
         {
-          if (definitions_.find(name) != definitions_.end())
+          auto const it = definitions_.find(name);
+          if (it != definitions_.end())
             {
-              definitions_.erase(definitions_.find(name));
+              delete it->second;
+              definitions_.erase(it);
               xre_.undefine(name);  // XRE
             }
           name = strtok(NULL, " ");
