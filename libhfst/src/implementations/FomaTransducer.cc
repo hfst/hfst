@@ -942,7 +942,6 @@ namespace hfst { namespace implementations {
         printf("File format error sigma!\n");
         return NULL;
     }
-    net->sigma = sigma_create();
     for (;;) {
       io_gets(infile, buf);
         if (buf[0] == '#') break;
