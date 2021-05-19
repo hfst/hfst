@@ -322,13 +322,15 @@ int fsm_isuniversal(struct fsm *net) {
 }
 
 int fsm_isempty(struct fsm *net) {
-    struct fsm_state *fsm;
-    net = fsm_minimize(net);
-    fsm = net->states;
+    int result;
+    struct fsm *minimal = fsm_minimize(fsm_copy(net));
+    struct fsm_state *fsm = minimal->states;
     if (fsm->target == -1 && fsm->final_state == 0 && (fsm+1)->state_no == -1)
-        return 1;
+        result = 1;
     else
-        return 0;
+        result = 0;
+    fsm_destroy(minimal);
+    return result;
 }
 
 int fsm_issequential(struct fsm *net) {

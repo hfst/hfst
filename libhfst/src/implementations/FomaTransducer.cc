@@ -496,7 +496,7 @@ namespace hfst { namespace implementations {
       fsm_union(fsm_minus(fsm_copy(t1),fsm_copy(t2)),
                 fsm_minus(fsm_copy(t2),fsm_copy(t1)));
     int eq = fsm_isempty(test);
-    //fsm_destroy(test);
+    fsm_destroy(test);
     return (eq == 1);
   }
 
