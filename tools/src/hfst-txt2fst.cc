@@ -390,6 +390,7 @@ int main( int argc, char **argv )
       }
     free(inputfilename);
     free(outfilename);
+    delete outstream;
     return EXIT_SUCCESS;
 }
 

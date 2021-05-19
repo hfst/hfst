@@ -453,6 +453,7 @@ int main( int argc, char **argv )
         new HfstOutputStream(outfilename, output_format) :
         new HfstOutputStream(output_format);
   process_stream(*outstream);
+  delete outstream;
   free(inputfilename);
   free(outfilename);
   return EXIT_SUCCESS;

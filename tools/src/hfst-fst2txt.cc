@@ -217,6 +217,7 @@ process_stream(HfstInputStream& instream, FILE* outf)
           verbose_printf("Converting %s..." SIZE_T_SPECIFIER "\n", inputname,
                          transducer_n);
         }
+        free(inputname);
 
 
         if(transducer_n > 1)

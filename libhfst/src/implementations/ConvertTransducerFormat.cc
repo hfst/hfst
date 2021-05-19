@@ -187,6 +187,7 @@ int main(void)
               ConversionFunctions::hfst_transducer_to_hfst_basic_transducer(fsm1);
             
             HfstTransducer fsm1_converted_twice(*fsm1_converted, types[i]);
+            delete fsm1_converted;
             
             if (! fsm1.compare(fsm1_converted_twice))
               return 1;
