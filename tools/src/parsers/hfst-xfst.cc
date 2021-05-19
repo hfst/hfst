@@ -47,7 +47,7 @@
 static hfst::ImplementationType output_format = hfst::UNSPECIFIED_TYPE;
 static char* scriptfilename = NULL;
 static char* startupfilename = NULL;
-static std::vector<char*> execute_commands;
+static std::vector<std::string> execute_commands;
 static char* execute_command_and_quit = NULL;
 static bool pipe_input = false;
 static bool pipe_output = false; // this has no effect on non-windows platforms
@@ -172,7 +172,7 @@ parse_options(int argc, char** argv)
             // todo: on windows getopt_long does not support unicode:
             // e.g. option  -e 'regex U;'  where U is a unicode character is not possible
           case 'e':
-            execute_commands.push_back(hfst_strdup(optarg));
+            execute_commands.push_back(std::string(optarg));
             break;
 	  case 'E':
             execute_command_and_quit = hfst_strdup(optarg);
@@ -405,13 +405,12 @@ int main(int argc, char** argv)
     comp.setOutputToConsole(true);
 
   // If needed, execute scripts given in command line
-  for (std::vector<char*>::const_iterator cmd = execute_commands.begin();
-       cmd != execute_commands.end(); cmd++)
+  for (auto const & cmd: execute_commands)
     {
-      verbose_printf("Executing xfst command '%s' given on command line\n", *cmd);
-      if (0 != comp.parse_line(*cmd))
+      verbose_printf("Executing xfst command '%s' given on command line\n", cmd.c_str());
+      if (0 != comp.parse_line(cmd))
         {
-          error(EXIT_FAILURE, 0, "command '%s' could not be parsed\n", *cmd);
+          error(EXIT_FAILURE, 0, "command '%s' could not be parsed\n", cmd.c_str());
           return EXIT_FAILURE;
         }
     }
