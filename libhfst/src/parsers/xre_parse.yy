@@ -388,6 +388,8 @@ PARALLEL_RULES: PARALLEL_RULES COMMACOMMA RULE
            //std::cerr << "parallel_rules: parallel_rules ,, rule"<< std::endl;
            if ($3->first != $1->first)
            {
+             delete $3;
+             delete $1;
              xreerror("Replace type mismatch in parallel rules");
              YYABORT;
            }
