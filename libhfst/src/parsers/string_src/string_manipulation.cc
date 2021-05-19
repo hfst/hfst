@@ -104,13 +104,6 @@ int str2int(const std::string &str)
 void print_kill_symbol(void)
 { std::cout << std::endl << "__HFST_TWOLC_DIE" << std::endl; }
 
-void copy_c_string(char * target,const char * source)
-{
-  for ( ; *source != 0; ++source && ++target)
-    { *target = *source; }
-  *(++target) = 0;
-}
-
 StringVector::StringVector(void)
 {}
 
@@ -289,15 +282,5 @@ int main(void)
     }
   catch (const FaultyStringInput &fsi)
     { /* nothing */ }
-
-  const char * arr1 = "foo";
-  char arr2[4];
-  copy_c_string(arr2,arr1);
-  assert(arr2[0] == 'f');
-  assert(arr2[1] == 'o');
-  assert(arr2[2] == 'o');
-
-  // Apparently this sometimes fails on Mac...
-  // assert(arr2[3] == 0);
 }
 #endif // STRING_MANIPULATION_TEST

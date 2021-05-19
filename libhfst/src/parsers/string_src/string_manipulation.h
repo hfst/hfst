@@ -105,11 +105,6 @@ std::string remove_white_space(std::string str);
 //! @pre @a str doesn't contain <tt>'\\n'</tt>.
 std::string unescape_and_remove_white_space(std::string str);
 
-//! @brief Copy the first complete c-string found in @a source to @a target.
-//! @pre The space reserved for @a source may not be smaller than the space
-//! reserved for @a target.
-void copy_c_string(char * target,const char * source);
-
 //! @brief Print a symbol which guarantees that the next compiler will die with
 //! exit signal 1.
 //!
