@@ -1224,7 +1224,7 @@ LABEL: HALFARC {
               if (! hfst::xre::define_function_args($1, $2))
               {
                 xreerror("Could not define function args.\n");  // TODO: more informative message
-                delete $1; delete $2;
+                free($1); delete $2;
                 YYABORT;
               }
 
@@ -1237,7 +1237,7 @@ LABEL: HALFARC {
 
               hfst::xre::cr = chars_read;
               hfst::xre::undefine_function_args($1);
-              delete $1;
+              free($1);
 
               xre_delete_buffer(bs,scanner);
               xrelex_destroy(scanner);
