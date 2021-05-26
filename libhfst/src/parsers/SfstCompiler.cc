@@ -165,6 +165,7 @@ namespace hfst
 
   void SfstCompiler::free_values( Ranges *r ) {
     if (r) {
+      free_values(r->range);
       free_values(r->next);
       delete r;
     }
