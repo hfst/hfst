@@ -69,6 +69,11 @@ struct fsm *flag_eliminate(struct fsm *net, char *name) {
 
     filter = NULL;
 
+    if (net->pathcount == 0) {
+	fprintf(stderr,"Skipping flag elimination since there are no paths in network.\n");
+        return(net);
+    }
+
     flags = flag_extract(net);
     /* Check that flag actually exists in net */
     if (name != NULL) {
