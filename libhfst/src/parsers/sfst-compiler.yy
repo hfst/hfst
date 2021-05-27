@@ -28,7 +28,7 @@ namespace hfst
 
 bool DEBUG = false;
 
-void sfsterror(char *text)
+void sfsterror(const char *text)
 
 {
   cerr << "\n" << sfst_compiler->filename << ":" << sfstlineno << ": " << text << " at: ";
@@ -36,13 +36,13 @@ void sfsterror(char *text)
   HFST_THROW(HfstException);
 }
 
-void warn(char *text)
+void warn(const char *text)
 
 {
   cerr << "\n" << sfst_compiler->filename << ":" << sfstlineno << ": warning: " << text << "!\n";
 }
 
-void warn2(const char *text, char *text2)
+void warn2(const char *text, const char *text2)
 
 {
   cerr << "\n" << sfst_compiler->filename << ":" << sfstlineno << ": warning: " << text << ": ";

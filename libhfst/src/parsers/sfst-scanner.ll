@@ -21,7 +21,7 @@
 #include "SfstUtf8.h"
 #include "HfstTransducer.h"
 
-extern void sfsterror(char*);
+extern void sfsterror(const char*);
 
 #undef YY_FATAL_ERROR
 #define YY_FATAL_ERROR(msg) sfsterror(msg);
@@ -69,8 +69,6 @@ static void print_lineno() {
     fputs("  ", stderr);
   fprintf(stderr,"%s: %d", sfst_compiler->filename.c_str(), sfstlineno);
 }
-
-extern void sfsterror(char *text);
 
 %}
 
