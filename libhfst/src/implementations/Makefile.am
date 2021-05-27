@@ -34,7 +34,11 @@ if WANT_MINGW
   AM_CPPFLAGS += -I${top_srcdir}/back-ends/openfstwin/src/include \
 		-I${top_srcdir}/back-ends/dlfcn -DWINDOWS
 else
+if WANT_OPENFST_UPSTREAM
+# Skip extra include
+else
   AM_CPPFLAGS += -I${top_srcdir}/back-ends/openfst/src/include
+endif
 endif
 
 if GENERATE_LEXC_WRAPPER

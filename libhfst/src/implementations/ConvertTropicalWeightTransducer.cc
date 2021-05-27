@@ -18,7 +18,11 @@
 #ifdef _MSC_VER
 #include "back-ends/openfstwin/src/include/fst/fstlib.h"
 #else
+#if HAVE_OPENFST_UPSTREAM
+#include <fst/fstlib.h>
+#else
 #include "back-ends/openfst/src/include/fst/fstlib.h"
+#endif
 #endif // _MSC_VER
 
 #ifndef _MSC_VER

@@ -27,8 +27,8 @@
 #include <iosfwd>
 #include <fstream>
 
-#ifdef OPENFST_VERSION_1_5_4
-  #include "back-ends/openfst/src/include/fst/fst-decl.h"
+#ifdef HAVE_OPENFST_UPSTREAM
+  #include <fst/fst-decl.h>
 #else
 namespace fst
 {

@@ -8,8 +8,11 @@ AM_CPPFLAGS += -I${top_srcdir}/back-ends/foma \
 if WANT_MINGW
   AM_CPPFLAGS += -I${top_srcdir}/back-ends/openfstwin/src/include \
 		-I${top_srcdir}/back-ends/dlfcn -DWINDOWS
+if WANT_OPENFST_UPSTREAM
+# Skip extra include
 else
   AM_CPPFLAGS += -I${top_srcdir}/back-ends/openfst/src/include
+endif
 endif
 
 AM_CXXFLAGS = -Wno-deprecated

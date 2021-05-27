@@ -86,6 +86,15 @@ AS_IF([test "x$with_openfst" != xno], [AC_DEFINE([HAVE_OPENFST], [1],
                                               [Define to compile OpenFst support in HFST])])
 AM_CONDITIONAL([WANT_OPENFST], [test x$with_openfst != xno])
 
+AC_ARG_WITH([openfst-upstream],
+            [AS_HELP_STRING([--with-openfst-upstream],
+                            [Use upstream OpenFST @<:@default=no@:>@])],
+            [],
+            [with_openfst_upstream=no])
+AS_IF([test "x$with_openfst_upstream" != xno], [AC_DEFINE([HAVE_OPENFST_UPSTREAM], [1],
+                                              [Use upstream OpenFST])])
+AM_CONDITIONAL([WANT_OPENFST_UPSTREAM], [test x$with_openfst_upstream != xno])
+
 AC_ARG_WITH([openfst-log],
             [AS_HELP_STRING([--with-openfst-log],
                             [enable logarithmic weights @<:@default=yes@:>@])],
