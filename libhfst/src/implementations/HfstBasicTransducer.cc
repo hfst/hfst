@@ -2971,43 +2971,42 @@
                             StringPairVector::const_iterator &it,
                             HfstState s)
          {
+           HfstState current_state = s;
            // Path inserted, return the final state on this path
-           if (it == spv.end()) {
-             return s;
+           while (it != spv.end()) {
+            HfstBasicTransitions tr = state_vector[current_state];
+            bool transition_found=false;
+            /* The target state of the transition followed or added */
+            HfstState next_state;
+
+            // Find the transition
+            // (Searching is slow?)
+            for (const auto & tr_it: tr)
+              {
+                HfstTropicalTransducerTransitionData data = tr_it.get_transition_data();
+                if (data.get_input_symbol().compare(it->first) == 0 &&
+                    data.get_output_symbol().compare(it->second) == 0)
+                  {
+                    transition_found=true;
+                    next_state = tr_it.get_target_state();
+                    break;
+                  }
+              }
+
+            // If not found, create the transition
+            if (! transition_found)
+              {
+                next_state = add_state();
+                HfstBasicTransition transition(next_state, it->first,
+                                          it->second, 0);
+                add_transition(current_state, transition);
+              }
+
+            // Advance to the next transition on path
+            it++;
+            current_state = next_state;
            }
-
-           HfstBasicTransitions tr = state_vector[s];
-           bool transition_found=false;
-           /* The target state of the transition followed or added */
-           HfstState next_state;
-
-           // Find the transition
-           // (Searching is slow?)
-           for (HfstBasicTransitions::iterator tr_it = tr.begin();
-                tr_it != tr.end(); tr_it++)
-             {
-               HfstTropicalTransducerTransitionData data = tr_it->get_transition_data();
-               if (data.get_input_symbol().compare(it->first) == 0 &&
-                   data.get_output_symbol().compare(it->second) == 0)
-                 {
-                   transition_found=true;
-                   next_state = tr_it->get_target_state();
-                   break;
-                 }
-             }
-
-           // If not found, create the transition
-           if (! transition_found)
-             {
-               next_state = add_state();
-               HfstBasicTransition transition(next_state, it->first,
-                                         it->second, 0);
-               add_transition(s, transition);
-             }
-
-           // Advance to the next transition on path
-           it++;
-           return disjunct(spv, it, next_state);
+           return current_state;
          }
 
        
