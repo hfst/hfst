@@ -912,10 +912,10 @@ void fsm_merge_sigma(struct fsm *net1, struct fsm *net2) {
   sigma_1 = net1->sigma;
   sigma_2 = net2->sigma;
 
-  sigmasizes = sigma_size(sigma_1) + sigma_size(sigma_2);
+  sigmasizes = sigma_max(sigma_1) + sigma_max(sigma_2) + 3;
 
-  mapping_1 = xxmalloc(sizeof(int)*(sigmasizes+30));
-  mapping_2 = xxmalloc(sizeof(int)*(sigmasizes+30));
+  mapping_1 = xxmalloc(sizeof(int) * (sigmasizes));
+  mapping_2 = xxmalloc(sizeof(int) * (sigmasizes));
 
   /* Fill mergesigma */
 
