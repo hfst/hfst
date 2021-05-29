@@ -464,5 +464,8 @@ When reporting, please include at least following:
 
 .. _libxml2: http://www.xmlsoft.org/
 .. _libreadline: http://www.gnu.org/software/readline/
+.. _foma: https://github.com/mhulden/foma
+.. _openfst: http://www.openfst.org
+.. _sfst: https://www.cis.lmu.de/~schmid/tools/SFST/
 
 .. vim: set ft=rst:

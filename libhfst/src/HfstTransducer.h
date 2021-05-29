@@ -1807,7 +1807,7 @@ alphabet = set(a, a:b, b, c, d, e, ...)
         Note that the alphabet must contain the pair a:b here.
         
         @see
-    <a href="ftp://ftp.ims.uni-stuttgart.de/pub/corpora/SFST/SFST-Manual.pdf">
+    <a href="https://www.cis.lmu.de/~schmid/tools/SFST/data/SFST-Manual.pdf">
     SFST manual</a>
     */
     HFSTDLL HfstTransducer two_level_if(HfstTransducerPair &context,
@@ -1899,7 +1899,7 @@ alphabet = set(a, b, c)
         @throws ContextTransducersAreNotAutomataException
 
         @see
-     <a href="ftp://ftp.ims.uni-stuttgart.de/pub/corpora/SFST/SFST-Manual.pdf">
+     <a href="https://www.cis.lmu.de/~schmid/tools/SFST/data/SFST-Manual.pdf">
      SFST manual</a>
     */
     HFSTDLL HfstTransducer replace_up(HfstTransducerPair &context,
@@ -1911,7 +1911,7 @@ alphabet = set(a, b, c)
         the output side of \a mapping
 
         @see replace_up
-<a href="ftp://ftp.ims.uni-stuttgart.de/pub/corpora/SFST/SFST-Manual.pdf">
+<a href="https://www.cis.lmu.de/~schmid/tools/SFST/data/SFST-Manual.pdf">
 SFST manual</a>. */
     HFSTDLL HfstTransducer replace_down(HfstTransducerPair &context,
                                 HfstTransducer &mapping,
@@ -1928,7 +1928,7 @@ SFST manual</a>. */
         and right context on the input side of \a mapping
 
         @see replace_up
-<a href="ftp://ftp.ims.uni-stuttgart.de/pub/corpora/SFST/SFST-Manual.pdf">
+<a href="https://www.cis.lmu.de/~schmid/tools/SFST/data/SFST-Manual.pdf">
 SFST manual</a>. */
     HFSTDLL HfstTransducer replace_right(HfstTransducerPair &context,
                                  HfstTransducer &mapping,
@@ -1940,7 +1940,7 @@ SFST manual</a>. */
         and right context on the output side of \a mapping.
 
         @see replace_up
-<a href="ftp://ftp.ims.uni-stuttgart.de/pub/corpora/SFST/SFST-Manual.pdf">
+<a href="https://www.cis.lmu.de/~schmid/tools/SFST/data/SFST-Manual.pdf">
 SFST manual</a>. */
     HFSTDLL HfstTransducer replace_left(HfstTransducerPair &context,
                                 HfstTransducer &mapping,
@@ -2037,7 +2037,7 @@ SFST manual</a>. */
         @throws EmptySetOfContextsException
 
         @see
-     <a href="ftp://ftp.ims.uni-stuttgart.de/pub/corpora/SFST/SFST-Manual.pdf">
+     <a href="https://www.cis.lmu.de/~schmid/tools/SFST/data/SFST-Manual.pdf">
      SFST manual</a>. */
     HFSTDLL HfstTransducer restriction(HfstTransducerPairVector &contexts,
                                HfstTransducer &mapping,
@@ -2050,7 +2050,7 @@ SFST manual</a>. */
         substrings are mapped to any symbol allowed by \a alphabet.
 
         @see
-     <a href="ftp://ftp.ims.uni-stuttgart.de/pub/corpora/SFST/SFST-Manual.pdf">
+     <a href="https://www.cis.lmu.de/~schmid/tools/SFST/data/SFST-Manual.pdf">
      SFST manual</a>. */
     HFSTDLL HfstTransducer coercion(HfstTransducerPairVector &contexts,
                             HfstTransducer &mapping,
@@ -2066,7 +2066,7 @@ SFST manual</a>. */
         @see
         restriction(HfstTransducerPairVector&, HfstTransducer&, StringPairSet&)
         #coercion
-     <a href="ftp://ftp.ims.uni-stuttgart.de/pub/corpora/SFST/SFST-Manual.pdf">
+     <a href="https://www.cis.lmu.de/~schmid/tools/SFST/data/SFST-Manual.pdf">
      SFST manual</a> */
     HFSTDLL HfstTransducer restriction_and_coercion(HfstTransducerPairVector &contexts,
                                             HfstTransducer &mapping,
@@ -2082,7 +2082,7 @@ SFST manual</a>. */
         to any symbol allowed by \a alphabet.
 
         @see
-     <a href="ftp://ftp.ims.uni-stuttgart.de/pub/corpora/SFST/SFST-Manual.pdf">
+     <a href="https://www.cis.lmu.de/~schmid/tools/SFST/data/SFST-Manual.pdf">
      SFST manual</a>. */
     HFSTDLL HfstTransducer surface_restriction(HfstTransducerPairVector &contexts,
                                        HfstTransducer &mapping,
@@ -2098,7 +2098,7 @@ SFST manual</a>. */
         any symbol allowed by \a alphabet.
 
         @see
-     <a href="ftp://ftp.ims.uni-stuttgart.de/pub/corpora/SFST/SFST-Manual.pdf">
+     <a href="https://www.cis.lmu.de/~schmid/tools/SFST/data/SFST-Manual.pdf">
      SFST manual</a>. */
     HFSTDLL HfstTransducer surface_coercion(HfstTransducerPairVector &contexts,
                                     HfstTransducer &mapping,
@@ -2108,7 +2108,7 @@ SFST manual</a>. */
         surface_restriction and surface_coercion.
 
         @see #surface_restriction #surface_coercion
-   <a href="ftp://ftp.ims.uni-stuttgart.de/pub/corpora/SFST/SFST-Manual.pdf">
+   <a href="https://www.cis.lmu.de/~schmid/tools/SFST/data/SFST-Manual.pdf">
    SFST manual</a>. */
     HFSTDLL HfstTransducer surface_restriction_and_coercion
       (HfstTransducerPairVector &contexts,
@@ -2124,7 +2124,7 @@ SFST manual</a>. */
         to any symbol allowed by \a alphabet.
 
         @see
-  <a href="ftp://ftp.ims.uni-stuttgart.de/pub/corpora/SFST/SFST-Manual.pdf">
+  <a href="https://www.cis.lmu.de/~schmid/tools/SFST/data/SFST-Manual.pdf">
   SFST manual</a>. */
     HFSTDLL HfstTransducer deep_restriction(HfstTransducerPairVector &contexts,
                                     HfstTransducer &mapping,
@@ -2139,7 +2139,7 @@ SFST manual</a>. */
         to any symbol allowed by \a alphabet.
 
         @see
-   <a href="ftp://ftp.ims.uni-stuttgart.de/pub/corpora/SFST/SFST-Manual.pdf">
+   <a href="https://www.cis.lmu.de/~schmid/tools/SFST/data/SFST-Manual.pdf">
    SFST manual</a>. */
     HFSTDLL HfstTransducer deep_coercion(HfstTransducerPairVector &contexts,
                                  HfstTransducer &mapping,
@@ -2149,7 +2149,7 @@ SFST manual</a>. */
         of deep_restriction and deep_coercion.
 
         @see #deep_restriction #deep_coercion
-  <a href="ftp://ftp.ims.uni-stuttgart.de/pub/corpora/SFST/SFST-Manual.pdf">
+  <a href="https://www.cis.lmu.de/~schmid/tools/SFST/data/SFST-Manual.pdf">
   SFST manual</a>. */
     HFSTDLL HfstTransducer deep_restriction_and_coercion
       (HfstTransducerPairVector &contexts,

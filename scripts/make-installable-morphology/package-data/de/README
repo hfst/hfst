@@ -6,7 +6,7 @@ which are included in the archive.
 The steps to reproduce these transducers are as follows:
 
 1) Download and install SFST from
-	http://www.ims.uni-stuttgart.de/projekte/gramotron/SOFTWARE/SFST.html
+	https://www.cis.lmu.de/~schmid/tools/SFST/
 
 2) Download Morphisto from http://code.google.com/p/morphisto/ and follow its
 instructions

@@ -33,11 +33,11 @@
 //! Two-Level Rule Compiler</a>
 //!
 //! The Flex Project 2008:
-//! <a href="http://flex.sourceforge.net/manual/">Lexical Analysis With Flex
+//! <a href="https://westes.github.io/flex/manual/">Lexical Analysis With Flex
 //! </a>
 //!
 //! Free SoftWare Foundation 2010:
-//! <a href="http://www.gnu.org/software/bison/manual/bison.html">
+//! <a href="https://www.gnu.org/software/bison/manual/bison.html">
 //! Bison 2.4.3</a>
 //!
 //! Free SoftWare Foundation 2007:
@@ -46,8 +46,8 @@
 //!
 //! Karttunen, Koskenniemi and Kaplan 1987:
 //! <a href=
-//! "http://www2.parc.com/istl/members/karttune/publications/archive/
-//! twolcomp.pdf">A Compiler for Two-level Phonological Rules</a>
+//! "http://web.stanford.edu/~laurik/publications/archive/twolcomp.pdf">
+//! A Compiler for Two-level Phonological Rules</a>
 //!
 //! Koskenniemi 1983: <a
 //! href="http://www.ling.helsinki.fi/~koskenni/doc/Two-LevelMorphology.pdf">

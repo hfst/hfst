@@ -5,9 +5,9 @@
 #
 # HFST - The Helsinki Finite-State Transducer technology is intended for creating and manipulating weighted or unweighted synchronic transducers implementing regular relations.
 # UTF-8 is chosen as the character encoding used in HFST software. Currently, HFST has been implemented using the
-# <a href="http://www.ims.uni-stuttgart.de/projekte/gramotron/SOFTWARE/SFST.html">SFST</a>,
+# <a href="https://www.cis.lmu.de/~schmid/tools/SFST/">SFST</a>,
 # <a href="http://www.openfst.org">OpenFst</a> and
-# <a href="http://code.google.com/p/foma/">foma</a> software libraries.
+# <a href="https://github.com/mhulden/foma">foma</a> software libraries.
 # Other versions may be added in some future release. SFST and foma implementations are unweighted and OpenFst implementation is weighted.
 #
 # Part of HFST interface has been implemented for HFST's own two transducer formats, HfstBasicTransducer and optimized lookup format.
