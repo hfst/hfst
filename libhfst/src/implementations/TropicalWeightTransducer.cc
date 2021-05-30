@@ -371,6 +371,10 @@ namespace hfst {
   {
     assert(t->InputSymbols() != NULL);
     StringSet symbols;
+    if (t->NumStates() == 0)
+    {
+      return symbols;
+    }
     StateId s = t->Start();
     std::set<StateId> visited_states;
     get_first_input_symbols(t, s, visited_states, symbols);
