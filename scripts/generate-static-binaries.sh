@@ -8,7 +8,7 @@
 # recognize whther we are on Linux or Mac
 ENVIRONMENT=      # linux/mac
 SHOW_LINKS=       # ldd/otool -L
-CONFIGURE_ARGS='--enable-xfst --with-readline --enable-foma-wrapper=no'
+CONFIGURE_ARGS='--enable-xfst --with-readline'
 DYLIB_EXTENSION=  # so/dylib
 if (uname -a | grep 'Linux' > /dev/null); then
     ENVIRONMENT='Linux';

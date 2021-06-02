@@ -147,9 +147,6 @@ if WANT_TXT2FST
 TESTS += txt2fst-functionality.sh
 endif
 
-if WANT_LEXC_WRAPPER
-TESTS += lexc-wrapper-functionality.sh
-endif
 if WANT_LEXC
 TESTS += lexc-compiler-functionality.sh
 endif
@@ -485,7 +482,6 @@ summarize-functionality.sh \
 symbol-harmonization-functionality.sh \
 tail-functionality.sh \
 txt2fst-functionality.sh \
-lexc-wrapper-functionality.sh \
 lexc-compiler-functionality.sh \
 calculate-functionality.sh \
 shuffle-functionality.sh \

@@ -33,5 +33,4 @@ done
 # tokenize
 
 # fst2fst-functionality doesn't exist
-# lexc-wrapper not supported any more
 # lexc-compiler-flags not carried out even with c++

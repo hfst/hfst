@@ -131,8 +131,6 @@ Compilation requirements
   - the foma library version 0.9.18alpha is bundled with HFST and included
     be default when building HFST
 
-  - foma requires editline, termcap (or ncurses) and zlib libraries to compile
-
   - to disable foma backend, configure switch ``--without-foma`` may be used
 
   - the *hfst-xfst* frontend does not require foma binary or foma library
@@ -346,15 +344,6 @@ your distributions manuals on how to set up new library directories. Same
 applies for libraries installed to e.g. home directory.
 
 See also the previous error description.
-
-chmod: cannot access 'scripts/hfst-foma-wrapper.sh': No such file or directory
-------------------------------------------------------------------------------
-
-**During the configuration phase.** This is a case of autoconf being silly; the
-commands for creating a script and making it executable from autoconf are ran
-in parallel but must be ran once per file and autoconf just doesn't keep track
-of the files it creates. The script for doing this is copied to configure.ac
-from autoconf manual so it supposably will always work correctly...
 
 fatal error: htwolcpre1.h: No such file or directory
 ----------------------------------------------------

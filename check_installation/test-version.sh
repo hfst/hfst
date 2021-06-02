@@ -16,8 +16,7 @@ for file in $TOOLSDIR/hfst-* ; do
 	"$f" != "hfst-preprocess-for-optimized-lookup-format""$EXT" -a \
 	"$f" != "hfst-duplicate""$EXT" -a \
 	"$f" != "hfst-strip-header""$EXT" -a \
-	"$f" != "hfst-info""$EXT" -a \
-	"$f" != "hfst-foma-wrapper.sh" ] ; then
+	"$f" != "hfst-info""$EXT" ] ; then
         if [ -x "$f" -a ! -d "$f" ] ; then
             if ! "$f" --version > version.out ; then
                 rm -f version.out

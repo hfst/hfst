@@ -35,14 +35,6 @@ README_eight_tools_mac.txt     README file for Mac package that contains eight c
 README_xfst_mac.txt            README file for MAc package that contains hfst-xfst command line tool
 
 
-Foma wrapper files
-------------------
-
-Makefile.am                   Make foma wrapper (not so much needed now because hfst-xfst replaces it)
-hfst-foma-wrapper.sh.in       Needed for foma wrapper?
-hfst-foma.in                  Needed for foma wrapper?
-
-
 Miscellaneous files
 -------------------
 

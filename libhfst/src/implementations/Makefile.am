@@ -41,10 +41,6 @@ else
 endif
 endif
 
-if GENERATE_LEXC_WRAPPER
-  AM_CPPFLAGS += -DZLIB
-endif
-
 
 # the bridges
 if WANT_SFST

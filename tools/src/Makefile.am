@@ -94,9 +94,6 @@ endif
 if WANT_INVERT
 MAYBE_INVERT=hfst-invert$(EXEEXT)
 endif
-if GENERATE_LEXC_WRAPPER
-MAYBE_LEXC_WRAPPER=hfst-lexc-wrapper$(EXEEXT)
-endif
 if WANT_LEXC
 MAYBE_LEXC=hfst-lexc$(EXEEXT)
 endif
@@ -221,7 +218,7 @@ bin_PROGRAMS= \
 			 $(MAYBE_SPLIT) $(MAYBE_STRINGS2FST) $(MAYBE_STRIP_HEADER)  \
 			 $(MAYBE_SUBTRACT) $(MAYBE_SUMMARIZE) $(MAYBE_TAIL)         \
 			 $(MAYBE_TXT2FST) $(MAYBE_CALCULATE) $(MAYBE_SUBSTITUTE)    \
-			 $(MAYBE_LEXC) $(MAYBE_LEXC_WRAPPER)   \
+			 $(MAYBE_LEXC) \
 			 $(MAYBE_FORMAT)                     \
 			 $(MAYBE_COMPOSE_INTERSECT) $(MAYBE_NAME) $(MAYBE_PAIR_TEST)\
 			 $(MAYBE_TRAVERSE) $(MAYBE_GUESSIFY) $(MAYBE_GUESS) \
@@ -255,7 +252,6 @@ hfst_head_SOURCES=hfst-head.cc $(HFST_COMMON_SRC)
 hfst_info_SOURCES=hfst-info.cc $(HFST_COMMON_SRC)
 hfst_invert_SOURCES=hfst-invert.cc $(HFST_COMMON_SRC)
 hfst_insert_freely_SOURCES=hfst-insert-freely.cc $(HFST_COMMON_SRC)
-hfst_lexc_wrapper_SOURCES=hfst-lexc-wrapper.cc lexc-readline-ui.cc $(HFST_COMMON_SRC)
 hfst_lexc_SOURCES=hfst-lexc-compiler.cc $(HFST_COMMON_SRC)
 hfst_lookup_SOURCES=hfst-lookup.cc $(HFST_COMMON_SRC)
 hfst_flookup_SOURCES=hfst-flookup.cc $(HFST_COMMON_SRC)

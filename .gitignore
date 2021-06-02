@@ -221,9 +221,6 @@ stamp-h?
 /man/hfst-tokenise.1
 
 # Binary files
-/back-ends/foma/hfst_foma
-/scripts/hfst-foma
-/scripts/hfst-foma-wrapper.sh
 /tools/src/hfst-affix-guessify
 /tools/src/hfst-calculate
 /tools/src/hfst-compare
@@ -248,7 +245,6 @@ stamp-h?
 /tools/src/hfst-insert-freely
 /tools/src/hfst-invert
 /tools/src/hfst-lexc
-/tools/src/hfst-lexc-wrapper
 /tools/src/hfst-lookup
 /tools/src/hfst-minimize
 /tools/src/hfst-multiply

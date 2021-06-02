@@ -33,33 +33,5 @@ libfoma_la_SOURCES = int_stack.c define.c determinize.c apply.c \
         coaccessible.c io.c utf8.c spelling.c dynarray.c mem.c stringhash.c \
         trie.c lex.lexc.c lex.yy.c regex.c
 
-hfst_foma_LDADD = $(top_builddir)/back-ends/foma/libfoma.la
-
-if WANT_READLINE
-hfst_foma_LDFLAGS=-lreadline -lz
-else
-hfst_foma_LDFLAGS=-lz
-endif
-
-if HAVE_TERMCAP
-hfst_foma_LDFLAGS += -ltermcap
-else
-if HAVE_NCURSES
-hfst_foma_LDFLAGS += -lncurses
-else
-if HAVE_CURSES
-hfst_foma_LDFLAGS += -lcurses
-endif
-endif
-endif
-
-
-if GENERATE_FOMA_WRAPPER
-bin_PROGRAMS=hfst_foma
-AM_CPPFLAGS += -DZLIB
-endif
-
-hfst_foma_SOURCES=foma.c stack.c iface.c lex.interface.c lex.cmatrix.c
-
 EXTRA_DIST = foma.h fomalibconf.h fomalib.h lexc.h regex.h \
 	cmatrix.l interface.l lexc.l regex.l regex.y

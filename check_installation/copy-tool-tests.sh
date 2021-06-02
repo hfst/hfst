@@ -55,7 +55,6 @@ rm incompatible-formats.sh
 rm latin-1-strings.sh
 rm lexc-compiler-functionality.sh
 rm lexc-compiler-flags-functionality.sh
-rm lexc-wrapper-functionality.sh
 rm test.sh
 rm xfst-att-to-hfst-att.sh
 rm xfst-prolog-to-hfst-att.sh

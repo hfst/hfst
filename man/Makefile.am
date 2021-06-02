@@ -37,20 +37,6 @@ hfst_tools=hfst-compare.1 hfst-compose.1 \
 hfst_xfst=hfst-xfst.1
 hfst_apertium_proc=hfst-apertium-proc.1
 
-if GENERATE_LEXC_WRAPPER
-  hfst_lexc_wrapper=hfst-lexc-wrapper.1
-else
-  hfst_lexc_wrapper=
-endif
-
-if GENERATE_FOMA_WRAPPER
-  hfst_foma=hfst-foma.1 # hand-written
-  hfst_foma_wrapper=hfst-foma-wrapper.1 # hand-written
-else
-  hfst_foma=
-  hfst_foma_wrapper=
-endif
-
 hfst_tag_and_reweight=hfst-tag.1 hfst-reweight-tagger.1
 
 if WANT_TRAIN_TAGGER
@@ -75,11 +61,11 @@ aliases= hfst-determinise.1 hfst-expand.1 hfst-intersect.1 hfst-minimise.1 \
 	 hfst-optimised-lookup.1 \
 	 hfst-proc2.1 hfst-tokenise.1
 
-dist_man1_MANS=$(hfst_tools) $(hfst_xfst) $(hfst_apertium_proc) $(hfst_foma) $(hfst_foma_wrapper) \
+dist_man1_MANS=$(hfst_tools) $(hfst_xfst) $(hfst_apertium_proc) \
 	$(hfst_tag_and_reweight) $(hfst_train_tagger) $(hfst_train_tagger_subprograms) $(hfst_twolc) \
-	$(hfst_twolc_subprograms) $(hfst_lexc_wrapper) $(aliases)
+	$(hfst_twolc_subprograms) $(aliases)
 
-EXTRA_DIST=hfst-lexc-wrapper.1 hfst-foma.1 hfst-foma-wrapper.1 hfst-train-tagger.1 \
+EXTRA_DIST=hfst-train-tagger.1 \
 	hfst-open-input-file-for-tagger.1 hfst_tagger_compute_data_statistics.py.1 \
 	hfst-build-tagger.1 htwolcpre1.1 htwolcpre2.1 htwolcpre3.1 hfst-twolc-script.1
 

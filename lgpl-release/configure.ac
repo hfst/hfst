@@ -287,12 +287,6 @@ AC_ARG_ENABLE([invert],
 			  [enable_invert=$enableval],
 			  [if test x$enable_no_tools != xno; then enable_invert=no; else enable_invert=yes; fi])
 AM_CONDITIONAL([WANT_INVERT], [test x$enable_invert != xno])
-AC_ARG_ENABLE([lexc-wrapper],
-              [AS_HELP_STRING([--enable-lexc-wrapper],
-                              [build lexc-wrapper cli and readline @<:@default=no@:>@])],
-              [enable_lexc_wrapper=$enableval],
-              [enable_lexc_wrapper=$enable_all_tools])
-AM_CONDITIONAL([WANT_LEXC_WRAPPER], [test "x$enable_lexc_wrapper" != xno])
 AC_ARG_ENABLE([twolc],
               [AS_HELP_STRING([--enable-twolc],
                               [build twolc @<:@default=yes@:>@])],
@@ -491,33 +485,12 @@ AC_ARG_ENABLE([txt2fst],
 			  [enable_txt2fst=$enableval],
 			  [if test x$enable_no_tools != xno; then enable_txt2fst=no; else enable_txt2fst=yes; fi])
 AM_CONDITIONAL([WANT_TXT2FST], [test x$enable_txt2fst != xno])
-AC_ARG_ENABLE([foma_wrapper],
-			  [AS_HELP_STRING([--enable-foma-wrapper],
-							  [build foma wrapper tool @<:@default=no@:>@])],
-			  [enable_foma_wrapper=$enableval],
-			  [enable_foma_wrapper=$enable_all_tools])
-AM_CONDITIONAL([WANT_FOMA_WRAPPER], [test x$enable_foma_wrapper != xno])
 AC_ARG_ENABLE([xfst],
 			  [AS_HELP_STRING([--enable-xfst],
 							  [build xfst tool @<:@default=no@:>@])],
 			  [enable_xfst=$enableval],
 			  [enable_xfst=$enable_all_tools])
 AM_CONDITIONAL([WANT_XFST], [test x$enable_xfst != xno])
-
-# Check if zlib is available
-AC_CHECK_LIB([z], [main], [zlib_exists=yes], [zlib_exists=no])
-# Check if foma and lexc wrappers are wanted and possible to generate
-AM_CONDITIONAL([GENERATE_FOMA_WRAPPER], [test "x$enable_foma_wrapper" != "xno" -a "x$with_foma" != "xno" -a "x$zlib_exists" != "xno"])
-AM_CONDITIONAL([GENERATE_LEXC_WRAPPER], [test "x$enable_lexc_wrapper" != "xno" -a "x$with_foma" != "xno" -a "x$zlib_exists" != "xno"])
-# The same as variables..
-AS_IF([test "x$enable_foma_wrapper" != "xno" -a "x$with_foma" != "xno" -a "x$zlib_exists" != "xno"], [generate_foma_wrapper=yes], [generate_foma_wrapper=no])
-AS_IF([test "x$enable_lexc_wrapper" != "xno" -a "x$with_foma" != "xno" -a "x$zlib_exists" != "xno"], [generate_lexc_wrapper=yes], [generate_lexc_wrapper=no])
-
-# If foma wrapper is not wanted or possible to generate, set these conditionals/variables to 'no'
-AM_COND_IF([GENERATE_FOMA_WRAPPER], [], [AM_CONDITIONAL([WANT_FOMA_WRAPPER], [false])])
-AM_COND_IF([GENERATE_FOMA_WRAPPER], [], [enable_foma_wrapper=no])
-AM_COND_IF([GENERATE_LEXC_WRAPPER], [], [AM_CONDITIONAL([WANT_LEXC_WRAPPER], [false])])
-AM_COND_IF([GENERATE_LEXC_WRAPPER], [], [enable_lexc_wrapper=no])
 
 # Disable stress tests by default
 AC_ARG_ENABLE([stress-tests],
@@ -599,21 +572,6 @@ AS_IF([test "x$ac_cv_lib_sfst_main" == xno -a "x$ac_cv_lib_sfst1_main" == xno],
       [AC_MSG_FAILURE([sfst tests failed (--without-sfst to disable)])])
 AC_LANG_POP
 AC_LANG_PUSH([C])
-
-AM_COND_IF([GENERATE_FOMA_WRAPPER], [AC_CHECK_LIB([z], [main], [], [AC_MSG_FAILURE([foma test failed because zlib.h was not found (--without-foma to disable)])])])
-AM_COND_IF([GENERATE_LEXC_WRAPPER], [AC_CHECK_LIB([z], [main], [], [AC_MSG_FAILURE([foma test failed because zlib.h was not found (--without-foma to disable)])])])
-
-AM_CONDITIONAL(HAVE_NCURSES,[false])
-AM_CONDITIONAL(HAVE_CURSES,[false])
-AM_CONDITIONAL(HAVE_TERMCAP,[false])
-
-AC_CHECK_HEADER(ncurses.h,[AC_CHECK_HEADER(term.h,[AC_CHECK_LIB(ncurses,tgetent,[AM_CONDITIONAL(HAVE_NCURSES,[true])])])])
-if test x$ac_cv_lib_ncurses_tgetent != xyes ; then
-   AC_CHECK_HEADER(curses.h,[AC_CHECK_HEADER(term.h,[AC_CHECK_LIB(curses,tgetent,[AM_CONDITIONAL(HAVE_CURSES,[true])])])])
-   if test x$ac_cv_lib_curses_tgetent != xyes ; then
-      AC_CHECK_HEADER(termcap.h,[AC_CHECK_LIB(termcap,tgetent,[AM_CONDITIONAL(HAVE_TERMCAP,[true])])])
-   fi
-fi
 
 AC_LANG_POP
 
@@ -735,7 +693,6 @@ cat <<EOF
     *                 conjunct: $enable_conjunct (intersect)
     *                 determinize: $enable_determinize (determinise)
     *                 disjunct: $enable_disjunct (union)
-    *                 foma: $enable_foma_wrapper
     *                 format: $enable_format
     *                 fst2fst: $enable_fst2fst
     *                 fst2strings: $enable_fst2strings (expand)
@@ -746,7 +703,6 @@ cat <<EOF
     *                 head: $enable_head
     *                 invert: $enable_invert
     *                 lexc: $enable_lexc
-    *                 lexc-wrapper: $enable_lexc_wrapper
     *                 lookup: $enable_lookup
     *                 minimize: $enable_minimize (minimise)
     *                 name: $enable_name
