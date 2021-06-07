@@ -516,6 +516,10 @@ int main(int argc, char * argv[])
     hfst::HfstTransducer cmp_w(basic_w, hfst::TROPICAL_OPENFST_TYPE);
     assert(cmp.compare(hfst::HfstTransducer(*basic_converted, hfst::TROPICAL_OPENFST_TYPE)));
     assert(cmp_w.compare(hfst::HfstTransducer(*basic_converted_w, hfst::TROPICAL_OPENFST_TYPE)));
+    delete basic_ol;
+    delete basic_olw;
+    delete basic_converted;
+    delete basic_converted_w;
     
     std::cout << "ok" << std::endl;
     return 0;

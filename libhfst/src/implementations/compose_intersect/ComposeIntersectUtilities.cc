@@ -95,7 +95,7 @@ int main(int argc, char * argv[])
   v.push_back(1);
 
   for (size_t i = 0; i != 100000; ++i)
-    { IntSpaceSavingSet * p = new IntSpaceSavingSet(); p->insert(0); p->insert(1);}
+    { IntSpaceSavingSet * p = new IntSpaceSavingSet(); p->insert(0); p->insert(1); delete p;}
 
   sset.clear();
   sset.insert(2);
