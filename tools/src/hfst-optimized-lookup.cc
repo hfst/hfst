@@ -182,6 +182,7 @@ int main(int argc, char **argv)
 
         case 'e':
           echoInputsFlag = true;
+          break;
 
         case 'w':
           displayWeightsFlag = true;
