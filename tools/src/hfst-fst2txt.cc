@@ -198,14 +198,14 @@ process_stream(HfstInputStream& instream, FILE* outf)
           {
             error(EXIT_FAILURE, 0, "input transducers do not have the same type");
           }
-        char* inputname = strdup(t->get_name().c_str());
-        if (strlen(inputname) <= 0)
+        string inputname = t->get_name();
+        if (inputname.length() == 0)
           {
-            inputname = strdup(inputfilename);
+            inputname = inputfilename;
           }
         if (transducer_n == 1)
         {
-          verbose_printf("Converting %s...\n", inputname);
+          verbose_printf("Converting %s...\n", inputname.c_str());
         }
         else
         {
@@ -214,11 +214,9 @@ process_stream(HfstInputStream& instream, FILE* outf)
                   "use [hfst-head|hfst-tail|hfst-split] to extract individual transducers from input");
             return EXIT_FAILURE;
           }
-          verbose_printf("Converting %s..." SIZE_T_SPECIFIER "\n", inputname,
+          verbose_printf("Converting %s..." SIZE_T_SPECIFIER "\n", inputname.c_str(),
                          transducer_n);
         }
-        free(inputname);
-
 
         if(transducer_n > 1)
             fprintf(outf, "--\n");

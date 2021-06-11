@@ -17,22 +17,17 @@ namespace hfst {
 void
 print_pckimmo(FILE* out, HfstTransducer& t)
   {
-    HfstBasicTransducer* mutt = new HfstBasicTransducer(t);
+    HfstBasicTransducer mutt {t};
     HfstState s = 0;
     HfstState last = 0;
     std::set<std::pair<std::string,std::string> > pairs;
-    for (HfstBasicTransducer::const_iterator state = mutt->begin();
-         state != mutt->end();
-         ++state)
+    for (const auto & state: mutt)
       {
-        for (hfst::implementations::HfstBasicTransitions::const_iterator arc =
-             state->begin();
-             arc != state->end();
-             ++arc)
+        for (const auto & arc : state)
           {
-            std::string first = arc->get_input_symbol();
-            std::string second = arc->get_output_symbol();
-            pairs.insert(std::pair<std::string,std::string>(first, second));
+            const std::string first = arc.get_input_symbol();
+            const std::string second = arc.get_output_symbol();
+            pairs.emplace(first, second);
           }
         ++last;
       }
@@ -43,52 +38,46 @@ print_pckimmo(FILE* out, HfstTransducer& t)
     // first line is input symbols per pair
     // (left corner is digit width + 2)
     fprintf(out, "%*s  ", numwidth, " ");
-    for (std::set<std::pair<std::string, std::string> >::const_iterator p = pairs.begin();
-         p != pairs.end();
-         ++p)
+    for (const auto & p: pairs)
       {
-        if (p->first == hfst::internal_epsilon)
+        if (p.first == hfst::internal_epsilon)
           {
             fprintf(out, "%.*s ", numwidth, "0");
           }
-        else if (p->first == hfst::internal_unknown)
+        else if (p.first == hfst::internal_unknown)
           {
             fprintf(out, "%.*s ", numwidth, "@");
           }
         else
           {
-            fprintf(out, "%.*s ", numwidth, p->first.c_str());
+            fprintf(out, "%.*s ", numwidth, p.first.c_str());
           }
       }
     // second line is output symbols per pair
     fprintf(out, "\n");
     // (left corner is digit width + 2)
     fprintf(out, "%*s  ", numwidth, " ");
-    for (std::set<std::pair<std::string, std::string> >::const_iterator p = pairs.begin();
-         p != pairs.end();
-         ++p)
+    for (const auto & p: pairs)
       {
-        if (p->second == hfst::internal_epsilon)
+        if (p.second == hfst::internal_epsilon)
           {
             fprintf(out, "%.*s ", numwidth, "0");
           }
-        else if (p->second == hfst::internal_unknown)
+        else if (p.second == hfst::internal_unknown)
           {
             fprintf(out, "%.*s ", numwidth, "@");
           }
         else
           {
-            fprintf(out, "%.*s ", numwidth, p->second.c_str());
+            fprintf(out, "%.*s ", numwidth, p.second.c_str());
           }
 
       }
     // the transition table per state
     fprintf(out, "\n");
-    for (HfstBasicTransducer::const_iterator state = mutt->begin();
-         state != mutt->end();
-         ++state)
+    for (const auto & state : mutt)
       {
-        if (mutt->is_final_state(s))
+        if (mutt.is_final_state(s))
           {
             fprintf(out, "%.*d. ", numwidth, s + 1);
           }
@@ -98,28 +87,19 @@ print_pckimmo(FILE* out, HfstTransducer& t)
           }
         // map everything to sink state 0 first
         std::map<std::pair<std::string,std::string>,HfstState> transitions;
-        for(std::set<std::pair<std::string,std::string> >::const_iterator p = pairs.begin();
-            p != pairs.end();
-            ++p)
+        for(const auto & p : pairs)
           {
-            transitions[*p] = -1;
+            transitions[p] = -1;
           }
-        for (hfst::implementations::HfstBasicTransitions::const_iterator arc =
-             state->begin();
-             arc != state->end();
-             ++arc)
+        for (const auto & arc : state)
           {
-            std::string first = arc->get_input_symbol();
-            std::string second = arc->get_output_symbol();
-            transitions[std::pair<std::string,std::string>(first,second)] =
-                arc->get_target_state();
+            const std::string first = arc.get_input_symbol();
+            const std::string second = arc.get_output_symbol();
+            transitions[std::make_pair(first,second)] = arc.get_target_state();
           }
-        for(std::map<std::pair<std::string,std::string>,HfstState>::const_iterator trans =
-            transitions.begin();
-            trans != transitions.end();
-            ++trans)
+        for(const auto & trans : transitions)
           {
-            fprintf(out, "%.*d ", numwidth, trans->second + 1);
+            fprintf(out, "%.*d ", numwidth, trans.second + 1);
           }
         fprintf(out, "\n");
         ++s;
