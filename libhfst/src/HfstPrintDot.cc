@@ -89,20 +89,18 @@ print_dot(FILE* out, HfstTransducer& t)
     fprintf(out, "charset = UTF8;\n");
     fprintf(out, "rankdir = LR;\n");
     fprintf(out, "node [shape=circle,style=filled,fillcolor=yellow]\n");
-    HfstBasicTransducer* mutt = new HfstBasicTransducer(t);
+    HfstBasicTransducer mutt {t};
     HfstState s = 0;
     // for some reason, dot works nicer if I first have all nodes, then arcs
-    for (HfstBasicTransducer::const_iterator state = mutt->begin();
-         state != mutt->end();
-         ++state)
+    for (const auto & state: mutt)
       {
-        if (mutt->is_final_state(s))
+        if (mutt.is_final_state(s))
           {
-            if (mutt->get_final_weight(s) > 0)
+            if (mutt.get_final_weight(s) > 0)
               {
                 fprintf(out, "q%d [shape=doublecircle,"
                        "label=\"q%d/\\n%.2f\"] \n",
-                        s, s, mutt->get_final_weight(s));
+                        s, s, mutt.get_final_weight(s));
               }
             else
               {
@@ -119,19 +117,14 @@ print_dot(FILE* out, HfstTransducer& t)
         ++s;
       } // each state
     s = 0;
-    for (HfstBasicTransducer::const_iterator state = mutt->begin();
-         state != mutt->end();
-         ++state)
+    for (const auto & state : mutt)
       {
         std::map<HfstState, std::string> target_labels;
-        for (hfst::implementations::HfstBasicTransitions::const_iterator arc =
-             state->begin();
-             arc != state->end();
-             ++arc)
+        for (const auto & arc : state)
           {
-            std::string old_label = target_labels[arc->get_target_state()];
-            std::string first = arc->get_input_symbol();
-            std::string second = arc->get_output_symbol();
+            std::string old_label = target_labels[arc.get_target_state()];
+            std::string first = arc.get_input_symbol();
+            std::string second = arc.get_output_symbol();
             if (first == hfst::internal_epsilon)
               {
                 first = std::string("00");
@@ -161,14 +154,14 @@ print_dot(FILE* out, HfstTransducer& t)
                                                 DOT_MAX_LABEL_SIZE));
             if (first == second)
               {
-                if (arc->get_weight() > 0)
+                if (arc.get_weight() > 0)
                   {
                     if (old_label != "")
                       {
                         if (snprintf(l, DOT_MAX_LABEL_SIZE,
                              "%s, %s/%.2f", old_label.c_str(),
                              first.c_str(),
-                             arc->get_weight()) < 0)
+                             arc.get_weight()) < 0)
                           {
                             HFST_THROW_MESSAGE(HfstException, "sprinting dot arc label");
                           }
@@ -177,7 +170,7 @@ print_dot(FILE* out, HfstTransducer& t)
                       {
                         if (snprintf(l, DOT_MAX_LABEL_SIZE,
                                      "%s/%.2f", first.c_str(),
-                                     arc->get_weight()) < 0)
+                                     arc.get_weight()) < 0)
                           {
                             HFST_THROW_MESSAGE(HfstException, "sprinting dot arc label");
                           }
@@ -207,14 +200,14 @@ print_dot(FILE* out, HfstTransducer& t)
               } // if id pair
             else
               {
-                if (arc->get_weight() > 0)
+                if (arc.get_weight() > 0)
                   {
                     if (old_label != "")
                       {
                         if (snprintf(l, DOT_MAX_LABEL_SIZE,
                                      "%s, %s:%s/%.2f", old_label.c_str(),
                                     first.c_str(), second.c_str(),
-                                    arc->get_weight()) < 0)
+                                    arc.get_weight()) < 0)
                           {
                             HFST_THROW_MESSAGE(HfstException,
                                   "sprinting dot arc label");
@@ -225,7 +218,7 @@ print_dot(FILE* out, HfstTransducer& t)
                         if (snprintf(l, DOT_MAX_LABEL_SIZE,
                                      "%s:%s/%.2f",
                                     first.c_str(), second.c_str(),
-                                    arc->get_weight()) < 0)
+                                    arc.get_weight()) < 0)
                           {
                             HFST_THROW_MESSAGE(HfstException,
                                   "sprinting dot arc label");
@@ -259,15 +252,13 @@ print_dot(FILE* out, HfstTransducer& t)
             trim_to_valid_utf8(l);
             string sl(l);
             replace_all(sl, "\"", "\\\"");
-            target_labels[arc->get_target_state()] = sl;
+            target_labels[arc.get_target_state()] = sl;
             free(l);
           } // each arc
-        for (std::map<HfstState,std::string>::const_iterator tl = target_labels.begin();
-             tl != target_labels.end();
-             ++tl)
+        for (const auto & tl : target_labels)
           {
-            fprintf(out, "q%d -> q%d ", s, tl->first);
-            fprintf(out, "[label=\"%s \"];\n", tl->second.c_str());
+            fprintf(out, "q%d -> q%d ", s, tl.first);
+            fprintf(out, "[label=\"%s \"];\n", tl.second.c_str());
           }
         ++s;
       } // each state
@@ -291,19 +282,17 @@ print_dot(std::ostream & out, HfstTransducer& t)
     out << "charset = UTF8;" << std::endl;
     out << "rankdir = LR;" << std::endl;
     out << "node [shape=circle,style=filled,fillcolor=yellow]" << std::endl;
-    HfstBasicTransducer* mutt = new HfstBasicTransducer(t);
+    HfstBasicTransducer mutt {t};
     HfstState s = 0;
     // for some reason, dot works nicer if I first have all nodes, then arcs
-    for (HfstBasicTransducer::const_iterator state = mutt->begin();
-         state != mutt->end();
-         ++state)
+    for (const auto & state : mutt)
       {
-        if (mutt->is_final_state(s))
+        if (mutt.is_final_state(s))
           {
-            if (mutt->get_final_weight(s) > 0)
+            if (mutt.get_final_weight(s) > 0)
               {
                 out << "q" << s << " [shape=doublecircle," <<
-                  "label=\"q" << s << "/\\n" << mutt->get_final_weight(s) << "\"] " << std::endl;
+                  "label=\"q" << s << "/\\n" << mutt.get_final_weight(s) << "\"] " << std::endl;
               }
             else
               {
@@ -318,19 +307,14 @@ print_dot(std::ostream & out, HfstTransducer& t)
         ++s;
       } // each state
     s = 0;
-    for (HfstBasicTransducer::const_iterator state = mutt->begin();
-         state != mutt->end();
-         ++state)
+    for (const auto & state : mutt)
       {
         std::map<HfstState, std::string> target_labels;
-        for (hfst::implementations::HfstBasicTransitions::const_iterator arc =
-             state->begin();
-             arc != state->end();
-             ++arc)
+        for (const auto & arc : state)
           {
-            std::string old_label = target_labels[arc->get_target_state()];
-            std::string first = arc->get_input_symbol();
-            std::string second = arc->get_output_symbol();
+            std::string old_label = target_labels[arc.get_target_state()];
+            std::string first = arc.get_input_symbol();
+            std::string second = arc.get_output_symbol();
             if (first == hfst::internal_epsilon)
               {
                 first = std::string("00");
@@ -360,14 +344,14 @@ print_dot(std::ostream & out, HfstTransducer& t)
                                                 DOT_MAX_LABEL_SIZE));
             if (first == second)
               {
-                if (arc->get_weight() > 0)
+                if (arc.get_weight() > 0)
                   {
                     if (old_label != "")
                       {
                         if (snprintf(l, DOT_MAX_LABEL_SIZE,
                              "%s, %s/%.2f", old_label.c_str(),
                              first.c_str(),
-                             arc->get_weight()) < 0)
+                             arc.get_weight()) < 0)
                           {
                             HFST_THROW_MESSAGE(HfstException, "sprinting dot arc label");
                           }
@@ -376,7 +360,7 @@ print_dot(std::ostream & out, HfstTransducer& t)
                       {
                         if (snprintf(l, DOT_MAX_LABEL_SIZE,
                                      "%s/%.2f", first.c_str(),
-                                     arc->get_weight()) < 0)
+                                     arc.get_weight()) < 0)
                           {
                             HFST_THROW_MESSAGE(HfstException, "sprinting dot arc label");
                           }
@@ -406,14 +390,14 @@ print_dot(std::ostream & out, HfstTransducer& t)
               } // if id pair
             else
               {
-                if (arc->get_weight() > 0)
+                if (arc.get_weight() > 0)
                   {
                     if (old_label != "")
                       {
                         if (snprintf(l, DOT_MAX_LABEL_SIZE,
                                      "%s, %s:%s/%.2f", old_label.c_str(),
                                     first.c_str(), second.c_str(),
-                                    arc->get_weight()) < 0)
+                                    arc.get_weight()) < 0)
                           {
                             HFST_THROW_MESSAGE(HfstException,
                                   "sprinting dot arc label");
@@ -424,7 +408,7 @@ print_dot(std::ostream & out, HfstTransducer& t)
                         if (snprintf(l, DOT_MAX_LABEL_SIZE,
                                      "%s:%s/%.2f",
                                     first.c_str(), second.c_str(),
-                                    arc->get_weight()) < 0)
+                                    arc.get_weight()) < 0)
                           {
                             HFST_THROW_MESSAGE(HfstException,
                                   "sprinting dot arc label");
@@ -458,15 +442,13 @@ print_dot(std::ostream & out, HfstTransducer& t)
             trim_to_valid_utf8(l);
             string sl(l);
             replace_all(sl, "\"", "\\\"");
-            target_labels[arc->get_target_state()] = sl;
+            target_labels[arc.get_target_state()] = sl;
             free(l);
           } // each arc
-        for (std::map<HfstState,std::string>::const_iterator tl = target_labels.begin();
-             tl != target_labels.end();
-             ++tl)
+        for (const auto & tl : target_labels)
           {
-            out << "q" << s << " -> q" << tl->first << " ";
-            out << "[label=\"" << tl->second << " \"];" << std::endl;
+            out << "q" << s << " -> q" << tl.first << " ";
+            out << "[label=\"" << tl.second << " \"];" << std::endl;
           }
         ++s;
       } // each state
