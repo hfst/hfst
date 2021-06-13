@@ -173,6 +173,7 @@ XreCompiler::define(const std::string& name, const std::string& xre)
         }
       return false;
     }
+  this->undefine(name);
   definitions_[name] = compiled;
   return true;
 }
@@ -186,6 +187,7 @@ XreCompiler::define_list(const std::string& name, const std::set<std::string>& s
 void
 XreCompiler::define(const std::string& name, const HfstTransducer & transducer)
 {
+  this->undefine(name);
   definitions_[name] = new HfstTransducer(transducer);
 }
 

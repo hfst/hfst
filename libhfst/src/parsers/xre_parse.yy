@@ -327,7 +327,7 @@ REGEXP2: REPLACE
                 }
                 tmpTr->optimize();
                 $$ = tmpTr;
-                delete $1; delete $2; delete $3;
+                delete $1; free($2); delete $3;
             }
          }
         ;

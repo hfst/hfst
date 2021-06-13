@@ -1287,30 +1287,40 @@ namespace xfst {
         PROMPT_AND_RETURN_THIS;
       }
 
-  XfstCompiler&
-  XfstCompiler::define(const char * name)
+  void
+  XfstCompiler::define(const char * name, HfstTransducer * transducer)
   {
-    GET_TOP(top);
     bool was_defined = xre_.is_definition(name);
-    //if (!was_defined) {
-    xre_.define(name, *top); // XRE
-      //}
-    HfstTransducer * nu = new HfstTransducer(*top);
-    stack_.pop(); // todo: delete?
+    xre_.define(name, *transducer);
     if (variables_["name-nets"] == "ON") {
-      nu->set_name(name);
+      transducer->set_name(name);
     }
-    definitions_[name] = nu;
+    auto const it = definitions_.find(name);
+    if (it != definitions_.end())
+    {
+      delete it->second;
+      definitions_.erase(it);
+    }
+    definitions_[name] = transducer;
 
     if (verbose_)
       {
         if (was_defined)
-          output() << "Redefined"; // hfst_fprintf(outstream_, "Redefined");
+          output() << "Redefined";
         else
-          output() << "Defined"; // hfst_fprintf(outstream_, "Defined");
-        output() << " '" << std::string(name) << "'" << std::endl; // hfst_fprintf(outstream_, " '%s'\n", name);
+          output() << "Defined";
+        output() << " '" << std::string(name) << "'" << std::endl;
         flush(&output());
       }
+  }
+
+  XfstCompiler&
+  XfstCompiler::define(const char * name)
+  {
+    GET_TOP(top);
+    stack_.pop();
+    this->define(name, top);
+
     original_definitions_[name] = "<net taken from stack>";
     PROMPT_AND_RETURN_THIS;
   }
@@ -1343,40 +1353,20 @@ namespace xfst {
 
       /*else*/ if (latest_regex_compiled != NULL)
         {
-          bool was_defined = xre_.is_definition(name);
-          //if (!was_defined)
-          if (! xre_.define(name, xre))  // todo: equal to latest_regex_compiled ?  XRE
+          HfstTransducer* compiled = xre_.compile(xre);
+          if (!compiled)
             {
               error() << "Could not define variable '" << std::string(name) << "'" << std::endl;
               flush(&error());
-                //        << xre_.get_error_message() << std::endl;
-              //hfst_fprintf(errorstream_, "Could not define variable %s:\n%s\n",
-              //             name, xre_.get_error_message().c_str());
               xfst_fail();
             }
-          HfstTransducer * nu = new HfstTransducer(*latest_regex_compiled);
-          if (variables_["name-nets"] == "ON")
-            nu->set_name(name);
-          definitions_[name] = nu;
-
-          if (verbose_)
-            {
-              if (was_defined)
-                output() << "Redefined" << std::endl; // hfst_fprintf(outstream_, "Redefined");
-              else
-                output() << "Defined" << std::endl; // hfst_fprintf(outstream_, "Defined");
-              output() << " '" << std::string(name) << "'" << std::endl; // hfst_fprintf(outstream_, " '%s'\n", name);
-              flush(&output());
-            }
+          this->define(name, compiled);
           original_definitions_[name] = xre;
         }
       else
         {
           error() << "Could not define variable '" << std::string(name) << "'" << std::endl;
           flush(&error());
-          //        << xre_.get_error_message() << std::endl;
-          //hfst_fprintf(errorstream_, "Could not define variable %s:\n%s\n",
-          //        name, xre_.get_error_message().c_str());
           xfst_fail();
         }
       PROMPT_AND_RETURN_THIS;
@@ -1750,8 +1740,10 @@ namespace xfst {
         output() << "Stack is empty." << std::endl; //hfst_fprintf(outstream_, "Stack is empty.\n");
         flush(&output());
       }
-      else // todo: delete if not definition?
+      else {
+        delete(stack_.top());
         stack_.pop();
+      }
       PROMPT_AND_RETURN_THIS;
     }
 
@@ -1850,6 +1842,7 @@ namespace xfst {
         //hfst_fprintf(warnstream_, "warning: a definition named '%s' "
         //        "already exists, overwriting it\n", def_name.c_str());
         // xfst_lesser_fail(); ???
+        delete it->second;
         definitions_.erase(def_name);
       }
     definitions_[def_name] = t;
@@ -4224,7 +4217,7 @@ namespace xfst {
   XfstCompiler::apply_unary_operation(UnaryOperation operation)
   {
     GET_TOP(result);
-    this->pop();
+    stack_.pop();
 
     try
       {

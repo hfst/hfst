@@ -113,6 +113,8 @@ class XfstCompiler
   XfstCompiler& define(const char* name, const char* xre);
   //! @brief Define regex macro
   XfstCompiler& define(const char* name);
+  //! @brief Define transducer
+  void define(const char* name, HfstTransducer * transducer);
   //! @brief Define regex macro function
   //! @todo Regex parser does not support macro functions
   XfstCompiler& define_function(const char* prototype, const char* xre);
