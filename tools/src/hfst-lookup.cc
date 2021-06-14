@@ -1844,16 +1844,14 @@ process_stream(HfstInputStream& inputstream, FILE* outstream)
 
     if (!only_optimized_lookup)
       {
-        char* format_string = hfst_strformat(cascade[0].get_type());
         if (!silent) {
           warning(0, 0,
                   "It is not possible to perform fast lookups with %s "
                   "format automata.\n"
                   "Using HFST basic transducer format "
                   "and performing slow lookups",
-                  format_string);
+                  hfst_strformat(cascade[0].get_type()));
         }
-        free(format_string);
       }
     long filesize = -1;
     if (show_progress_bar)

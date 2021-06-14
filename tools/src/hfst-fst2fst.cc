@@ -260,18 +260,16 @@ int main( int argc, char **argv ) {
     }
     verbose_printf("Reading from %s, writing to %s\n",
         inputfilename, outfilename);
-    char* format_description = hfst_strformat(output_type);
     if (hfst_format && (output_type != hfst::XFSM_TYPE))
       {
         verbose_printf("Writing %s format transducers with HFST3 headers\n",
-                       format_description);
+                       hfst_strformat(output_type));
       }
     else
       {
         verbose_printf("Writing %s format transducers without HFST specific"
-                       " headers\n", format_description);
+                       " headers\n", hfst_strformat(output_type));
       }
-    free(format_description);
 
     if (output_type == hfst::XFSM_TYPE)
       {
