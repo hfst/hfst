@@ -157,8 +157,8 @@ process_stream(HfstInputStream& instream)
         {
           verbose_printf("Summarizing... " SIZE_T_SPECIFIER "\n", transducer_n);
         }
-      HfstTransducer *trans = new HfstTransducer(instream);
-      HfstBasicTransducer *mutt = new HfstBasicTransducer(*trans);
+      HfstTransducer trans { instream };
+      HfstBasicTransducer mutt { trans };
       size_t states = 0;
       size_t final_states = 0;
       //size_t paths = 0;
@@ -179,7 +179,7 @@ process_stream(HfstInputStream& instream)
       bool transducerKnowsAlphabet = false;
       try
         {
-          transducerAlphabet = trans->get_alphabet();
+          transducerAlphabet = trans.get_alphabet();
           transducerKnowsAlphabet = true;
         }
       catch (FunctionNotImplementedException)
@@ -203,7 +203,7 @@ process_stream(HfstInputStream& instream)
       //bool is_string = true;
       //bool minimised = false;
       // assign data from knowledge about source type
-      switch (trans->get_type())
+      switch (trans.get_type())
         {
         case hfst::SFST_TYPE:
           is_mutable = true;
@@ -237,13 +237,13 @@ process_stream(HfstInputStream& instream)
       std::map<std::pair<std::string, std::string>,unsigned int> symbol_pairs;
       // iterate states in random order
       HfstState source_state=0;
-      for (HfstBasicTransducer::const_iterator it = mutt->begin();
-           it != mutt->end();
+      for (HfstBasicTransducer::const_iterator it = mutt.begin();
+           it != mutt.end();
            it++)
         {
           HfstState s = source_state;
           ++states;
-          if (mutt->is_final_state(s))
+          if (mutt.is_final_state(s))
             {
               ++final_states;
             }
@@ -307,7 +307,7 @@ process_stream(HfstInputStream& instream)
                 {
                   output_deterministic = false;
                 }
-              if (it == mutt->begin() && (tr_it->get_target_state() == 0))
+              if (it == mutt.begin() && (tr_it->get_target_state() == 0))
                 {
                   cyclic = true;
                   cyclic_at_initial_state = true;
@@ -350,7 +350,6 @@ process_stream(HfstInputStream& instream)
             }
       source_state++;
       }
-      //delete mutt;
       // traverse
       
       // count physical size
@@ -372,10 +371,10 @@ process_stream(HfstInputStream& instream)
         {
           fprintf(outfile, "-- \nTransducer #" SIZE_T_SPECIFIER ":\n", transducer_n);
         }
-      fprintf(outfile, "name: \"%s\"\n", trans->get_name().c_str());
+      fprintf(outfile, "name: \"%s\"\n", trans.get_name().c_str());
       // next is printed as in OpenFST's fstinfo
       // do not modify for compatibility
-      switch (trans->get_type())
+      switch (trans.get_type())
         {
         case hfst::SFST_TYPE:
           fprintf(outfile, "fst type: SFST\n"
@@ -406,7 +405,6 @@ process_stream(HfstInputStream& instream)
                   "arc type: ???\n");
           break;
         }
-      //delete trans;
       fprintf(outfile, "input symbol table: yes\n"
               "output symbol table: yes\n"
               "# of states: " SIZE_T_SPECIFIER "\n"
@@ -467,9 +465,8 @@ process_stream(HfstInputStream& instream)
                   most_ambiguous_input.first.c_str(), most_ambiguous_input.second,
                   most_ambiguous_output.first.c_str(), most_ambiguous_output.second,
                   average_input_ambiguity, average_output_ambiguity,
-                  expected_arcs_per_symbol, mutt->is_infinitely_ambiguous()? "yes": "no"
+                  expected_arcs_per_symbol, mutt.is_infinitely_ambiguous()? "yes": "no"
               );
-          delete mutt;
           // alphabets
           fprintf(outfile,
                   "sigma set:\n");
@@ -537,9 +534,9 @@ process_stream(HfstInputStream& instream)
               fprintf(outfile, "<Unknown in used transducer format>\n");
             }
           // ADDED
-          if (trans->get_type() == hfst::TROPICAL_OPENFST_TYPE)
+          if (trans.get_type() == hfst::TROPICAL_OPENFST_TYPE)
             {
-              StringSet ss = trans->get_first_input_symbols();
+              StringSet ss = trans.get_first_input_symbols();
               fprintf(outfile, "first input symbols:\n");
               first = true;
               for (StringSet::const_iterator s = ss.begin();
@@ -578,7 +575,6 @@ process_stream(HfstInputStream& instream)
                 }
               fprintf(outfile, "\n");
             }
-          delete trans;
     }
 
     fprintf(outfile, "\nRead " SIZE_T_SPECIFIER " transducers in total.\n", transducer_n);
@@ -624,6 +620,7 @@ int main( int argc, char **argv ) {
     }
     free(inputfilename);
     free(outfilename);
+    delete instream;
     return EXIT_SUCCESS;
 }
 
