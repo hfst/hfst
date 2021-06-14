@@ -2750,6 +2750,7 @@ namespace xfst {
       subst_regex += "\"" + std::string(target) + "\" , " + liststr + " ]";
       HfstTransducer * substituted = xre_.compile(subst_regex);  // XRE
       xre_.undefine("TempXfstTransducerName");  // XRE
+      delete top;
 
       if (substituted != NULL)
         {
