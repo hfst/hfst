@@ -277,7 +277,6 @@ process_stream(HfstOutputStream& outstream)
       transducer_n++;
       line_n++;
       verbose_printf("Parsing line %u...\n", line_n);
-      char* orig_line = hfst_strdup(line);
       // parse line end and weight
       char* tab = strstr(line, "\t");
       char* string_end = tab;
@@ -371,7 +370,6 @@ process_stream(HfstOutputStream& outstream)
           HfstTransducer res(tr, output_format);
           hfst_set_name(res, "", "string");
           outstream << res;
-          free(orig_line);
         }
       else // disjunct all strings into a single transducer
         {
