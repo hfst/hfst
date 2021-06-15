@@ -392,7 +392,7 @@ hfst_parse_format_name(const char* s)
     return rv;
 }
 
-char*
+const char*
 hfst_strformat(hfst::ImplementationType format)
 {
   switch (format)

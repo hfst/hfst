@@ -216,8 +216,8 @@ long hfst_strtol(char* s, int base);
  */
 hfst::ImplementationType hfst_parse_format_name(const char* s);
 
-/** @brief allocate new string describing type of transducer format */
-char* hfst_strformat(hfst::ImplementationType format);
+/** @brief return string describing type of transducer format */
+const char* hfst_strformat(hfst::ImplementationType format);
 
 #ifndef HAVE_STRNDUP
 char* strndup(const char* s, size_t n);
