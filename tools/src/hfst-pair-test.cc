@@ -28,6 +28,7 @@
 
 #include <iostream>
 #include <fstream>
+#include <memory>
 
 #include <cstdio>
 #include <cstdlib>
@@ -61,6 +62,8 @@ using hfst::implementations::HfstState;
 using hfst::implementations::HfstBasicTransition;
 using hfst::TROPICAL_OPENFST_TYPE;
 using hfst::ImplementationType;
+using std::unique_ptr;
+using std::make_unique;
 
 typedef std::vector<HfstBasicTransducer> BasicTransducerVector;
 typedef std::vector<std::string> StringVector;
@@ -784,12 +787,12 @@ int main( int argc, char **argv ) {
         inputfilename, outfilename);
 
     // here starts the buffer handling part
-    HfstInputStream* instream = NULL;
+    unique_ptr<HfstInputStream> instream;
     try
       {
-        instream = (inputfile != stdin) ?
+        instream.reset((inputfile != stdin) ?
           new HfstInputStream(inputfilename) :
-          new HfstInputStream();
+          new HfstInputStream());
       }
     catch(const HfstException e)
       {

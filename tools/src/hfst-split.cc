@@ -27,6 +27,7 @@
 
 #include <iostream>
 #include <fstream>
+#include <memory>
 
 #include <cstdio>
 #include <cstdlib>
@@ -46,6 +47,8 @@ using hfst::HfstTransducer;
 using hfst::HfstInputStream;
 using hfst::HfstOutputStream;
 
+using std::unique_ptr;
+using std::make_unique;
 
 // add tools-specific variables here
 char *prefix;
@@ -156,14 +159,12 @@ process_stream(HfstInputStream& instream)
                               extension);
         verbose_printf("Writing " SIZE_T_SPECIFIER " of %s to %s...\n", transducer_n,
                        inputfilename, outfilename);
-        HfstOutputStream* outstream = new HfstOutputStream(outfilename,
-                                                           instream.get_type());
+        auto outstream = make_unique<HfstOutputStream>(outfilename, instream.get_type());
         //outstream->open();
         HfstTransducer trans(instream);
         *outstream << trans;
         outstream->flush();
         outstream->close();
-        delete outstream;
         free(outfilename);
     }
     instream.close();
@@ -194,10 +195,10 @@ int main( int argc, char **argv ) {
     verbose_printf("Reading from %s, writing to %s...%s\n",
         inputfilename, prefix, extension);
     // here starts the buffer handling part
-    HfstInputStream* instream = NULL;
+    unique_ptr<HfstInputStream> instream;
     try {
-      instream = (inputfile != stdin) ?
-        new HfstInputStream(inputfilename) : new HfstInputStream();
+      instream.reset((inputfile != stdin) ?
+        new HfstInputStream(inputfilename) : new HfstInputStream());
     } catch(const HfstException e)  {
         error(EXIT_FAILURE, 0, "%s is not a valid transducer file",
               inputfilename);
@@ -205,7 +206,6 @@ int main( int argc, char **argv ) {
     }
     
     retval = process_stream(*instream);
-    delete instream;
     free(inputfilename);
     return retval;
 }

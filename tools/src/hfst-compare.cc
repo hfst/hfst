@@ -28,6 +28,7 @@
 
 #include <iostream>
 #include <fstream>
+#include <memory>
 
 #include <cstdio>
 #include <cstdlib>
@@ -47,7 +48,8 @@ using hfst::HfstTransducer;
 using hfst::HfstInputStream;
 using hfst::HfstOutputStream;
 using hfst::ImplementationType;
-
+using std::unique_ptr;
+using std::make_unique;
 
 #include "hfst-commandline.h"
 #include "hfst-program-options.h"
@@ -238,7 +240,7 @@ compare_streams(HfstInputStream& firststream, HfstInputStream& secondstream)
         free(firstname);
         free(secondname);
     }
-    
+
     if (firststream.is_good())
     {
         error(EXIT_FAILURE, 0, "second input '%s' contains fewer transducers than first input '%s'; "
@@ -288,27 +290,27 @@ int main( int argc, char **argv ) {
     verbose_printf("Reading from %s and %s, writing log to %s\n",
         firstfilename, secondfilename, outfilename);
     // here starts the buffer handling part
-    HfstInputStream* firststream = NULL;
-    HfstInputStream* secondstream = NULL;
+    unique_ptr<HfstInputStream> firststream;
+    unique_ptr<HfstInputStream> secondstream;
     try {
-        firststream = (firstfile != stdin) ?
-            new HfstInputStream(firstfilename) : new HfstInputStream();
-    } //catch(const HfstException e)   {
+        firststream.reset(firstfile != stdin ?
+            new HfstInputStream(firstfilename) : new HfstInputStream());
+    } //catch(const HfstException e) {
     catch (const HfstException e) {
         error(EXIT_FAILURE, 0, "%s is not a valid transducer file",
               firstfilename);
     }
     try {
-        secondstream = (secondfile != stdin) ?
-            new HfstInputStream(secondfilename) : new HfstInputStream();
-    } //catch(const HfstException e)   {
+        secondstream.reset((secondfile != stdin) ?
+            new HfstInputStream(secondfilename) : new HfstInputStream());
+    } //catch(const HfstException e) {
     catch (const HfstException e) {
         error(EXIT_FAILURE, 0, "%s is not a valid transducer file",
               secondfilename);
     }
 
-    if ( is_input_stream_in_ol_format(firststream, "hfst-compare") ||
-         is_input_stream_in_ol_format(secondstream, "hfst-compare") )
+    if ( is_input_stream_in_ol_format(*firststream, "hfst-compare") ||
+         is_input_stream_in_ol_format(*secondstream, "hfst-compare") )
       {
         return EXIT_FAILURE;
       }
@@ -318,11 +320,8 @@ int main( int argc, char **argv ) {
     {
         fclose(outfile);
     }
-    delete firststream;
-    delete secondstream;
     free(firstfilename);
     free(secondfilename);
     free(outfilename);
     return retval;
 }
-

@@ -27,6 +27,7 @@
 
 #include <iostream>
 #include <fstream>
+#include <memory>
 
 #include <cstdio>
 #include <cstdlib>
@@ -42,6 +43,8 @@ using hfst::HfstInputStream;
 using hfst::HfstOutputStream;
 using hfst::ImplementationType;
 
+using std::unique_ptr;
+using std::make_unique;
 
 #include "hfst-commandline.h"
 #include "hfst-program-options.h"
@@ -276,36 +279,32 @@ int main( int argc, char **argv ) {
     verbose_printf("Reading from %s and %s, writing to %s\n",
         firstfilename, secondfilename, outfilename);
     // here starts the buffer handling part
-    HfstInputStream* firststream = NULL;
-    HfstInputStream* secondstream = NULL;
+    unique_ptr<HfstInputStream> firststream;
+    unique_ptr<HfstInputStream> secondstream;
     try {
-        firststream = (firstfile != stdin) ?
-            new HfstInputStream(firstfilename) : new HfstInputStream();
-    } catch(const HfstException e)   {
+        firststream.reset(firstfile != stdin ?
+            new HfstInputStream(firstfilename) : new HfstInputStream());
+    } catch(const HfstException e) {
         error(EXIT_FAILURE, 0, "%s is not a valid transducer file",
               firstfilename);
     }
     try {
-        secondstream = (secondfile != stdin) ?
-            new HfstInputStream(secondfilename) : new HfstInputStream();
-    } catch(const HfstException e)   {
+        secondstream.reset((secondfile != stdin) ?
+            new HfstInputStream(secondfilename) : new HfstInputStream());
+    } catch(const HfstException e) {
         error(EXIT_FAILURE, 0, "%s is not a valid transducer file",
               secondfilename);
     }
 
-    if ( is_input_stream_in_ol_format(firststream, "hfst-priority-disjunct") ||
-         is_input_stream_in_ol_format(secondstream, "hfst-priority-disjunct") )
+    if ( is_input_stream_in_ol_format(*firststream, "hfst-priority-disjunct") ||
+         is_input_stream_in_ol_format(*secondstream, "hfst-priority-disjunct") )
       {
         return EXIT_FAILURE;
       }
 
     retval = priority_disjunct_streams(*firststream, *secondstream);
-    delete firststream;
-    delete secondstream;
     free(firstfilename);
     free(secondfilename);
     free(outfilename);
     return retval;
 }
-
-

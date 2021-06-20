@@ -30,9 +30,12 @@
 #include <fstream>
 #include <set>
 #include <map>
+#include <memory>
 
 using std::set;
 using std::map;
+using std::unique_ptr;
+using std::make_unique;
 
 #include <cstdio>
 #include <cstdlib>
@@ -320,10 +323,10 @@ int main( int argc, char **argv )
     verbose_printf("Reading from %s, writing to %s\n",
         inputfilename, outfilename);
     // here starts the buffer handling part
-    HfstInputStream* instream = NULL;
+    unique_ptr<HfstInputStream> instream;
     try {
-      instream = (inputfile != stdin) ?
-        new HfstInputStream(inputfilename) : new HfstInputStream();
+      instream.reset((inputfile != stdin) ?
+        new HfstInputStream(inputfilename) : new HfstInputStream());
     } catch(const HfstException e)  {
         error(EXIT_FAILURE, 0, "%s is not a valid transducer file",
               inputfilename);
@@ -362,7 +365,6 @@ int main( int argc, char **argv )
     
     retval = process_stream(*instream, outfile);
 
-    delete instream;
     free(inputfilename);
     free(outfilename);
     return retval;

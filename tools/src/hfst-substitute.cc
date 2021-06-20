@@ -28,6 +28,7 @@
 
 #include <iostream>
 #include <fstream>
+#include <memory>
 
 #include <cstdio>
 #include <cstdlib>
@@ -49,6 +50,9 @@ using hfst::String;
 using hfst::StringPair;
 typedef std::map<String, String> HfstSymbolSubstitutions;
 typedef std::map<StringPair, StringPair> HfstSymbolPairSubstitutions;
+
+using std::unique_ptr;
+using std::make_unique;
 
 #include "hfst-commandline.h"
 #include "hfst-program-options.h"
@@ -912,17 +916,17 @@ int main( int argc, char **argv )
       }
 
     // here starts the buffer handling part
-    HfstInputStream* instream = NULL;
+    unique_ptr<HfstInputStream> instream;
     try {
-      instream = (inputfile != stdin) ?
-        new HfstInputStream(inputfilename) : new HfstInputStream();
+      instream.reset((inputfile != stdin) ?
+        new HfstInputStream(inputfilename) : new HfstInputStream());
     } catch(const HfstException e)  {
             error(EXIT_FAILURE, 0, "%s is not a valid transducer file",
           inputfilename);
             return EXIT_FAILURE;
     }
 
-    if ( is_input_stream_in_ol_format(instream, "hfst-substitute"))
+    if ( is_input_stream_in_ol_format(*instream, "hfst-substitute"))
       {
         return EXIT_FAILURE;
       }

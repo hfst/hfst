@@ -28,6 +28,7 @@
 
 #include <iostream>
 #include <fstream>
+#include <memory>
 
 #include <cstdio>
 #include <cstdlib>
@@ -48,6 +49,8 @@ using hfst::HfstTransducer;
 using hfst::HfstInputStream;
 using hfst::HfstOutputStream;
 
+using std::unique_ptr;
+using std::make_unique;
 
 // add tools-specific variables here
 static char boundary_symbol = '>';
@@ -201,27 +204,25 @@ int main( int argc, char **argv ) {
     verbose_printf("Reading from %s, writing to %s\n",
         inputfilename, outfilename);
     // here starts the buffer handling part
-    HfstInputStream* instream = NULL;
+    unique_ptr<HfstInputStream> instream;
     try {
-      instream = (inputfile != stdin) ?
-        new HfstInputStream(inputfilename) : new HfstInputStream();
+      instream.reset((inputfile != stdin) ?
+        new HfstInputStream(inputfilename) : new HfstInputStream());
     } catch(const HfstException e)  {
         error(EXIT_FAILURE, 0, "%s is not a valid transducer file",
               inputfilename);
         return EXIT_FAILURE;
     }
-    HfstOutputStream* outstream = (outfile != stdout) ?
-        new HfstOutputStream(outfilename, instream->get_type()) :
-        new HfstOutputStream(instream->get_type());
+    auto outstream = (outfile != stdout) ?
+        make_unique<HfstOutputStream>(outfilename, instream->get_type()) :
+        make_unique<HfstOutputStream>(instream->get_type());
 
-    if ( is_input_stream_in_ol_format(instream, "hfst-realign"))
+    if ( is_input_stream_in_ol_format(*instream, "hfst-realign"))
       {
 	return EXIT_FAILURE;
       }
     
     retval = process_stream(*instream, *outstream);
-    delete instream;
-    delete outstream;
     free(inputfilename);
     free(outfilename);
     return retval;

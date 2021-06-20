@@ -29,10 +29,13 @@
 #include <fstream>
 #include <set>
 #include <map>
+#include <memory>
 #include <sstream>
 
 using std::set;
 using std::map;
+using std::unique_ptr;
+using std::make_unique;
 
 #include <cstdio>
 #include <cstdlib>
@@ -244,11 +247,11 @@ int main( int argc, char **argv )
            inputfilename, outfilename);
     
     // here starts the buffer handling part
-    HfstInputStream * instream = NULL;
+    unique_ptr<HfstInputStream> instream;
 
     try
       {
-    instream = (inputfile != stdin ?
+        instream.reset(inputfile != stdin ?
             new HfstInputStream(inputfilename) :
             new HfstInputStream());
       }
@@ -375,8 +378,6 @@ int main( int argc, char **argv )
       }
     (*out) << std::endl;
       }
-
-    delete instream;
 
     if (outfile != stdout)
       { assert(out != &std::cout); delete out; }

@@ -26,6 +26,7 @@
 #endif
 
 #include <fstream>
+#include <memory>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -39,6 +40,8 @@
 using std::map;
 using std::string;
 using std::set;
+using std::unique_ptr;
+using std::make_unique;
 
 using hfst::HfstTransducer;
 using hfst::HfstInputStream;
@@ -297,21 +300,21 @@ int main( int argc, char **argv ) {
     verbose_printf("Reading from %s, writing to %s\n",
         inputfilename, outfilename);
     // here starts the buffer handling part
-    HfstInputStream* instream = NULL;
+    unique_ptr<HfstInputStream> instream;
     try {
-        instream = (inputfile != stdin) ?
-        new HfstInputStream(inputfilename) : new HfstInputStream();
+        instream.reset((inputfile != stdin) ?
+        new HfstInputStream(inputfilename) : new HfstInputStream());
     } // NotTransducerStreamException
     catch (const HfstException e) {
         error(EXIT_FAILURE, 0, "%s is not a valid transducer file",
               inputfilename);
         return EXIT_FAILURE;
     }
-    HfstOutputStream* outstream = (outfile != stdout) ?
-                new HfstOutputStream(outfilename, instream->get_type()) :
-                new HfstOutputStream(instream->get_type());
+    auto outstream = (outfile != stdout) ?
+        make_unique<HfstOutputStream>(outfilename, instream->get_type()) :
+        make_unique<HfstOutputStream>(instream->get_type());
 
-    if ( is_input_stream_in_ol_format(instream, "hfst-affix-guessify"))
+    if ( is_input_stream_in_ol_format(*instream, "hfst-affix-guessify"))
       {
         return EXIT_FAILURE;
       }
