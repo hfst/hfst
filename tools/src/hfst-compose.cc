@@ -401,14 +401,14 @@ int main( int argc, char **argv ) {
     try {
         firststream.reset(firstfile != stdin ?
             new HfstInputStream(firstfilename) : new HfstInputStream());
-    } catch(const HfstException e)   {
+    } catch(const HfstException e) {
         error(EXIT_FAILURE, 0, "%s is not a valid transducer file",
               firstfilename);
     }
     try {
         secondstream.reset((secondfile != stdin) ?
             new HfstInputStream(secondfilename) : new HfstInputStream());
-    } catch(const HfstException e)   {
+    } catch(const HfstException e) {
         error(EXIT_FAILURE, 0, "%s is not a valid transducer file",
               secondfilename);
     }

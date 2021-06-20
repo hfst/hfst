@@ -668,7 +668,7 @@ int main( int argc, char **argv ) {
     try {
       instream.reset((inputfile != stdin) ?
         new HfstInputStream(inputfilename) : new HfstInputStream());
-    } catch(const HfstException e)   {
+    } catch(const HfstException e) {
         fprintf(stderr, "%s is not a valid transducer file\n", inputfilename);
         return EXIT_FAILURE;
     }
