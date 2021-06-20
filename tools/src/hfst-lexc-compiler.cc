@@ -373,6 +373,10 @@ int main( int argc, char **argv ) {
         lexc.setTreatWarningsAsErrors(true);
       }
     retval = lexc_streams(lexc, *outstream);
+    for (unsigned int i = 0; i < lexccount; i++)
+      {
+        free(lexcfilenames[i]);
+      }
     free(lexcfilenames);
     free(outfilename);
     return retval;
