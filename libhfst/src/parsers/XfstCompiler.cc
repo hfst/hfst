@@ -20,11 +20,14 @@
 #include <map>
 #include <queue>
 #include <stack>
+#include <memory>
 
 using std::string;
 using std::map;
 using std::queue;
 using std::stack;
+using std::unique_ptr;
+using std::make_unique;
 
 #include <cstdio>
 #include <cstdlib>
@@ -3881,15 +3884,14 @@ namespace xfst {
           PROMPT_AND_RETURN_THIS;
         }
 
-      HfstOutputStream* outstream = (outfile != 0) ?
-        new HfstOutputStream(outfile, format_):
-        new HfstOutputStream(format_);
+      auto outstream = (outfile != 0) ?
+        make_unique<HfstOutputStream>(outfile, format_):
+        make_unique<HfstOutputStream>(format_);
       HfstTransducer tmp(*(definitions_[name]));
       if (variables_["name-nets"] == "ON")
         tmp.set_name(name);
       *outstream << tmp;
       outstream->close();
-      delete outstream;
       PROMPT_AND_RETURN_THIS;
     }
   XfstCompiler&
@@ -3903,9 +3905,9 @@ namespace xfst {
           PROMPT_AND_RETURN_THIS;
         }
 
-      HfstOutputStream* outstream = (outfile != 0) ?
-        new HfstOutputStream(outfile, format_):
-        new HfstOutputStream(format_);
+      auto outstream = (outfile != 0) ?
+        make_unique<HfstOutputStream>(outfile, format_):
+        make_unique<HfstOutputStream>(format_);
       for (map<string,HfstTransducer*>::iterator def = definitions_.begin();
            def != definitions_.end();
            ++def)
@@ -3915,7 +3917,6 @@ namespace xfst {
           *outstream << tmp;
         }
       outstream->close();
-      delete outstream;
       PROMPT_AND_RETURN_THIS;
     }
 
@@ -3952,9 +3953,9 @@ namespace xfst {
 
     CHECK_FILENAME(filename);
         
-      HfstOutputStream* outstream = (filename != 0)?
-        new HfstOutputStream(filename, stack_.top()->get_type()):
-        new HfstOutputStream(stack_.top()->get_type());
+      auto outstream = (filename != 0)?
+        make_unique<HfstOutputStream>(filename, stack_.top()->get_type()):
+        make_unique<HfstOutputStream>(stack_.top()->get_type());
       stack<HfstTransducer*> tmp;
       while (!stack_.empty())
         {
@@ -3968,7 +3969,6 @@ namespace xfst {
           tmp.pop();
         }
       outstream->close();
-      delete outstream;
       PROMPT_AND_RETURN_THIS;
     }
   XfstCompiler&

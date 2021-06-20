@@ -233,10 +233,10 @@ convert_transducers(hfst::HfstTransducer & first, hfst::HfstTransducer & second)
 }
 
 bool
-is_input_stream_in_ol_format(const hfst::HfstInputStream * is, const char * program)
+is_input_stream_in_ol_format(const hfst::HfstInputStream & is, const char * program)
 {
-  if ( is->get_type() == hfst::HFST_OL_TYPE ||
-       is->get_type() == hfst::HFST_OLW_TYPE )
+  if ( is.get_type() == hfst::HFST_OL_TYPE ||
+       is.get_type() == hfst::HFST_OLW_TYPE )
     {
       fprintf(stderr, "Error: %s cannot process transducers that are in optimized lookup format.\n", program);
       return true;

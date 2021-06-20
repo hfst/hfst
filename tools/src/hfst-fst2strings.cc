@@ -28,6 +28,7 @@
 
 #include <iostream>
 #include <fstream>
+#include <memory>
 
 #include <cstdio>
 #include <cstdlib>
@@ -50,6 +51,9 @@ using hfst::FdOperation;
 using hfst::StringPairVector;
 using hfst::HfstTwoLevelPath;
 using hfst::HfstTwoLevelPaths;
+
+using std::unique_ptr;
+using std::make_unique;
 
 using hfst::HFST_OL_TYPE;
 using hfst::HFST_OLW_TYPE;
@@ -660,10 +664,10 @@ int main( int argc, char **argv ) {
     verbose_printf("Reading from %s, writing to %s\n",
         inputfilename, outfilename);
     // here starts the buffer handling part
-    HfstInputStream* instream = NULL;
+    unique_ptr<HfstInputStream> instream;
     try {
-      instream = (inputfile != stdin) ?
-        new HfstInputStream(inputfilename) : new HfstInputStream();
+      instream.reset((inputfile != stdin) ?
+        new HfstInputStream(inputfilename) : new HfstInputStream());
     } catch(const HfstException e)   {
         fprintf(stderr, "%s is not a valid transducer file\n", inputfilename);
         return EXIT_FAILURE;
@@ -677,7 +681,6 @@ int main( int argc, char **argv ) {
     else
       retval = process_stream(*instream, std::cout);
 
-    delete instream;
     free(inputfilename);
     free(outfilename);
     free(epsilon_format);

@@ -28,6 +28,7 @@
 
 #include <iostream>
 #include <fstream>
+#include <memory>
 
 #include <cstdio>
 #include <cstdlib>
@@ -43,6 +44,8 @@ using hfst::HfstInputStream;
 using hfst::HfstOutputStream;
 using hfst::ImplementationType;
 
+using std::unique_ptr;
+using std::make_unique;
 
 #include "hfst-commandline.h"
 #include "hfst-program-options.h"
@@ -305,35 +308,33 @@ int main( int argc, char **argv ) {
     verbose_printf("Reading from %s and %s, writing to %s\n",
         firstfilename, secondfilename, outfilename);
     // here starts the buffer handling part
-    HfstInputStream* firststream = NULL;
-    HfstInputStream* secondstream = NULL;
+    unique_ptr<HfstInputStream> firststream;
+    unique_ptr<HfstInputStream> secondstream;
     try {
-        firststream = (firstfile != stdin) ?
-            new HfstInputStream(firstfilename) : new HfstInputStream();
+        firststream.reset(firstfile != stdin ?
+            new HfstInputStream(firstfilename) : new HfstInputStream());
     } catch(const HfstException e)   {
         error(EXIT_FAILURE, 0, "%s is not a valid transducer file",
               firstfilename);
     }
     try {
-        secondstream = (secondfile != stdin) ?
-            new HfstInputStream(secondfilename) : new HfstInputStream();
+        secondstream.reset((secondfile != stdin) ?
+            new HfstInputStream(secondfilename) : new HfstInputStream());
     } catch(const HfstException e)   {
         error(EXIT_FAILURE, 0, "%s is not a valid transducer file",
               secondfilename);
     }
-    HfstOutputStream* outstream = (outfile != stdout) ?
-        new HfstOutputStream(outfilename, firststream->get_type()) :
-        new HfstOutputStream(firststream->get_type());
+    auto outstream = (outfile != stdout) ?
+        make_unique<HfstOutputStream>(outfilename, firststream->get_type()) :
+        make_unique<HfstOutputStream>(firststream->get_type());
 
-    if ( is_input_stream_in_ol_format(firststream, "hfst-subtract") ||
-         is_input_stream_in_ol_format(secondstream, "hfst-subtract") )
+    if ( is_input_stream_in_ol_format(*firststream, "hfst-subtract") ||
+         is_input_stream_in_ol_format(*secondstream, "hfst-subtract") )
       {
         return EXIT_FAILURE;
       }
 
     retval = subtract_streams(*firststream, *secondstream);
-    delete firststream;
-    delete secondstream;
     free(firstfilename);
     free(secondfilename);
     free(outfilename);

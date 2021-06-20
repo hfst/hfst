@@ -28,6 +28,7 @@
 
 #include <iostream>
 #include <fstream>
+#include <memory>
 
 #include <cstdio>
 #include <cstdlib>
@@ -49,6 +50,8 @@
 using hfst::HfstTransducer;
 using hfst::HfstOutputStream;
 using hfst::implementations::HfstBasicTransducer;
+using std::unique_ptr;
+using std::make_unique;
 
 #include "inc/globals-common.h"
 #include "inc/globals-unary.h"
@@ -380,9 +383,9 @@ int main( int argc, char **argv )
 
 
     // here starts the buffer handling part
-    HfstOutputStream* outstream = (outfile != stdout) ?
-                new HfstOutputStream(outfilename, output_format) :
-                new HfstOutputStream(output_format);
+    auto outstream = (outfile != stdout) ?
+        make_unique<HfstOutputStream>(outfilename, output_format) :
+        make_unique<HfstOutputStream>(output_format);
     process_stream(*outstream);
     if (inputfile != stdin)
       {
@@ -390,7 +393,6 @@ int main( int argc, char **argv )
       }
     free(inputfilename);
     free(outfilename);
-    delete outstream;
     return EXIT_SUCCESS;
 }
 

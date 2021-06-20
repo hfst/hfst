@@ -27,6 +27,7 @@
 
 #include <iostream>
 #include <fstream>
+#include <memory>
 
 #include <cstdio>
 #include <cstdlib>
@@ -47,6 +48,8 @@ using hfst::HfstTransducer;
 using hfst::HfstInputStream;
 using hfst::HfstOutputStream;
 using hfst::ImplementationType;
+using std::unique_ptr;
+using std::make_unique;
 
 
 // tool-specific variables
@@ -281,10 +284,10 @@ int main( int argc, char **argv ) {
       }
 
     // here starts the buffer handling part
-    HfstInputStream* instream = NULL;
+    unique_ptr<HfstInputStream> instream;
     try {
-      instream = (inputfile != stdin) ?
-        new HfstInputStream(inputfilename) : new HfstInputStream();
+      instream.reset((inputfile != stdin) ?
+        new HfstInputStream(inputfilename) : new HfstInputStream());
     }
     catch(const FileIsInGZFormatException e)
       {
@@ -310,13 +313,11 @@ int main( int argc, char **argv ) {
         return EXIT_FAILURE;
     }
 
-    HfstOutputStream* outstream = (outfile != stdout) ?
-      new HfstOutputStream(outfilename, output_type, hfst_format) :
-      new HfstOutputStream(output_type, hfst_format);
+    auto outstream = (outfile != stdout) ?
+      make_unique<HfstOutputStream>(outfilename, output_type, hfst_format) :
+      make_unique<HfstOutputStream>(output_type, hfst_format);
 
     retval = process_stream(*instream, *outstream);
-    delete instream;
-    delete outstream;
     free(inputfilename);
     free(outfilename);
     return retval;

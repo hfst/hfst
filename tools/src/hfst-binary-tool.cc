@@ -24,6 +24,7 @@
 
 #include <iostream>
 #include <fstream>
+#include <memory>
 
 #include <cstdio>
 #include <cstdlib>
@@ -36,7 +37,8 @@ using hfst::HfstTransducer;
 using hfst::HfstInputStream;
 using hfst::HfstOutputStream;
 using hfst::ImplementationType;
-
+using std::unique_ptr;
+using std::make_unique;
 
 #include "hfst-commandline.h"
 #include "hfst-program-options.h"
@@ -131,7 +133,7 @@ binaryoperate_streams(HfstInputStream& firststream, HfstInputStream& secondstrea
         outstream << first.concatenate(second);
         bothInputs = firststream.is_good() && secondstream.is_good();
     }
-    
+
     if (firststream.is_good())
     {
       warning(0, 0, "Warning: %s contains more transducers than %s; "
@@ -172,33 +174,29 @@ int main( int argc, char **argv ) {
     verbose_printf("Reading from %s and %s, writing to %s\n",
         firstfilename, secondfilename, outfilename);
     // here starts the buffer handling part
-    HfstInputStream* firststream = NULL;
-    HfstInputStream* secondstream = NULL;
+    unique_ptr<HfstInputStream> firststream;
+    unique_ptr<HfstInputStream> secondstream;
     try {
-        firststream = (firstfile != stdin) ?
-            new HfstInputStream(firstfilename) : new HfstInputStream();
+        firststream.reset(firstfile != stdin ?
+            new HfstInputStream(firstfilename) : new HfstInputStream());
     } catch(const HfstException e)   {
         error(EXIT_FAILURE, 0, "%s is not a valid transducer file",
               firstfilename);
     }
     try {
-        secondstream = (secondfile != stdin) ?
-            new HfstInputStream(secondfilename) : new HfstInputStream();
+        secondstream.reset((secondfile != stdin) ?
+            new HfstInputStream(secondfilename) : new HfstInputStream());
     } catch(const HfstException e)   {
         error(EXIT_FAILURE, 0, "%s is not a valid transducer file",
               secondfilename);
     }
-    HfstOutputStream* outstream = (outfile != stdout) ?
-        new HfstOutputStream(outfilename, firststream->get_type()) :
-        new HfstOutputStream(firststream->get_type());
+    auto outstream = (outfile != stdout) ?
+        make_unique<HfstOutputStream>(outfilename, firststream->get_type()) :
+        make_unique<HfstOutputStream>(firststream->get_type());
 
     retval = concatenate_streams(*firststream, *secondstream, *outstream);
-    delete firststream;
-    delete secondstream;
-    delete outstream;
     free(firstfilename);
     free(secondfilename);
     free(outfilename);
     return retval;
 }
-
