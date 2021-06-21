@@ -285,10 +285,9 @@ namespace xfst {
         delete(stack_.top());
         stack_.pop();
       }
-    for (std::map<std::string, hfst::HfstTransducer*>::const_iterator it
-           = definitions_.begin(); it != definitions_.end(); it++)
+    for (const auto & it : definitions_)
       {
-        delete it->second;
+        delete it.second;
       }
     if (latest_regex_compiled != NULL)
       {
@@ -419,24 +418,22 @@ namespace xfst {
   static HfstOneLevelPaths extract_output_paths(const HfstTwoLevelPaths & paths)
   {
     HfstOneLevelPaths retval;
-    for (hfst::HfstTwoLevelPaths::const_iterator it = paths.begin();
-         it != paths.end(); it++)
+    for (const auto & it : paths)
       {
         hfst::StringVector new_path;
-        hfst::StringPairVector path = it->second;
-        for (hfst::StringPairVector::const_iterator p = path.begin();
-             p != path.end(); p++)
+        const hfst::StringPairVector & path = it.second;
+        for (const auto & p : path)
           {
-            if (p->second != "@0@" &&
-                p->second != "@_EPSILON_SYMBOL_@" )
+            if (p.second != "@0@" &&
+                p.second != "@_EPSILON_SYMBOL_@" )
               {
-                if (p->second == "@_UNKNOWN_SYMBOL_@")
+                if (p.second == "@_UNKNOWN_SYMBOL_@")
                   new_path.push_back("?");
                 else
-                  new_path.push_back(p->second);
+                  new_path.push_back(p.second);
               }
           }
-        retval.insert(std::pair<float, StringVector>(it->first, new_path));
+        retval.insert({ it.first, new_path });
       }
     return retval;
   }
@@ -448,15 +445,15 @@ namespace xfst {
     // and keep track of features whose values have been negatively set
     std::set<std::string> negative_values;
 
-    for (StringVector::const_iterator it = sv.begin(); it != sv.end(); it++)
+    for (const auto & it : sv)
       {
-        if (FdOperation::is_diacritic(*it))
+        if (FdOperation::is_diacritic(it))
           {
-            std::string opstr = FdOperation::get_operator(*it);
+            std::string opstr = FdOperation::get_operator(it);
             assert(opstr.size() == 1);
             char op = opstr[0];
-            std::string feat = FdOperation::get_feature(*it);
-            std::string val = FdOperation::get_value(*it);
+            std::string feat = FdOperation::get_feature(it);
+            std::string val = FdOperation::get_value(it);
 
             bool is_negatively_set = (negative_values.find(feat) != negative_values.end());
 
@@ -532,10 +529,9 @@ namespace xfst {
     oss->precision(get_precision());
 
     // go through at most n paths
-    for (hfst::HfstOneLevelPaths::const_iterator it = paths.begin();
-         n != 0 && it != paths.end(); it++)
+    for (const auto & it : paths)
       {
-        hfst::StringVector path = it->second;
+        const hfst::StringVector & path = it.second;
         bool something_printed = false;  // to control printing spaces
 
         if ((variables_["obey-flags"] == "ON") && !is_valid_string(path))
@@ -544,10 +540,9 @@ namespace xfst {
         retval = true; // something will be printed
 
         // go through the path
-        for (hfst::StringVector::const_iterator p = path.begin();
-             p != path.end(); p++)
+        for (const auto & p : path)
           {
-            const char * print_symbol = get_print_symbol(p->c_str());
+            const char * print_symbol = get_print_symbol(p.c_str());
 
             // see if symbol separator (space) is needed
             if (variables_["print-space"] == "ON" &&  // print space required
@@ -568,7 +563,7 @@ namespace xfst {
         // if needed, print the weight
         if (variables_["print-weight"] == "ON")
           {
-            *oss << "\t" << std::fixed << it->first;
+            *oss << "\t" << std::fixed << it.first;
           }
 
         *oss << std::endl;
@@ -608,10 +603,9 @@ namespace xfst {
         retval = true; // something will be printed
 
         // go through the path
-        for (hfst::StringPairVector::const_iterator p = path.begin();
-             p != path.end(); p++)
+        for (const auto & p : path)
           {
-            const char * print_symbol = get_print_symbol(p->first.c_str());
+            const char * print_symbol = get_print_symbol(p.first.c_str());
 
             // see if symbol separator (space) is needed
             if (variables_["print-space"] == "ON" &&  // print space required
@@ -627,11 +621,11 @@ namespace xfst {
               something_printed = true;
             }
 
-            print_symbol = get_print_symbol(p->second.c_str());
+            print_symbol = get_print_symbol(p.second.c_str());
 
             // see if output symbol is needed
             if (strcmp(print_symbol, "") != 0 &&   // something to show
-                p->first != p->second)             // input and output symbols differ
+                p.first != p.second)             // input and output symbols differ
               {
                 *oss << ":" << std::string(print_symbol);
               }
@@ -676,10 +670,9 @@ namespace xfst {
         char* token = strstrip(line);
         StringSet alpha = t->get_input_symbols();
         HfstTokenizer tok;
-        for (StringSet::const_iterator it = alpha.begin();
-             it != alpha.end(); it++)
+        for (const auto & it : alpha)
           {
-            tok.add_multichar_symbol(*it);
+            tok.add_multichar_symbol(it);
           }
         StringVector lookup_path = tok.tokenize_one_level(std::string(token));
         free(token);
@@ -1421,12 +1414,11 @@ namespace xfst {
     std::string retval(xre);
     unsigned int arg_number = 1;
 
-    for (std::vector<std::string>::const_iterator arg
-           = arguments.begin(); arg != arguments.end(); arg++)
+    for (const auto & argument : arguments)
       {
         std::set<unsigned int> arg_positions;
         if (! xre_.get_positions_of_symbol_in_xre
-            (*arg, retval, arg_positions) )  // XRE
+            (argument, retval, arg_positions) )  // XRE
           {
             return std::string("");
           }
@@ -1462,7 +1454,7 @@ namespace xfst {
                 // skip rest of the original symbol by advancing i to
                 // point to the last char in the original symbol
                 for (unsigned int offset=1;
-                     offset < arg->length(); offset++)
+                     offset < argument.length(); offset++)
                   {
                     ++i;
                   }
@@ -1726,11 +1718,9 @@ namespace xfst {
   XfstCompiler&
   XfstCompiler::push()
     {
-      for (map<string,HfstTransducer*>::const_iterator def
-             = definitions_.begin(); def != definitions_.end();
-           ++def)
+      for (const auto & def : definitions_)
         {
-          stack_.push(new HfstTransducer(*(def->second)));
+          stack_.push(new HfstTransducer(*(def.second)));
         }
 
       PRINT_INFO_PROMPT_AND_RETURN_THIS;
@@ -1791,8 +1781,7 @@ namespace xfst {
         flush(&error());
         return *this;
       }
-    std::map<std::string, HfstTransducer*>::const_iterator it
-      = definitions_.find(def_name);
+    auto it = definitions_.find(def_name);
     if (it != definitions_.end())
       {
         error() << "warning: a definition named '" << def_name << "' already exists, overwriting it" << std::endl;
@@ -2144,21 +2133,19 @@ namespace xfst {
   XfstCompiler&
   XfstCompiler::show()
     {
-      for (map<string,string>::const_iterator var = variables_.begin();
-           var != variables_.end();
-           var++)
+      for (const auto & var : variables_)
         {
-          if (var->first == "copyright-owner")
+          if (var.first == "copyright-owner")
             {
               output().width(20);
-              output() << var->first << ": " << var->second << std::endl;
+              output() << var.first << ": " << var.second << std::endl;
             }
           else
             {
               output().width(20);
-              output() << var->first << ": ";
+              output() << var.first << ": ";
               output().width(6);
-              output() << var->second << ": " << variable_explanations_[var->first] << std::endl;
+              output() << var.second << ": " << variable_explanations_[var.first] << std::endl;
             }
         }
       flush(&output());
@@ -2482,8 +2469,7 @@ namespace xfst {
     {
       GET_TOP(top);
 
-      std::map<std::string, HfstTransducer*>::const_iterator it
-        = definitions_.find(variable);
+      auto it = definitions_.find(variable);
       if (it == definitions_.end())
         {
           error() << "no such definition '" << variable << "', cannot substitute" << std::endl;
@@ -2509,14 +2495,12 @@ namespace xfst {
 
       HfstBasicTransducer fsm(*top);
 
-      for (HfstBasicTransducer::const_iterator it = fsm.begin();
-           it != fsm.end(); it++ )
+      for (const auto & it : fsm)
         {
-          for (hfst::implementations::HfstBasicTransitions::const_iterator tr_it
-                 = it->begin(); tr_it != it->end(); tr_it++)
+          for (const auto & tr_it : it)
             {
-              std::string isymbol = tr_it->get_input_symbol();
-              std::string osymbol = tr_it->get_output_symbol();
+              std::string isymbol = tr_it.get_input_symbol();
+              std::string osymbol = tr_it.get_output_symbol();
               if (isymbol != osymbol &&
                   (isymbol == labelstr || osymbol == labelstr))
                 {
@@ -2553,11 +2537,10 @@ namespace xfst {
       if (strcmp("NOTHING", list) != 0)
         {
           StringVector labels = tokenize_string(list, ' ');
-          for (StringVector::const_iterator it = labels.begin();
-               it != labels.end(); it++)
+          for (const auto & label : labels)
             {
               // tokenize labels into string pairs
-              StringVector sv = tokenize_string(it->c_str(), ':');
+              StringVector sv = tokenize_string(label.c_str(), ':');
               try
                 {
                   StringPair sp = symbol_vector_to_symbol_pair(sv);
@@ -2586,11 +2569,10 @@ namespace xfst {
           for (HfstBasicTransducer::const_iterator it = fsm.begin();
                it != fsm.end() && !target_label_found; it++ )
             {
-              for (hfst::implementations::HfstBasicTransitions::const_iterator tr_it
-                     = it->begin(); tr_it != it->end(); tr_it++)
+              for (const auto & tr_it : *it)
                 {
-                  if (target_label.first == tr_it->get_input_symbol() &&
-                      target_label.second == tr_it->get_output_symbol())
+                  if (target_label.first == tr_it.get_input_symbol() &&
+                      target_label.second == tr_it.get_output_symbol())
                     {
                       target_label_found = true;
                       break;
@@ -2665,12 +2647,10 @@ namespace xfst {
   XfstCompiler::print_aliases(std::ostream * oss_)
     {
       std::ostream * oss = get_stream(oss_);
-      for (map<string,string>::const_iterator alias = aliases_.begin();
-           alias != aliases_.end();
-           ++alias)
+      for (const auto & alias : aliases_)
         {
           oss->width(10);
-          *oss << "alias " << alias->first << " " << alias->second;
+          *oss << "alias " << alias.first << " " << alias.second;
         }
       flush(oss);
       PROMPT_AND_RETURN_THIS;
@@ -2698,24 +2678,21 @@ namespace xfst {
     {
       std::ostream * oss = get_stream(oss_);
       bool definitions = false;
-      for (map<string,string>::const_iterator def
-             = original_definitions_.begin(); def != original_definitions_.end();
-           ++def)
+      for (const auto & def : original_definitions_)
         {
           definitions = true;
           oss->width(10);
-          *oss << def->first << " " << def->second << std::endl;
+          *oss << def.first << " " << def.second << std::endl;
         }
       if (!definitions)
         *oss << "No defined symbols." << std::endl;
 
       definitions = false;
-      for (map<string,string>::const_iterator func = original_function_definitions_.begin();
-           func != original_function_definitions_.end(); func++)
+      for (const auto & func : original_function_definitions_)
         {
           definitions = true;
           oss->width(10);
-          *oss << func->first << " " << func->second << std::endl;
+          *oss << func.first << " " << func.second << std::endl;
         }
       if (!definitions)
         *oss << "No function definitions." << std::endl;
@@ -2769,8 +2746,7 @@ namespace xfst {
   XfstCompiler::print_labels(const char* name, std::ostream * oss_)
     {
       std::ostream * oss = get_stream(oss_);
-      std::map<std::string, HfstTransducer*>::const_iterator it
-        = definitions_.find(name);
+      auto it = definitions_.find(name);
       if (it == definitions_.end())
         {
           *oss << "no such definition '" << name << "'" << std::endl;
@@ -2790,14 +2766,12 @@ namespace xfst {
       std::set<std::pair<std::string, std::string> > label_set;
       HfstBasicTransducer fsm(*tr);
 
-      for (HfstBasicTransducer::const_iterator it = fsm.begin();
-           it != fsm.end(); it++ )
+      for (const auto & it : fsm)
         {
-          for (hfst::implementations::HfstBasicTransitions::const_iterator tr_it
-                 = it->begin(); tr_it != it->end(); tr_it++)
+          for (const auto & tr_it : it)
             {
               std::pair<std::string, std::string> label_pair
-                (tr_it->get_input_symbol(), tr_it->get_output_symbol());
+                (tr_it.get_input_symbol(), tr_it.get_output_symbol());
               label_set.insert(label_pair);
             }
         }
@@ -2836,14 +2810,12 @@ namespace xfst {
     std::map<std::pair<std::string, std::string>, unsigned int > label_map;
     HfstBasicTransducer fsm(*topmost);
 
-      for (HfstBasicTransducer::const_iterator it = fsm.begin();
-           it != fsm.end(); it++ )
+      for (const auto & it : fsm)
         {
-          for (hfst::implementations::HfstBasicTransitions::const_iterator tr_it
-                 = it->begin(); tr_it != it->end(); tr_it++)
+          for (const auto & tr_it : it)
             {
               std::pair<std::string, std::string> label_pair
-                (tr_it->get_input_symbol(), tr_it->get_output_symbol());
+                (tr_it.get_input_symbol(), tr_it.get_output_symbol());
               (label_map[label_pair])++;
             }
         }
@@ -2881,11 +2853,9 @@ namespace xfst {
       std::set<string> l = lists_[name];
       oss->width(10);
       *oss << name << ": ";
-      for (std::set<string>::const_iterator s = l.begin();
-           s != l.end();
-           ++s)
+      for (const auto & s : l)
         {
-          *oss << *s << " ";
+          *oss << s << " ";
         }
       *oss << std::endl;
       flush(oss);
@@ -2909,11 +2879,9 @@ namespace xfst {
           // HERE
           oss->width(10);
           *oss << l->first << " ";
-          for (std::set<string>::const_iterator s = l->second.begin();
-               s != l->second.end();
-               ++s)
+          for (const auto & s : l->second)
             {
-              *oss << *s << " ";
+              *oss << s << " ";
             }
           *oss << std::endl;
         }
@@ -3101,8 +3069,7 @@ namespace xfst {
         }
       else
         {
-          std::map<std::string, HfstTransducer*>::const_iterator it
-            = definitions_.find(name);
+          auto it = definitions_.find(name);
           if (it == definitions_.end())
             {
               *oss << "no such definition '" << std::string(name) << "'" << std::endl;
@@ -3144,8 +3111,7 @@ namespace xfst {
         }
       else
         {
-          std::map<std::string, HfstTransducer*>::const_iterator it
-            = definitions_.find(name);
+          auto it = definitions_.find(name);
           if (it == definitions_.end())
             {
               *oss << "no such definition '" << std::string(name) << std::endl;
@@ -3188,8 +3154,7 @@ namespace xfst {
         }
       else
         {
-          std::map<std::string, HfstTransducer*>::const_iterator it
-            = definitions_.find(name);
+          auto it = definitions_.find(name);
           if (it == definitions_.end())
             {
               *oss << "no such definition '" << std::string(name) << "'" << std::endl;
@@ -3259,8 +3224,7 @@ namespace xfst {
         }
       else
         {
-          std::map<std::string, HfstTransducer*>::const_iterator it
-            = definitions_.find(name);
+          auto it = definitions_.find(name);
           if (it == definitions_.end())
             {
               *oss << "no such definition '" << std::string(name) << "'" << std::endl;
@@ -3322,12 +3286,11 @@ namespace xfst {
       std::ostream * oss = get_stream(oss_);
       GET_TOP(tmp);
 
-      for (std::map<std::string, HfstTransducer*>::const_iterator it
-             = names_.begin(); it != names_.end(); it++)
+      for (const auto & it : names_)
         {
-          if (tmp == it->second)
+          if (tmp == it.second)
             {
-              *oss << "Name " << it->first << std::endl;
+              *oss << "Name " << it.first << std::endl;
               flush(oss);
               PROMPT_AND_RETURN_THIS;
             }
@@ -3400,8 +3363,7 @@ namespace xfst {
   XfstCompiler&
   XfstCompiler::print_net(const char* name, std::ostream * oss_)
     {
-      std::map<std::string,hfst::HfstTransducer*>::const_iterator it =
-        definitions_.find(name);
+      auto it = definitions_.find(name);
       if (it == definitions_.end())
         {
           error() << "no such defined network: '" << name << "'" << std::endl;
@@ -3457,18 +3419,18 @@ namespace xfst {
       }
 
     bool first_symbol = true;
-    for (StringSet::const_iterator it = alpha.begin(); it != alpha.end(); it++)
+    for (const auto & it : alpha)
       {
-        if (! is_special_symbol(*it))
+        if (! is_special_symbol(it))
           {
             if (!first_symbol || unknown || identity)
               *oss << ", ";
-            if (*it == "?")
+            if (it == "?")
               *oss << "\"?\"";
-            else if (*it == "@" && variables_["print-foma-sigma"] == "ON")
+            else if (it == "@" && variables_["print-foma-sigma"] == "ON")
               *oss << "\"@\"";
             else
-              *oss << *it;
+              *oss << it;
             sigma_count++;
             first_symbol = false;
           }
@@ -3485,14 +3447,12 @@ namespace xfst {
     identity = false;
 
     HfstBasicTransducer fsm(*t);
-    for (HfstBasicTransducer::const_iterator it = fsm.begin();
-         it != fsm.end(); it++ )
+    for (const auto & it : fsm)
       {
-        for (hfst::implementations::HfstBasicTransitions::const_iterator tr_it
-               = it->begin(); tr_it != it->end(); tr_it++)
+        for (const auto & tr_it : it)
           {
-            std::string istr = tr_it->get_input_symbol();
-            std::string ostr = tr_it->get_input_symbol();
+            std::string istr = tr_it.get_input_symbol();
+            std::string ostr = tr_it.get_input_symbol();
             if (istr == hfst::internal_unknown ||
                 ostr == hfst::internal_unknown)
               unknown = true;
@@ -3729,12 +3689,10 @@ namespace xfst {
       auto outstream = (outfile != 0) ?
         std::make_unique<HfstOutputStream>(outfile, format_):
         std::make_unique<HfstOutputStream>(format_);
-      for (map<string,HfstTransducer*>::iterator def = definitions_.begin();
-           def != definitions_.end();
-           ++def)
+      for (auto & definition : definitions_)
         {
-          HfstTransducer tmp(*(def->second));
-          tmp.set_name(def->first);
+          HfstTransducer tmp(*(definition.second));
+          tmp.set_name(definition.first);
           *outstream << tmp;
         }
       outstream->close();
@@ -4270,22 +4228,19 @@ namespace xfst {
       std::set<std::pair<std::string, std::string> > label_set;
       HfstBasicTransducer fsm(*topmost);
 
-      for (HfstBasicTransducer::const_iterator it = fsm.begin();
-           it != fsm.end(); it++ )
+      for (const auto & it : fsm)
         {
-          for (hfst::implementations::HfstBasicTransitions::const_iterator tr_it
-                 = it->begin(); tr_it != it->end(); tr_it++)
+          for (const auto & tr_it : it)
             {
               std::pair<std::string, std::string> label_pair
-                (tr_it->get_input_symbol(), tr_it->get_output_symbol());
+                (tr_it.get_input_symbol(), tr_it.get_output_symbol());
               label_set.insert(label_pair);
             }
         }
 
-      for (std::set<std::pair<std::string, std::string> >::const_iterator
-             it = label_set.begin(); it != label_set.end(); it++)
+      for (const auto & it : label_set)
         {
-          HfstTransducer label_tr(it->first, it->second, result->get_type());
+          HfstTransducer label_tr(it.first, it.second, result->get_type());
           result->disjunct(label_tr);
         }
 
@@ -4449,8 +4404,7 @@ namespace xfst {
   {
     bool first_loop = true;
     unsigned int arc_number = 1;
-    for (hfst::implementations::HfstBasicTransitions::const_iterator it
-           = transitions.begin(); it != transitions.end(); it++)
+    for (const auto & transition : transitions)
       {
         if (first_loop)
           {
@@ -4462,8 +4416,8 @@ namespace xfst {
             output() << ", ";
           }
         flush(&output());
-        std::string isymbol = it->get_input_symbol();
-        std::string osymbol = it->get_output_symbol();
+        std::string isymbol = transition.get_input_symbol();
+        std::string osymbol = transition.get_output_symbol();
 
         if (isymbol == osymbol)
           {
@@ -4849,9 +4803,9 @@ namespace xfst {
   static std::string to_literal_regexp(const hfst::StringPairVector & path, bool input_side)
   {
     std::string pathstr("[");
-    for (hfst::StringPairVector::const_iterator it = path.begin(); it != path.end(); it++)
+    for (const auto & it : path)
       {
-        std::string symbol = (input_side) ? it->first : it->second ;
+        std::string symbol = (input_side) ? it.first : it.second ;
         if (symbol != hfst::internal_epsilon)
           pathstr.append("\"").append(symbol).append("\" ");
       }
@@ -4902,9 +4856,9 @@ namespace xfst {
   static std::string to_regexp(const hfst::StringPairVector & path, bool input_side, bool retokenize)
   {
     std::string pathstr("[");
-    for (hfst::StringPairVector::const_iterator it = path.begin(); it != path.end(); it++)
+    for (const auto & it : path)
       {
-        std::string symbol = (input_side) ? it->first : it->second ;
+        std::string symbol = (input_side) ? it.first : it.second ;
         // ignore "^[" and "^]"
         if (symbol != "^]" && symbol != "^[")
           {
@@ -4975,18 +4929,16 @@ namespace xfst {
         {
           HfstReplacementsMap replacement_map = fsm.find_replacements((level == UPPER_LEVEL));
 
-            for (HfstReplacementsMap::const_iterator it = replacement_map.begin();
-                 it != replacement_map.end(); it++)
+            for (const auto & it : replacement_map)
               {
-                HfstState start_state = it->first;
-                HfstReplacements replacements = it->second;
-                for (HfstReplacements::const_iterator rit = replacements.begin();
-                     rit != replacements.end(); rit++)
+                HfstState start_state = it.first;
+                const HfstReplacements & replacements = it.second;
+                for (const auto & rit : replacements)
                   {
-                   HfstState end_state = rit->first;
+                   HfstState end_state = rit.first;
 
-		   std::string regexp = to_regexp(rit->second, (level == UPPER_LEVEL), (variables_["retokenize"] == "ON"));
-                   std::string literal_regexp = to_literal_regexp(rit->second, (level != UPPER_LEVEL));
+                   std::string regexp = to_regexp(rit.second, (level == UPPER_LEVEL), (variables_["retokenize"] == "ON"));
+                   std::string literal_regexp = to_literal_regexp(rit.second, (level != UPPER_LEVEL));
 
                    std::string cross_product_regexp = "[ ";
                    if (level == UPPER_LEVEL)
@@ -5053,7 +5005,7 @@ namespace xfst {
   XfstCompiler::hfst(const char* text)
     {
       error() << "HFST: " << text << std::endl;
-        flush(&error());
+      flush(&error());
       PROMPT_AND_RETURN_THIS;
     }
 
@@ -5340,7 +5292,7 @@ namespace xfst {
               return *this;
             }
           output() << "? bytes. " << top->number_of_states() << " states, " << top->number_of_arcs() << " arcs, ? paths" << std::endl;
-          std::map<std::string,std::string>::const_iterator it = variables_.find("print-sigma");
+          auto it = variables_.find("print-sigma");
           if (it != variables_.end() && it->second == "ON")
             {
               (const_cast<XfstCompiler*>(this))->print_sigma(output_, false /* no prompt*/);
