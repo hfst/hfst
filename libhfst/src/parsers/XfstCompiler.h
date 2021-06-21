@@ -678,9 +678,6 @@ class XfstCompiler
   //! @brief Remove newline ('\n' and '\r') from the end of \a str.
   char * remove_newline(char * str);
 
-  //! @brief Print weight.
-  //int hfst_print_weight(FILE * stream, float weight);
-
   //! @brief Get current readline history index.
   int current_history_index();
 

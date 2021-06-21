@@ -531,7 +531,7 @@ namespace xfst {
     // go through at most n paths
     for (const auto & it : paths)
       {
-        const hfst::StringVector & path = it.second;
+        const auto & path = it.second;
         bool something_printed = false;  // to control printing spaces
 
         if ((variables_["obey-flags"] == "ON") && !is_valid_string(path))
@@ -2770,21 +2770,18 @@ namespace xfst {
         {
           for (const auto & tr_it : it)
             {
-              std::pair<std::string, std::string> label_pair
-                (tr_it.get_input_symbol(), tr_it.get_output_symbol());
-              label_set.insert(label_pair);
+              label_set.insert({ tr_it.get_input_symbol(), tr_it.get_output_symbol() });
             }
         }
 
       *oss << "Labels: ";
-      for(std::set<std::pair<std::string, std::string> >::const_iterator it
-            = label_set.begin(); it != label_set.end(); it++)
+      for(const auto & it : label_set)
         {
-          if (it != label_set.begin())
+          if (it != *label_set.begin())
             *oss << ", ";
-          *oss << it->first;
-          if (it->first != it->second)
-            *oss << ":" << it->second;
+          *oss << it.first;
+          if (it.first != it.second)
+            *oss << ":" << it.second;
         }
       *oss << std::endl;
       *oss << "Size: " << (int)label_set.size() << std::endl;
@@ -2814,23 +2811,20 @@ namespace xfst {
         {
           for (const auto & tr_it : it)
             {
-              std::pair<std::string, std::string> label_pair
-                (tr_it.get_input_symbol(), tr_it.get_output_symbol());
-              (label_map[label_pair])++;
+              label_map[{ tr_it.get_input_symbol(), tr_it.get_output_symbol() }]++;
             }
         }
 
       unsigned int index=1;
-      for(std::map<std::pair<std::string, std::string>, unsigned int >::const_iterator
-            it= label_map.begin(); it != label_map.end(); it++)
+      for(const auto & it : label_map)
         {
-          if (it != label_map.begin())
+          if (it != *label_map.begin())
             *oss << "   ";
           *oss << index << ". ";
-          *oss << it->first.first;
-          if (it->first.first != it->first.second)
-            *oss << ":" << it->first.second;
-          *oss << " " << it->second;
+          *oss << it.first.first;
+          if (it.first.first != it.first.second)
+            *oss << ":" << it.first.second;
+          *oss << " " << it.second;
           index++;
         }
       *oss << std::endl;
@@ -4232,9 +4226,7 @@ namespace xfst {
         {
           for (const auto & tr_it : it)
             {
-              std::pair<std::string, std::string> label_pair
-                (tr_it.get_input_symbol(), tr_it.get_output_symbol());
-              label_set.insert(label_pair);
+              label_set.insert({ tr_it.get_input_symbol(), tr_it.get_output_symbol() });
             }
         }
 
@@ -4628,7 +4620,7 @@ namespace xfst {
       }
     else if (level < 0 || level > (int)whole_path_length)
       {
-        output() << "no such level: '" << level << "' (current lievel is " << (int)whole_path_length << ")" << std::endl;
+        output() << "no such level: '" << level << "' (current level is " << (int)whole_path_length << ")" << std::endl;
         flush(&output());
         return false;
       }
@@ -4932,7 +4924,7 @@ namespace xfst {
             for (const auto & it : replacement_map)
               {
                 HfstState start_state = it.first;
-                const HfstReplacements & replacements = it.second;
+                const auto & replacements = it.second;
                 for (const auto & rit : replacements)
                   {
                    HfstState end_state = rit.first;
@@ -5051,19 +5043,6 @@ namespace xfst {
         flush(&error());
         xfst_fail();
       }
-
-    // using foma's lexc implementation
-    /*if (! HfstTransducer::is_implementation_type_available(hfst::FOMA_TYPE))
-      {
-        hfst_fprintf(errorstream_, "foma back-end not enabled, cannot read lexc files\n");
-        xfst_fail();
-        PROMPT_AND_RETURN_THIS;
-      }
-
-    t = HfstTransducer::read_lexc_ptr(std::string(filename), hfst::FOMA_TYPE, verbose_);
-    if (t != NULL)
-      t->convert(format_);
-    */
 
     if (t == NULL)
       {
