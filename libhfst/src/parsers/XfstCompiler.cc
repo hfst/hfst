@@ -931,35 +931,6 @@ namespace xfst {
       }
 
     XfstCompiler&
-    XfstCompiler::read_prop_line(char* line)
-      {
-        char* name = static_cast<char*>(malloc(sizeof(char)*strlen(line)));
-        char* p = line;
-        char* n = name;
-        while ((*p != '\0') && (*p != ':'))
-          {
-            *n = *p;
-            n++;
-            p++;
-          }
-        *n = '\0';
-        if (*p == '\0')
-          {
-            assert(*p != '\0');
-            error() << "no colon in line" << std::endl;
-            flush(&error());
-          }
-        p++;
-        while (isspace(*p))
-          {
-            p++;
-          }
-        char* value = strdup(p);
-        properties_[name] = value;
-        return *this;
-      }
-
-    XfstCompiler&
     XfstCompiler::add_props(FILE* infile)
       {
         char* line = 0;
