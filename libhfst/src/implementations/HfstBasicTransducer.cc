@@ -115,36 +115,33 @@
         are also in the alphabet. */
      bool HfstBasicTransducer::check_alphabet()
      {
-           for (iterator it = begin(); it != end(); it++)
+       for (auto& it : *this)
+         {
+           for (const auto & tr_it : it)
              {
-               for (HfstBasicTransitions::iterator tr_it
-                      = it->begin();
-                    tr_it != it->end(); tr_it++)
-                 {
-                  HfstTropicalTransducerTransitionData data = tr_it->get_transition_data();
+               const auto & data = tr_it.get_transition_data();
 
-                   if(alphabet.find(data.get_input_symbol())
-              == alphabet.end()) {
-             return false;
-           }
-                   if(alphabet.find(data.get_output_symbol())
-              == alphabet.end()) {
-             return false;
-           }
+               if (alphabet.find(data.get_input_symbol()) == alphabet.end())
+                 {
+                   return false;
+                 }
+               if (alphabet.find(data.get_output_symbol()) == alphabet.end())
+                 {
+                   return false;
                  }
              }
+         }
        return true;
      }
 
      /* Print the alphabet of the graph to standard error stream. */
      void HfstBasicTransducer::print_alphabet() const
      {
-       for (HfstBasicTransducer::HfstAlphabet::const_iterator it
-          = alphabet.begin(); it != alphabet.end(); it++)
+       for (const auto& it : alphabet)
          {
-           if (it != alphabet.begin())
-         std::cerr << ", ";
-           std::cerr << *it;
+           if (it != *alphabet.begin())
+             std::cerr << ", ";
+           std::cerr << it;
          }
        std::cerr << std::endl;
      }
@@ -197,10 +194,9 @@
      }
 
      void HfstBasicTransducer::remove_symbols_from_alphabet(const HfstSymbolSet &symbols) {
-       for (HfstSymbolSet::const_iterator it = symbols.begin();
-            it != symbols.end(); it++)
+       for (const auto & symbol : symbols)
          {
-           alphabet.erase(*it);
+           alphabet.erase(symbol);
          }
      }
 
@@ -208,20 +204,18 @@
          \a symbols. */
      void HfstBasicTransducer::add_symbols_to_alphabet(const HfstSymbolSet &symbols)
      {
-       for (HfstSymbolSet::const_iterator it = symbols.begin();
-            it != symbols.end(); it++)
+       for (const auto & symbol : symbols)
          {
-           alphabet.insert(*it);
+           alphabet.insert(symbol);
          }
      }
 
      void HfstBasicTransducer::add_symbols_to_alphabet(const HfstSymbolPairSet &symbols)
      {
-       for (HfstSymbolPairSet::const_iterator it = symbols.begin();
-            it != symbols.end(); it++)
+       for (const auto & symbol : symbols)
          {
-           alphabet.insert(it->first);
-           alphabet.insert(it->second);
+           alphabet.insert(symbol.first);
+           alphabet.insert(symbol.second);
          }
      }
 
@@ -237,13 +231,11 @@
          (HfstTropicalTransducerTransitionData::get_max_number()+1, false);
 
        // Go through all transitions
-       for (iterator it = begin(); it != end(); it++)
+       for (const auto& it : *this)
          {
-           for (HfstBasicTransitions::iterator tr_it
-                  = it->begin();
-                tr_it != it->end(); tr_it++)
+           for (const auto & tr_it : it)
              {
-               const HfstTropicalTransducerTransitionData & data = tr_it->get_transition_data();
+               const auto & data = tr_it.get_transition_data();
                symbols_found.at(data.get_input_number()) = true;
                symbols_found.at(data.get_output_number()) = true;
              }
@@ -251,11 +243,10 @@
 
        // Remove symbols in \a symbols from the alphabet if they did not
        // occur in any transitions
-       for (std::set<unsigned int>::const_iterator it = symbols.begin();
-            it != symbols.end(); it++)
+       for (unsigned int symbol : symbols)
          {
-           if (! symbols_found.at(*it))
-             alphabet.erase(HfstTropicalTransducerTransitionData::get_symbol(*it));
+           if (! symbols_found.at(symbol))
+             alphabet.erase(HfstTropicalTransducerTransitionData::get_symbol(symbol));
          }
 
      }
@@ -263,14 +254,12 @@
      HfstBasicTransducer::HfstAlphabet HfstBasicTransducer::symbols_used()
      {
        HfstBasicTransducer::HfstAlphabet retval;
-       for (iterator it = begin(); it != end(); it++)
+       for (const auto& it : *this)
          {
-           for (HfstBasicTransitions::iterator tr_it
-                  = it->begin();
-                tr_it != it->end(); tr_it++)
+           for (const auto& tr_it : it)
              {
-               HfstTropicalTransducerTransitionData data = tr_it->get_transition_data();
-               
+               const auto& data = tr_it.get_transition_data();
+
                retval.insert(data.get_input_symbol());
                retval.insert(data.get_output_symbol());
              }
@@ -310,21 +299,17 @@
            // the graph
            HfstBasicTransducer::HfstAlphabet symbols_not_found;
 
-           for (HfstBasicTransducer::HfstAlphabet::iterator it
-                  = alphabet.begin();
-                it != alphabet.end(); it++)
+           for (const auto & it : alphabet)
              {
-               if (symbols_found.find(*it) == symbols_found.end())
-                 symbols_not_found.insert(*it);
+               if (symbols_found.find(it) == symbols_found.end())
+                 symbols_not_found.insert(it);
              }
 
            // Remove the symbols that did not occur in the graph
            // from its alphabet
-           for (HfstBasicTransducer::HfstAlphabet::iterator it
-                  = symbols_not_found.begin();
-                it != symbols_not_found.end(); it++)
+           for (const auto & it : symbols_not_found)
              {
-               alphabet.erase(*it);
+               alphabet.erase(it);
              }
          }
 
@@ -338,55 +323,50 @@
            return alphabet;
          }
 
-     StringPairSet HfstBasicTransducer::get_transition_pairs() const {
+         StringPairSet HfstBasicTransducer::get_transition_pairs() const
+         {
 
            StringPairSet retval;
-           for (const_iterator it = begin(); it != end(); it++)
+           for (const auto& it : *this)
              {
-               for (HfstBasicTransitions::const_iterator tr_it
-                      = it->begin();
-                    tr_it != it->end(); tr_it++)
+               for (const auto & tr_it : it)
                  {
-                   HfstTropicalTransducerTransitionData data = tr_it->get_transition_data();
-                   retval.insert(StringPair(data.get_input_symbol(),
-                                            data.get_output_symbol()));
+                   const auto & data = tr_it.get_transition_data();
+                   retval.insert(StringPair(data.get_input_symbol(), data.get_output_symbol()));
                  }
              }
            return retval;
          }
 
-     StringSet HfstBasicTransducer::get_input_symbols() const {
+         StringSet HfstBasicTransducer::get_input_symbols() const
+         {
 
            StringSet retval;
-           for (const_iterator it = begin(); it != end(); it++)
+           for (const auto& it : *this)
              {
-               for (HfstBasicTransitions::const_iterator tr_it
-                      = it->begin();
-                    tr_it != it->end(); tr_it++)
+               for (const auto& tr_it : it)
                  {
-                   HfstTropicalTransducerTransitionData data = tr_it->get_transition_data();
+                   const auto& data = tr_it.get_transition_data();
                    retval.insert(data.get_input_symbol());
                  }
              }
            return retval;
          }
 
-          StringSet HfstBasicTransducer::get_output_symbols() const {
+         StringSet HfstBasicTransducer::get_output_symbols() const
+         {
 
            StringSet retval;
-           for (const_iterator it = begin(); it != end(); it++)
+           for (const auto& it : *this)
              {
-               for (HfstBasicTransitions::const_iterator tr_it
-                      = it->begin();
-                    tr_it != it->end(); tr_it++)
+               for (const auto & tr_it : it)
                  {
-                   HfstTropicalTransducerTransitionData data = tr_it->get_transition_data();
+                   const auto & data = tr_it.get_transition_data();
                    retval.insert(data.get_output_symbol());
                  }
              }
            return retval;
          }
-
 
      // ----------------------------------------------------------------
      // --- Adding states and transitions and iterating through them ---
@@ -520,11 +500,8 @@
              output symbols. */
          HfstBasicTransducer & HfstBasicTransducer::sort_arcs(void)
        {
-         for (HfstBasicStates::iterator it = state_vector.begin();
-          it != state_vector.end();
-          ++it)
+         for (auto & transitions : state_vector)
            {
-         HfstBasicTransitions &transitions = *it;
          std::sort<HfstBasicTransitions::iterator>
            (transitions.begin(),transitions.end());
            }
@@ -595,12 +572,12 @@
            state_vector[s2] = s1_copy;
 
            // ----- Go through all states -----
-           for (iterator it = begin(); it != end(); it++)
+           for (auto & it : *this)
              {
                // Go through all transitions
-               for (unsigned int i=0; i < it->size(); i++)
+               for (unsigned int i=0; i < it.size(); i++)
                  {
-                   HfstBasicTransition &tr_it = it->operator[](i);
+                   HfstBasicTransition &tr_it = it.operator[](i);
 
                    HfstState new_target=tr_it.get_target_state();
                    if (tr_it.get_target_state() == s1)
@@ -616,7 +593,7 @@
                           tr_it.get_output_symbol(),
                           tr_it.get_weight());
 
-                       it->operator[](i) = tr;
+                       it.operator[](i) = tr;
                      }
 
                  } // all transitions gone through
@@ -667,16 +644,16 @@
          void HfstBasicTransducer::xfstize(std::string & symbol)
          {
            std::string escaped_symbol;
-           for (size_t pos = 0; pos < symbol.size(); pos++)
+           for (char pos : symbol)
              {
-               if (symbol[pos] == '%')
+               if (pos == '%')
                  escaped_symbol.append("\"%\"");
-               else if (symbol[pos] == '"')
+               else if (pos == '"')
                  escaped_symbol.append("%\"");
-               else if (symbol[pos] == '?')
+               else if (pos == '?')
                  escaped_symbol.append("\"?\"");
                else
-                 escaped_symbol.append(1, symbol[pos]);
+                 escaped_symbol.append(1, pos);
              }
            symbol = escaped_symbol;
          }
@@ -784,7 +761,7 @@
                          {
                            os << ", ";
                          }
-                       HfstTropicalTransducerTransitionData data = tr_it->get_transition_data();
+                       const auto & data = tr_it->get_transition_data();
                        print_xfst_arc(os, data);
 
                        os << " -> ";
@@ -881,25 +858,22 @@
            // Print symbols that are in the alphabet but not used in arcs.
            HfstBasicTransducer::HfstAlphabet symbols_used_ = symbols_used();
            initialize_alphabet(symbols_used_); // exclude special symbols
-           for (HfstBasicTransducer::HfstAlphabet::const_iterator it
-                  = alphabet.begin(); it != alphabet.end(); it++)
+           for (const auto & it : alphabet)
              {
-               if (symbols_used_.find(*it) == symbols_used_.end())
+               if (symbols_used_.find(it) == symbols_used_.end())
                  {
-                   fprintf(file, "symbol(%s, \"%s\").\n", identifier, prologize_symbol(it->c_str()).c_str());
+                   fprintf(file, "symbol(%s, \"%s\").\n", identifier, prologize_symbol(it.c_str()).c_str());
                  }
              }
 
            // Print arcs.
-           for (iterator it = begin(); it != end(); it++)
+           for (auto & it : *this)
              {
-               for (HfstBasicTransitions::iterator tr_it
-                      = it->begin();
-                    tr_it != it->end(); tr_it++)
+               for (const auto & tr_it : it)
                  {
                    fprintf(file, "arc(%s, %i, %i, ",
-                           identifier, source_state, tr_it->get_target_state());
-                   HfstTropicalTransducerTransitionData data = tr_it->get_transition_data();
+                           identifier, source_state, tr_it.get_target_state());
+                   const auto & data = tr_it.get_transition_data();
                    print_prolog_arc_symbols(file, data);
                    if (write_weights) {
                      fprintf(file, ", ");
@@ -911,15 +885,13 @@
              }
 
            // Print final states.
-           for (FinalWeightMap::const_iterator it
-                  = this->final_weight_map.begin();
-                it != this->final_weight_map.end(); it++)
+           for (const auto & it : this->final_weight_map)
              {
-               fprintf(file, "final(%s, %i", identifier, it->first);
+               fprintf(file, "final(%s, %i", identifier, it.first);
                if (write_weights)
                  {
                    fprintf(file, ", ");
-                   write_weight(file, it->second);
+                   write_weight(file, it.second);
                  }
                fprintf(file, ").\n");
              }
@@ -943,24 +915,21 @@
            // Print symbols that are in the alphabet but not used in arcs.
            HfstBasicTransducer::HfstAlphabet symbols_used_ = symbols_used();
            initialize_alphabet(symbols_used_); // exclude special symbols
-           for (HfstBasicTransducer::HfstAlphabet::const_iterator it
-                  = alphabet.begin(); it != alphabet.end(); it++)
+           for (const auto & it : alphabet)
              {
-               if (symbols_used_.find(*it) == symbols_used_.end())
+               if (symbols_used_.find(it) == symbols_used_.end())
                  {
-                   os << "symbol(" << name << ", \"" << prologize_symbol(*it) << "\")." << std::endl;
+                   os << "symbol(" << name << ", \"" << prologize_symbol(it) << "\")." << std::endl;
                  }
              }
 
            // Print arcs.
-           for (iterator it = begin(); it != end(); it++)
+           for (auto & it : *this)
              {
-               for (HfstBasicTransitions::iterator tr_it
-                      = it->begin();
-                    tr_it != it->end(); tr_it++)
+               for (const auto & tr_it : it)
                  {
-                   os << "arc(" << name << ", " << source_state << ", " << tr_it->get_target_state() << ", ";
-                   HfstTropicalTransducerTransitionData data = tr_it->get_transition_data();
+                   os << "arc(" << name << ", " << source_state << ", " << tr_it.get_target_state() << ", ";
+                   const auto & data = tr_it.get_transition_data();
                    print_prolog_arc_symbols(os, data);
                    if (write_weights) {
                      os << ", ";
@@ -972,14 +941,12 @@
              }
 
            // Print final states.
-           for (FinalWeightMap::const_iterator it
-                  = this->final_weight_map.begin();
-                it != this->final_weight_map.end(); it++)
+           for (const auto & it : this->final_weight_map)
              {
-               os << "final(" << name << ", " << it->first;
+               os << "final(" << name << ", " << it.first;
                if (write_weights) {
                  os << ", ";
-                 write_weight(os, it->second);
+                 write_weight(os, it.second);
                }
                os <<  ")." << std::endl;
              }
@@ -1402,7 +1369,7 @@
                          {
                            fprintf(file, ", ");
                          }
-                       HfstTropicalTransducerTransitionData data = tr_it->get_transition_data();
+                       const auto & data = tr_it->get_transition_data();
 
                        print_xfst_arc(file, data);
 
@@ -1423,13 +1390,11 @@
      void HfstBasicTransducer::write_in_att_format(std::ostream &os, bool write_weights/*=true*/)
          {
            unsigned int source_state=0;
-           for (iterator it = begin(); it != end(); it++)
+           for (auto & it : *this)
              {
-               for (HfstBasicTransitions::iterator tr_it
-                      = it->begin();
-                    tr_it != it->end(); tr_it++)
+               for (const auto & tr_it : it)
                  {
-                   HfstTropicalTransducerTransitionData data = tr_it->get_transition_data();
+                   HfstTropicalTransducerTransitionData data = tr_it.get_transition_data();
 
                    std::string isymbol = data.get_input_symbol();
                    replace_all(isymbol, " ", "@_SPACE_@");
@@ -1442,7 +1407,7 @@
                    replace_all(osymbol, "\t", "@_TAB_@");
 
                    os <<  source_state << "\t"
-                      <<  tr_it->get_target_state() << "\t"
+                      <<  tr_it.get_target_state() << "\t"
                       <<  isymbol << "\t"
                       <<  osymbol;
 
@@ -1470,13 +1435,11 @@
      void HfstBasicTransducer::write_in_att_format(FILE *file, bool write_weights/*=true*/)
          {
            unsigned int source_state=0;
-           for (iterator it = begin(); it != end(); it++)
+           for (auto & it : *this)
              {
-               for (HfstBasicTransitions::iterator tr_it
-                      = it->begin();
-                    tr_it != it->end(); tr_it++)
+               for (const auto & tr_it : it)
                  {
-                   HfstTropicalTransducerTransitionData data = tr_it->get_transition_data();
+                   const auto & data = tr_it.get_transition_data();
 
                    std::string isymbol = data.get_input_symbol();
                    replace_all(isymbol, " ", "@_SPACE_@");
@@ -1490,7 +1453,7 @@
 
                    fprintf(file, "%i\t%i\t%s\t%s",
                            source_state,
-                           tr_it->get_target_state(),
+                           tr_it.get_target_state(),
                            isymbol.c_str(),
                            osymbol.c_str());
 
@@ -1518,13 +1481,11 @@
        unsigned int source_state=0;
        size_t cwt = 0; // characters written in total
        size_t cw = 0; // characters written in latest call to sprintf
-           for (iterator it = begin(); it != end(); it++)
+           for (auto & it : *this)
              {
-               for (HfstBasicTransitions::iterator tr_it
-                      = it->begin();
-                    tr_it != it->end(); tr_it++)
+               for (const auto & tr_it : it)
                  {
-                   HfstTropicalTransducerTransitionData data = tr_it->get_transition_data();
+                   const auto & data = tr_it.get_transition_data();
 
                    std::string isymbol = data.get_input_symbol();
                    replace_all(isymbol, " ", "@_SPACE_@");
@@ -1538,7 +1499,7 @@
 
                    cw = sprintf(ptr + cwt, "%i\t%i\t%s\t%s",
                                 source_state,
-                                tr_it->get_target_state(),
+                                tr_it.get_target_state(),
                                 isymbol.c_str(),
                                 osymbol.c_str());
                    
@@ -1573,19 +1534,17 @@
          void HfstBasicTransducer::write_in_att_format_number(FILE *file, bool write_weights/*=true*/)
          {
            unsigned int source_state=0;
-           for (iterator it = begin(); it != end(); it++)
+           for (auto & it : *this)
              {
-               for (HfstBasicTransitions::iterator tr_it
-                      = it->begin();
-                    tr_it != it->end(); tr_it++)
+               for (const auto & tr_it : it)
                  {
-                   HfstTropicalTransducerTransitionData data = tr_it->get_transition_data();
+                   const auto & data = tr_it.get_transition_data();
 
                    fprintf(file, "%i\t%i\t%i\t%i",
                            source_state,
-                           tr_it->get_target_state(),
-                           tr_it->get_input_number(),
-                           tr_it->get_output_number());
+                           tr_it.get_target_state(),
+                           tr_it.get_input_number(),
+                           tr_it.get_output_number());
 
                    if (write_weights)
                      fprintf(file, "\t%f",
@@ -1946,18 +1905,18 @@
            bool out_match_used = false;
 
            // ----- Go through all states -----
-           for (iterator it = begin(); it != end(); it++)
+           for (auto & it : *this)
              {
                // Go through all transitions of the current state
-               for (unsigned int i=0; i < it->size(); i++)
+               for (unsigned int i=0; i < it.size(); i++)
                  {
-                   HfstBasicTransition &tr_it = it->operator[](i);
+                   HfstBasicTransition &tr_it = it.operator[](i);
 
                    // If a match was found, remove the transition:
                    unsigned int in_tr = tr_it.get_input_number();
                    unsigned int out_tr = tr_it.get_output_number();
                    if (in_tr == in_match && out_tr == out_match) {
-                     it->erase(it->begin()+i); }
+                     it.erase(it.begin()+i); }
                    else
                      {
                        if (in_tr == in_match || out_tr == in_match) {
@@ -1993,15 +1952,15 @@
            bool substitution_performed=false;
 
            // ----- Go through all states -----
-           for (iterator it = begin(); it != end(); it++)
+           for (auto & it : *this)
              {
                // The transitions to be added to the current state
                HfstBasicTransitions new_transitions;
 
                // Go through all transitions of the current state
-               for (unsigned int i=0; i < it->size(); i++)
+               for (unsigned int i=0; i < it.size(); i++)
                  {
-                   HfstBasicTransition &tr_it = it->operator[](i);
+                   HfstBasicTransition &tr_it = it.operator[](i);
 
                    // If a match was found, substitute:
                    if (tr_it.get_input_number() == old_input_number &&
@@ -2021,7 +1980,7 @@
                           tr_it.get_weight(),
                           true);
                        
-                       it->operator[](i) = tr;
+                       it.operator[](i) = tr;
 
                        // and schedule the rest of the substituting transitions
                        // in new_sps to be added to the current state.
@@ -2043,11 +2002,9 @@
                  } // (all transitions of a state gone through)
                
                // Add the new transitions to the current state
-               for (HfstBasicTransitions
-                      ::const_iterator NIT = new_transitions.begin();
-                    NIT != new_transitions.end(); NIT++)
+               for (const auto & new_transition : new_transitions)
                  {
-                   it->push_back(*NIT);
+                   it.push_back(new_transition);
                  }
 
              } // ( ----- all states in the graph gone through ----- )
@@ -2159,12 +2116,10 @@
          } // All transitions gone through.
 
            // Add the new transitions.
-           for (HfstBasicTransitions
-              ::const_iterator NIT = new_transitions.begin();
-            NIT != new_transitions.end(); NIT++)
-         {
-           it->push_back(*NIT);
-         }
+           for (const auto& new_transition : new_transitions)
+             {
+               it->push_back(new_transition);
+             }
 
          } // ----- All states gone through. -----
 
@@ -2225,12 +2180,10 @@
            (const HfstSymbolSubstitutions &substitutions)
            {
              // add symbols to the global HfstTransition alphabet
-             for (HfstSymbolSubstitutions::const_iterator it
-                    = substitutions.begin();
-                  it != substitutions.end(); it++)
+             for (const auto & substitution : substitutions)
                {
-                 (void)get_symbol_number(it->first);
-                 (void)get_symbol_number(it->second);
+                 (void)get_symbol_number(substitution.first);
+                 (void)get_symbol_number(substitution.second);
                }
 
              // how symbol numbers are substituted:
@@ -2242,12 +2195,10 @@
 
              substitutions_.resize
                (HfstTropicalTransducerTransitionData::get_max_number()+1, no_substitution);
-             for (HfstSymbolSubstitutions::const_iterator it
-                    = substitutions.begin();
-                  it != substitutions.end(); it++)
+             for (const auto & substitution : substitutions)
                {
-                 HfstNumber from_symbol = get_symbol_number(it->first);
-                 HfstNumber to_symbol = get_symbol_number(it->second);
+                 HfstNumber from_symbol = get_symbol_number(substitution.first);
+                 HfstNumber to_symbol = get_symbol_number(substitution.second);
 
                  substitutions_.at(from_symbol) = to_symbol;
                }
@@ -2272,16 +2223,14 @@
            {
              // Convert from symbols to numbers
              HfstNumberPairSubstitutions substitutions_;
-             for (HfstSymbolPairSubstitutions::const_iterator it
-                    = substitutions.begin();
-                  it != substitutions.end(); it++)
+             for (const auto & substitution : substitutions)
                {
                  HfstNumberPair from_transition
-                   (get_symbol_number(it->first.first),
-                    get_symbol_number(it->first.second));
+                   (get_symbol_number(substitution.first.first),
+                    get_symbol_number(substitution.first.second));
                  HfstNumberPair to_transition
-                   (get_symbol_number(it->second.first),
-                    get_symbol_number(it->second.second));
+                   (get_symbol_number(substitution.second.first),
+                    get_symbol_number(substitution.second.second));
                  substitutions_[from_transition] = to_transition;
                }
 
@@ -2301,20 +2250,19 @@
          (EmptyStringException,
           "HfstBasicTransducer::substitute"); }
 
-         for (HfstSymbolPairSet::const_iterator it = sps.begin();
-          it != sps.end(); it++)
+         for (const auto& sp : sps)
            {
-         if (! HfstTropicalTransducerTransitionData::is_valid_symbol(it->first) ||
-             ! HfstTropicalTransducerTransitionData::is_valid_symbol(it->second) ) {
-           HFST_THROW_MESSAGE
-             (EmptyStringException,
-              "HfstBasicTransducer::substitute"); }
+             if (!HfstTropicalTransducerTransitionData::is_valid_symbol(sp.first) ||
+                 !HfstTropicalTransducerTransitionData::is_valid_symbol(sp.second))
+               {
+                 HFST_THROW_MESSAGE(EmptyStringException, "HfstBasicTransducer::substitute");
+               }
            }
 
          substitute_(sp, sps);
 
-           return *this;
-         }
+         return *this;
+       }
 
          /** @brief Substitute all transitions \a old_pair with
              \a new_pair. */
@@ -2377,7 +2325,7 @@
 
            // Go through all states
            HfstState source_state=0;
-           for (iterator it = begin(); it != end(); it++)
+           for (auto & it : *this)
              {
 
                // The transitions that are substituted, i.e. removed
@@ -2385,11 +2333,10 @@
                  old_transitions;
 
                // Go through all transitions
-               for (HfstBasicTransitions::iterator tr_it
-                      = it->begin();
-                    tr_it != it->end(); tr_it++)
+               for (HfstBasicTransitions::iterator tr_it = it.begin();
+                    tr_it != it.end(); tr_it++)
                  {
-                   HfstTropicalTransducerTransitionData data = tr_it->get_transition_data();
+                   const auto & data = tr_it->get_transition_data();
 
                    // Whether there is anything to substitute
                    // in this transition
@@ -2410,11 +2357,8 @@
                // (all transitions in a state gone through)
 
                // Remove the substituted transitions
-               for (std::vector<
-                      HfstBasicTransitions::iterator>::iterator IT =
-                      old_transitions.begin();
-                    IT != old_transitions.end(); IT++) {
-                 it->erase(*IT);
+               for (auto & old_transition : old_transitions) {
+                 it.erase(old_transition);
                }
 
                source_state++;
@@ -2422,11 +2366,9 @@
            // (all states gone trough)
 
            // Add the substitutions
-           for (std::vector<substitution_data>::iterator IT
-                  = substitutions.begin();
-                IT != substitutions.end(); IT++)
+           for (auto & substitution : substitutions)
              {
-               add_substitution(*IT);
+               add_substitution(substitution);
              }
            return *this;
          }
@@ -2449,17 +2391,14 @@
        // Copy \a graph
        const HfstBasicTransducer * graph = sub.substituting_graph;
        HfstState source_state=0;
-       for (const_iterator it = graph->begin();
-            it != graph->end(); it++)
+       for (const auto & it : *graph)
          {
-           for (HfstBasicTransitions::const_iterator tr_it
-                  = it->begin();
-                tr_it != it->end(); tr_it++)
+           for (const auto & tr_it : it)
              {
-               HfstTropicalTransducerTransitionData data = tr_it->get_transition_data();
+               const auto & data = tr_it.get_transition_data();
 
                HfstBasicTransition transition
-                 (tr_it->get_target_state() + offset,
+                 (tr_it.get_target_state() + offset,
                   data.get_input_symbol(),
                   data.get_output_symbol(),
                   data.get_weight());
@@ -2470,14 +2409,12 @@
          }
 
        // Epsilon transitions from final states of \a graph
-       for (FinalWeightMap::const_iterator it
-              = graph->final_weight_map.begin();
-            it != graph->final_weight_map.end(); it++)
+       for (auto it : graph->final_weight_map)
          {
            HfstBasicTransition epsilon_transition
              (sub.target_state, HfstTropicalTransducerTransitionData::get_epsilon(), HfstTropicalTransducerTransitionData::get_epsilon(),
-              it->second);
-           add_transition(it->first + offset, epsilon_transition);
+              it.second);
+           add_transition(it.first + offset, epsilon_transition);
          }
      }
 
@@ -2506,7 +2443,7 @@
                       = state_vector[state].begin();
                     tr_it != state_vector[state].end(); tr_it++)
                  {
-                   HfstTropicalTransducerTransitionData data = tr_it->get_transition_data();
+                   const auto & data = tr_it->get_transition_data();
 
                    // Whether there is anything to substitute
                    // in this transition
@@ -2532,20 +2469,18 @@
                }
                
                // Add the substituting transitions
-               for (std::vector<HfstBasicTransition>::iterator IT
-                      = new_transitions.begin();
-                    IT != new_transitions.end(); IT++)
+               for (auto & IT : new_transitions)
                  {
                    HfstState new_state = add_state();
-                   std::string marker = weight2marker(IT->get_weight());
+                   std::string marker = weight2marker(IT.get_weight());
                    //std::cerr << "got marker '" << marker << "'" << std::endl;
-                   HfstBasicTransition marker_transition(IT->get_target_state(),
+                   HfstBasicTransition marker_transition(IT.get_target_state(),
                                                         marker,
                                                         marker,
                                                         0);
                    HfstBasicTransition new_transition(new_state,
-                                                     IT->get_input_symbol(),
-                                                     IT->get_output_symbol(),
+                                                     IT.get_input_symbol(),
+                                                     IT.get_output_symbol(),
                                                      0);
 
                    unsigned int source_state = hfst::size_t_to_uint(state);
@@ -2559,26 +2494,24 @@
            // Go through the final states
            std::set<HfstState> final_states_to_remove;
 
-           for (FinalWeightMap::iterator fin_it = final_weight_map.begin();
-                fin_it != final_weight_map.end(); fin_it++)
+           for (auto & fin_it : final_weight_map)
              {
-               if (fin_it->second != 0)
+               if (fin_it.second != 0)
                  {
                    HfstState new_state = add_state();
                    set_final_weight(new_state, 0);
-                   std::string marker = weight2marker(fin_it->second);
+                   std::string marker = weight2marker(fin_it.second);
                    HfstBasicTransition epsilon_transition(new_state,
                                                          marker,
                                                          marker,
                                                          0);
-                   add_transition(fin_it->first, epsilon_transition);
-                   final_states_to_remove.insert(fin_it->first);
+                   add_transition(fin_it.first, epsilon_transition);
+                   final_states_to_remove.insert(fin_it.first);
                  }
              }
-           for (std::set<HfstState>::iterator it = final_states_to_remove.begin();
-                it != final_states_to_remove.end(); it++)
+           for (unsigned int it : final_states_to_remove)
              {
-               final_weight_map.erase(*it);
+               final_weight_map.erase(it);
              }
 
            return *this;
@@ -2619,7 +2552,7 @@
            
            // Go through all states
            HfstState source_state=0;
-           for (iterator it = begin(); it != end(); it++)
+           for (auto & it : *this)
              {
 
                // The transitions that are substituted, i.e. removed
@@ -2628,10 +2561,10 @@
 
                // Go through all transitions
                for (HfstBasicTransitions::iterator tr_it
-                      = it->begin();
-                    tr_it != it->end(); tr_it++)
+                      = it.begin();
+                    tr_it != it.end(); tr_it++)
                  {
-                   HfstTropicalTransducerTransitionData data = tr_it->get_transition_data();
+                   const auto & data = tr_it->get_transition_data();
 
                    // Whether there is anything to substitute
                    // in this transition
@@ -2671,7 +2604,7 @@
                // Remove the substituted transitions
                while (!old_transitions.empty())
                  {
-                   it->erase(old_transitions.top());
+                   it.erase(old_transitions.top());
                    old_transitions.pop();
                  }
                
@@ -2680,33 +2613,26 @@
            // (all states gone trough)
 
            // Remove all symbols that were substituted
-           for (StringSet::const_iterator sym_it = substitutions_performed_for_symbols.begin();
-                sym_it != substitutions_performed_for_symbols.end(); sym_it++)
+           for (const auto& sym_it : substitutions_performed_for_symbols)
              {
-               if (*sym_it != "@_EPSILON_SYMBOL_@" && *sym_it != "@_UNKNOWN_SYMBOL_@" && *sym_it != "@_IDENTITY_SYMBOL_@")
-                 this->remove_symbol_from_alphabet(*sym_it);
+               if (sym_it != "@_EPSILON_SYMBOL_@" && sym_it != "@_UNKNOWN_SYMBOL_@" &&
+                   sym_it != "@_IDENTITY_SYMBOL_@")
+                 this->remove_symbol_from_alphabet(sym_it);
              }
 
            // Harmonize the resulting and the substituting graphs, if needed
            if (harmonize)
              {
-               for (StringSet::iterator sym_it = substitutions_performed_for_symbols.begin();
-                    sym_it != substitutions_performed_for_symbols.end(); sym_it++)
+               for (const auto& sym_it : substitutions_performed_for_symbols)
                  {
-#ifdef NO_CPLUSPLUS_11
-                   this->harmonize(substitution_map[*sym_it]);
-#else					 
-                   this->harmonize(substitution_map.at(*sym_it));
-#endif			   
+                   this->harmonize(substitution_map.at(sym_it));
                  }
              }
 
            // Add the substitutions
-           for (std::vector<substitution_data>::iterator IT
-                  = substitutions.begin();
-                IT != substitutions.end(); IT++)
+           for (auto & substitution : substitutions)
              {
-               add_substitution(*IT);
+               add_substitution(substitution);
              }
 
            return *this;
@@ -2747,7 +2673,7 @@
                       = state_vector[state].begin();
                     tr_it != state_vector[state].end(); tr_it++)
                  {
-                   HfstTropicalTransducerTransitionData data = tr_it->get_transition_data();
+                   const auto & data = tr_it->get_transition_data();
 
                    float weight = 0;
                    // Whether there is anything to substitute
@@ -2785,11 +2711,9 @@
                }
                
                // Add the substituting transitions
-               for (std::vector<HfstBasicTransition>::iterator IT
-                      = new_transitions.begin();
-                    IT != new_transitions.end(); IT++)
+               for (auto & new_transition : new_transitions)
                  {
-                   state_vector[state].push_back(*IT);
+                   state_vector[state].push_back(new_transition);
                  }
 
              }
@@ -2851,10 +2775,10 @@
              alphabet.insert(symbol_pair.second);
 
          HfstState source_state=0;
-             for (iterator it = begin(); it != end(); it++) {
+             for (auto & it : *this) {
                HfstBasicTransition tr( source_state, symbol_pair.first,
                                   symbol_pair.second, weight );
-               it->push_back(tr);
+               it.push_back(tr);
            source_state++;
              }
 
@@ -2867,32 +2791,28 @@
            (const HfstSymbolPairSet &symbol_pairs,
             HfstTropicalTransducerTransitionData::WeightType weight)
            {
-             for (HfstSymbolPairSet::const_iterator symbols_it
-                    = symbol_pairs.begin();
-                  symbols_it != symbol_pairs.end(); symbols_it++)
+             for (const auto & symbol_pair : symbol_pairs)
                {
-                 if ( ! ( HfstTropicalTransducerTransitionData::is_valid_symbol(symbols_it->first) &&
-                            HfstTropicalTransducerTransitionData::is_valid_symbol(symbols_it->second) ) ) {
+                 if ( ! ( HfstTropicalTransducerTransitionData::is_valid_symbol(symbol_pair.first) &&
+                            HfstTropicalTransducerTransitionData::is_valid_symbol(symbol_pair.second) ) ) {
                    HFST_THROW_MESSAGE
                      (EmptyStringException,
                       "HfstBasicTransducer::insert_freely"
                       "(const HfstSymbolPairSet&, W)");
                  }
 
-                 alphabet.insert(symbols_it->first);
-                 alphabet.insert(symbols_it->second);
+                 alphabet.insert(symbol_pair.first);
+                 alphabet.insert(symbol_pair.second);
                }
 
              HfstState source_state=0;
-             for (iterator it = begin(); it != end(); it++)
+             for (auto & it : *this)
                {
-                 for (HfstSymbolPairSet::const_iterator symbols_it
-                        = symbol_pairs.begin();
-                      symbols_it != symbol_pairs.end(); symbols_it++)
+                 for (const auto & symbol_pair : symbol_pairs)
                    {
-                     HfstBasicTransition tr( source_state, symbols_it->first,
-                                        symbols_it->second, weight );
-                     it->push_back(tr);
+                     HfstBasicTransition tr( source_state, symbol_pair.first,
+                                        symbol_pair.second, weight );
+                     it.push_back(tr);
                    }
                  source_state++;
                }
@@ -3065,11 +2985,9 @@
                {
                  std::set<HfstSymbol> symbols_present;
 
-                 for (HfstBasicTransitions::iterator tr_it
-                        = it->begin();
-                      tr_it != it->end(); tr_it++)
+                 for (auto & tr_it : *it)
                    {
-                     HfstTropicalTransducerTransitionData data = tr_it->get_transition_data();
+                     HfstTropicalTransducerTransitionData data = tr_it.get_transition_data();
 
                      if (data.get_input_symbol() != data.get_output_symbol())
                        {
@@ -3077,16 +2995,15 @@
                        }
                      symbols_present.insert(data.get_input_symbol());
                    }
-                 for (std::set<std::string>::const_iterator alpha_it = alphabet.begin();
-                      alpha_it != alphabet.end(); alpha_it++)
+                 for (const auto & alpha_it : alphabet)
                    {
-                     if (symbols_present.find(*alpha_it) ==
+                     if (symbols_present.find(alpha_it) ==
                          symbols_present.end() &&
-                         ! is_special_symbol(*alpha_it))
+                         ! is_special_symbol(alpha_it))
                        {
                          add_transition
                            (current_state,
-                            HfstBasicTransition(failure_state, *alpha_it, *alpha_it, 0));
+                            HfstBasicTransition(failure_state, alpha_it, alpha_it, 0));
                        }
                    }
                  current_state++;
@@ -3097,11 +3014,10 @@
          StringSet HfstBasicTransducer::get_flags() const
            {
              StringSet flags;
-             for (StringSet::const_iterator it = alphabet.begin();
-                  it != alphabet.end(); it++)
+             for (const auto & it : alphabet)
                {
-                 if (FdOperation::is_diacritic(*it)) {
-                   flags.insert(*it);
+                 if (FdOperation::is_diacritic(it)) {
+                   flags.insert(it);
                  }
                }
              return flags;
@@ -3146,11 +3062,10 @@
              }
            // (2) Go through the alphabet
            StringSet extra_symbols;
-           for (StringSet::const_iterator it = alphabet.begin();
-                it != alphabet.end(); it++)
+           for (const auto & it : alphabet)
              {
-               if (purge_symbol(*it, flag))
-                 extra_symbols.insert(*it);
+               if (purge_symbol(it, flag))
+                 extra_symbols.insert(it);
              }
            // remove symbols
            remove_symbols_from_alphabet(extra_symbols);
@@ -3190,18 +3105,15 @@
                 // go through all states at current distance
                 const std::set<HfstState> & states =
                   TopSort.get_states_at_distance(current_distance);
-                for (StateIt state_it = states.begin();
-                     state_it != states.end(); state_it++)
+                for (unsigned int state : states)
                   {
                     // go through all transitions of each state
                     const HfstBasicTransitions & transitions
-                      = this->state_vector.at(*state_it);
-                    for (HfstBasicTransitions::const_iterator transition_it
-                           = transitions.begin();
-                         transition_it != transitions.end(); transition_it++)
+                      = this->state_vector.at(state);
+                    for (const auto & transition : transitions)
                       {
                         new_states_found = true;
-                        new_states.insert(transition_it->get_target_state());
+                        new_states.insert(transition.get_target_state());
                       }
                     // all transitions gone through
                   }
@@ -3209,10 +3121,9 @@
                 
                 // set each accessible state at distance one higher than the
                 // current distance
-                for (StateIt it = new_states.begin();
-                     it != new_states.end(); it++)
+                for (unsigned int new_state : new_states)
                   {
-                    TopSort.set_state_at_distance(*it, current_distance + 1, (dist == MaximumDistance));
+                    TopSort.set_state_at_distance(new_state, current_distance + 1, (dist == MaximumDistance));
                   }
                 current_distance++;
               }
@@ -3236,12 +3147,11 @@
                   const std::set<HfstState> & states
                     = states_sorted.at((unsigned int)distance);
                   // go through all states in a set
-                  for (std::set<HfstState>::const_iterator it = states.begin();
-                       it != states.end(); it++)
+                  for (unsigned int state : states)
                     {
                       // if a final state is encountered, return the distance
                       // of that state
-                      if (is_final_state(*it))
+                      if (is_final_state(state))
                         {
                           return distance;
                         }
@@ -3268,12 +3178,11 @@
                      const std::set<HfstState> & states
                        = states_sorted.at((unsigned int)distance);
                      // go through all states in a set
-                     for (std::set<HfstState>::const_iterator it = states.begin();
-                          it != states.end(); it++)
+                     for (unsigned int state : states)
                        {
                          // if a final state is encountered, add its distance
                          // to result
-                         if (is_final_state(*it))
+                         if (is_final_state(state))
                            {
                              result.push_back((unsigned int)distance);
                              break; // go to next set of states
@@ -3303,14 +3212,12 @@
            // Go through all transitions in this state
            const HfstBasicTransitions &transitions
              = this->operator[](state);
-           for (HfstBasicTransitions::const_iterator it
-                  = transitions.begin();
-                it != transitions.end(); it++)
+           for (const auto & transition : transitions)
              {
-               if (is_epsilon(it->get_input_symbol()) && is_epsilon(it->get_output_symbol()))
+               if (is_epsilon(transition.get_input_symbol()) && is_epsilon(transition.get_output_symbol()))
                  {
                    if (has_negative_epsilon_cycles
-                       (it->get_target_state(), total_weight + it->get_weight(), state_weights))
+                       (transition.get_target_state(), total_weight + transition.get_weight(), state_weights))
                      return true;
                  }
              }
@@ -3321,13 +3228,11 @@
          bool HfstBasicTransducer::has_negative_epsilon_cycles()
          {
            bool has_negative_epsilon_transitions = false;
-           for (iterator it = begin(); it != end(); it++)
+           for (auto & it : *this)
              {
-               for (HfstBasicTransitions::iterator tr_it
-                      = it->begin();
-                    tr_it != it->end(); tr_it++)
+               for (auto & tr_it : it)
                  {
-                   if (is_epsilon(tr_it->get_input_symbol()) && is_epsilon(tr_it->get_output_symbol()) && tr_it->get_weight() < 0)
+                   if (is_epsilon(tr_it.get_input_symbol()) && is_epsilon(tr_it.get_output_symbol()) && tr_it.get_weight() < 0)
                      {
                        has_negative_epsilon_transitions = true;
                        break;
@@ -3359,24 +3264,22 @@
            // Go through all transitions in this state
            const HfstBasicTransitions &transitions
              = this->operator[](state);
-           for (HfstBasicTransitions::const_iterator it
-                  = transitions.begin();
-                it != transitions.end(); it++)
+           for (const auto & transition : transitions)
              {
                // (Diacritics are also treated as epsilons, although it might cause false
                //  positive results, because loops with diacritics can be invalidated by
                //  other diacritics.)
-               if ( is_epsilon(it->get_input_symbol()) ||
-                    FdOperation::is_diacritic(it->get_input_symbol()) )
+               if ( is_epsilon(transition.get_input_symbol()) ||
+                    FdOperation::is_diacritic(transition.get_input_symbol()) )
                  {
                    epsilon_path_states.insert(state);
-                   if (epsilon_path_states.find(it->get_target_state())
+                   if (epsilon_path_states.find(transition.get_target_state())
                        != epsilon_path_states.end())
                      {
                        return true;
                      }
                    if (is_infinitely_ambiguous
-                       (it->get_target_state(), epsilon_path_states, states_handled))
+                       (transition.get_target_state(), epsilon_path_states, states_handled))
                      {
                        return true;
                      }
@@ -3435,27 +3338,25 @@
            // Go through all transitions in this state
            const HfstBasicTransitions &transitions
              = this->operator[](state);
-           for (HfstBasicTransitions::const_iterator it
-                  = transitions.begin();
-                it != transitions.end(); it++)
+           for (const auto & transition : transitions)
              {
                // CASE 1: Input epsilons do not consume a symbol in the lookup path s,
                //         so they can be added freely.
                // (Diacritics are also treated as epsilons, although it might cause false
                //  positive results, because loops with diacritics can be invalidated by
                //  other diacritics.)
-               bool possible_flag = is_possible_flag(it->get_input_symbol(), fds, obey_flags);
-               if ( is_epsilon(it->get_input_symbol()) ||
+               bool possible_flag = is_possible_flag(transition.get_input_symbol(), fds, obey_flags);
+               if ( is_epsilon(transition.get_input_symbol()) ||
                     possible_flag )
                  {
                    epsilon_path_states.insert(state);
-                   if (epsilon_path_states.find(it->get_target_state())
+                   if (epsilon_path_states.find(transition.get_target_state())
                        != epsilon_path_states.end())
                      {
                        return true;
                      }
                    if (is_lookup_infinitely_ambiguous
-                       (s, index, it->get_target_state(), epsilon_path_states, fds, obey_flags))
+                       (s, index, transition.get_target_state(), epsilon_path_states, fds, obey_flags))
                      {
                        return true;
                      }
@@ -3470,10 +3371,10 @@
                else if (! only_epsilons)
                  {
                    bool continu = false;
-                   if (it->get_input_symbol().compare(s.second.at(index)) == 0)
+                   if (transition.get_input_symbol().compare(s.second.at(index)) == 0)
                      continu = true;
-                   else if (((it->get_input_symbol().compare("@_UNKNOWN_SYMBOL_@") == 0) ||
-                             (it->get_input_symbol().compare("@_IDENTITY_SYMBOL_@") == 0))
+                   else if (((transition.get_input_symbol().compare("@_UNKNOWN_SYMBOL_@") == 0) ||
+                             (transition.get_input_symbol().compare("@_IDENTITY_SYMBOL_@") == 0))
                             &&
                             (alphabet.find(s.second.at(index)) == alphabet.end()))
                      {
@@ -3485,7 +3386,7 @@
                        index++; // consume an input symbol in the lookup path s
                        std::set<HfstState> empty_set;
                        if (is_lookup_infinitely_ambiguous
-                           (s, index, it->get_target_state(), empty_set, fds, obey_flags))
+                           (s, index, transition.get_target_state(), empty_set, fds, obey_flags))
                          {
                            return true;
                          }
@@ -3678,13 +3579,11 @@
            // go through all transitions in the current state.
            const HfstBasicTransitions &transitions
              = this->operator[](state);
-           for (HfstBasicTransitions::const_iterator it
-                  = transitions.begin();
-                it != transitions.end(); it++)
+           for (const auto & transition : transitions)
              {
                bool input_symbol_consumed=false;
                if ( is_possible_transition
-                    (*it, lookup_path, lookup_index, alphabet,
+                    (transition, lookup_path, lookup_index, alphabet,
                      input_symbol_consumed, flag_diacritic_path) )
                  {
                    // update path_so_far and lookup_index
@@ -3692,28 +3591,28 @@
                    std::string ostr;
 
                    // identity symbol is replaced with the lookup symbol
-                   if (is_identity(it->get_input_symbol()))
+                   if (is_identity(transition.get_input_symbol()))
                      {
                        istr = lookup_path.at(lookup_index);
                        ostr = istr;
                      }
                    else
                      {
-                       if (is_unknown(it->get_input_symbol()))
+                       if (is_unknown(transition.get_input_symbol()))
                          istr = lookup_path.at(lookup_index);
                        else
-                         istr = it->get_input_symbol();
+                         istr = transition.get_input_symbol();
 
                        /*if (is_unknown(it->get_output_symbol()))
                          ostr = std::string("?");
                          else*/
-                       ostr = it->get_output_symbol();
+                       ostr = transition.get_output_symbol();
                      }
 
                    push_back_to_two_level_path
                      (path_so_far,
                       StringPair(istr, ostr),
-                      it->get_weight(), flag_diacritic_path);
+                      transition.get_weight(), flag_diacritic_path);
 
                    HfstEpsilonHandler * Ehp = NULL;
                    if (input_symbol_consumed) {
@@ -3726,7 +3625,7 @@
                    }
                    
                    // call lookup for the target state of the transition
-                   lookup(lookup_path, results, it->get_target_state(),
+                   lookup(lookup_path, results, transition.get_target_state(),
 			  lookup_index, path_so_far, alphabet, *Ehp, max_epsilon_cycles, max_weight, max_number, flag_diacritic_path);
                    
                    // return to the original values of path_so_far
@@ -3740,7 +3639,7 @@
                      // of Eh is automatically called next
                    }
                    
-                   pop_back_from_two_level_path(path_so_far, it->get_weight(), flag_diacritic_path);
+                   pop_back_from_two_level_path(path_so_far, transition.get_weight(), flag_diacritic_path);
                  }
              }
            
@@ -3839,27 +3738,25 @@
              // go through all transitions
              const HfstBasicTransitions &transitions
                = this->operator[](s);
-             for (HfstBasicTransitions::const_iterator it
-                    = transitions.begin();
-                  it != transitions.end(); it++)
+             for (const auto & transition : transitions)
                {
                  // closing bracket..
-                 if (check_regexp_transition_end(*it, input_side)) // throws error message if *it is not a valid transition
+                 if (check_regexp_transition_end(transition, input_side)) // throws error message if *it is not a valid transition
                    {
                      // ..cannot lead to a state already visited..
-                     check_regexp_state_for_cycle(it->get_target_state(), states_visited);
+                     check_regexp_state_for_cycle(transition.get_target_state(), states_visited);
                      // ..but else we can add the expression that it ends to the results
-                     path.push_back(std::pair<std::string, std::string>(it->get_input_symbol(), it->get_output_symbol()));
+                     path.push_back(std::pair<std::string, std::string>(transition.get_input_symbol(), transition.get_output_symbol()));
                      full_paths.push_back
-                       (HfstReplacement(it->get_target_state(), path));
+                       (HfstReplacement(transition.get_target_state(), path));
                      path.pop_back(); // remove closing bracket as we are not going to proceed to next state
                    }
                  // add transition to path and call function again for its target state
                  else
                    {
-                     path.push_back(StringPair(it->get_input_symbol(), it->get_output_symbol()));
+                     path.push_back(StringPair(transition.get_input_symbol(), transition.get_output_symbol()));
                      find_regexp_paths
-                       (it->get_target_state(),
+                       (transition.get_target_state(),
                         states_visited,
                         path,
                         full_paths, input_side);
@@ -3887,12 +3784,10 @@
            // go through all transitions
            const HfstBasicTransitions &transitions
              = this->operator[](s);
-             for (HfstBasicTransitions::const_iterator it
-                    = transitions.begin();
-                  it != transitions.end(); it++)
+             for (const auto & transition : transitions)
                {
-                 std::string istr = it->get_input_symbol();
-                 std::string ostr = it->get_output_symbol();
+                 std::string istr = transition.get_input_symbol();
+                 std::string ostr = transition.get_output_symbol();
                  if ((input_side && ("^[" == istr)) || (!input_side && ("^[" == ostr)))
                    {
                      /*if (istr != ostr)
@@ -3903,7 +3798,7 @@
                      states_visited.insert(s);
                      std::vector<std::pair<std::string, std::string> > path;
                      path.push_back(std::pair<std::string, std::string>(istr, ostr));
-                     find_regexp_paths(it->get_target_state(), states_visited, path, full_paths, input_side);
+                     find_regexp_paths(transition.get_target_state(), states_visited, path, full_paths, input_side);
                      //fprintf(stderr, "%u regexp paths found for state %u\n", (unsigned int)full_paths.size(), s); // debug
                    }
                }
@@ -3940,17 +3835,14 @@
          {
            HfstState offset = add_state();
            HfstState source_state=0;
-           for (const_iterator it = graph.begin();
-                it != graph.end(); it++)
+           for (const auto & it : graph)
              {
-               for (HfstBasicTransitions::const_iterator tr_it
-                    = it->begin();
-                  tr_it != it->end(); tr_it++)
+               for (const auto & tr_it : it)
                {
-                 HfstTropicalTransducerTransitionData data = tr_it->get_transition_data();
+                 const auto & data = tr_it.get_transition_data();
 
                    HfstBasicTransition transition
-                     (tr_it->get_target_state() + offset,
+                     (tr_it.get_target_state() + offset,
                       data.get_input_symbol(),
                       data.get_output_symbol(),
                       data.get_weight());
@@ -3961,14 +3853,12 @@
            }
 
            // Epsilon transitions
-           for (FinalWeightMap::const_iterator it
-                  = graph.final_weight_map.begin();
-                it != graph.final_weight_map.end(); it++)
+           for (auto it : graph.final_weight_map)
              {
                HfstBasicTransition epsilon_transition
                  (state2, HfstTropicalTransducerTransitionData::get_epsilon(), HfstTropicalTransducerTransitionData::get_epsilon(),
-                  it->second);
-               add_transition(it->first + offset, epsilon_transition);
+                  it.second);
+               add_transition(it.first + offset, epsilon_transition);
              }
 
            // Initial transition
@@ -4061,9 +3951,8 @@
              // if a match is found for tr1[i] in tr2[j], a match for tr1[i+1] can be searched starting from
              // tr2[j+1]. If no match is found for tr1[i] in tr2 but tr2[j] is the first element that is bigger
              // than tr1[i], a match for tr1[i+1] can be searched starting from tr2[j]. ***
-             for (unsigned int i=0; i < tr1.size(); i++)
+             for (auto & transition1 : tr1)
                {
-                 HfstBasicTransition & transition1 = tr1[i];
                  // Transition data (input and output symbols) to be compared.
                  const HfstTropicalTransducerTransitionData & transition_data1 = transition1.get_transition_data();
 
@@ -4264,9 +4153,8 @@
                }
 
              // Go through all transitions in state \a graph_state of \a graph.
-             for (unsigned int i=0; i < graph_transitions.size(); i++)
+             for (auto & graph_transition : graph_transitions)
                {
-                 HfstBasicTransition & graph_transition = graph_transitions[i];
                  const HfstTropicalTransducerTransitionData & graph_transition_data = graph_transition.get_transition_data();
 
                  // List symbols must be checked separately
@@ -4275,9 +4163,8 @@
                      const std::set<std::string> & symbol_list = list_symbols.find(graph_transition_data.get_input_symbol())->second;
                      bool list_match_found=false;
                      // Find all matches
-                     for(unsigned int j=0; j < merger_transitions.size(); j++)
+                     for(auto & merger_transition : merger_transitions)
                        {
-                         HfstBasicTransition & merger_transition = merger_transitions[j];
                          const HfstTropicalTransducerTransitionData & merger_transition_data = merger_transition.get_transition_data();
                          const std::string & isymbol = merger_transition_data.get_input_symbol();
                          const std::string & osymbol = merger_transition_data.get_output_symbol();
