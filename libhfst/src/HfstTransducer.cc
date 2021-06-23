@@ -262,11 +262,10 @@ void HfstTransducer::insert_to_alphabet(const std::string &symbol)
 
 void HfstTransducer::insert_to_alphabet(const std::set<std::string> &symbols)
 {
-    for (std::set<std::string>::const_iterator it = symbols.begin();
-         it != symbols.end(); it++)
+    for (const auto & symbol : symbols)
       {
-        HfstTokenizer::check_utf8_correctness(*it);
-        if (*it == "")
+        HfstTokenizer::check_utf8_correctness(symbol);
+        if (symbol == "")
           { HFST_THROW_MESSAGE(EmptyStringException, "insert_to_alphabet"); }
       }
 
@@ -306,10 +305,9 @@ void HfstTransducer::remove_from_alphabet(const std::string &symbol)
 
 void HfstTransducer::remove_from_alphabet(const std::set<std::string> &symbols)
 {
-  for (std::set<std::string>::const_iterator it = symbols.begin();
-       it != symbols.end(); it++)
+  for (const auto & symbol : symbols)
     {
-      this->remove_from_alphabet(*it);
+      this->remove_from_alphabet(symbol);
     }
 }
   
@@ -452,32 +450,29 @@ HfstTransducer * HfstTransducer::harmonize_(const HfstTransducer &another)
     // the alphabet. FIX?: remove them at the end?
     if (this->get_type() == FOMA_TYPE)
       {
-    StringSet this_alphabet    = this->get_alphabet();
-    StringSet another_alphabet = another_copy.get_alphabet();
-    StringSet add_to_this;
-    StringSet add_to_another;
+        const StringSet & this_alphabet = this->get_alphabet();
+        const StringSet & another_alphabet = another_copy.get_alphabet();
+        StringSet add_to_this;
+        StringSet add_to_another;
 
-    for (StringSet::const_iterator it = another_alphabet.begin();
-     it != another_alphabet.end();
-     ++it)
-      {
-    if (FdOperation::is_diacritic(*it) && this_alphabet.count(*it) == 0)
-      {
-        add_to_this.insert(*it);
-      }
-      }
-    this->insert_to_alphabet(add_to_this);
+        for (const auto& it : another_alphabet)
+          {
+            if (FdOperation::is_diacritic(it) && this_alphabet.count(it) == 0)
+              {
+                add_to_this.insert(it);
+              }
+          }
 
-    for (StringSet::const_iterator it = this_alphabet.begin();
-     it != this_alphabet.end();
-     ++it)
-      {
-    if (FdOperation::is_diacritic(*it) && another_alphabet.count(*it) == 0)
-      {
-        add_to_another.insert(*it);
-      }
-      }
-    another_copy.insert_to_alphabet(add_to_another);
+        this->insert_to_alphabet(add_to_this);
+
+        for (const auto& it : this_alphabet)
+          {
+            if (FdOperation::is_diacritic(it) && another_alphabet.count(it) == 0)
+              {
+                add_to_another.insert(it);
+              }
+          }
+        another_copy.insert_to_alphabet(add_to_another);
       }
 
     switch(this->type)
@@ -540,27 +535,23 @@ HfstTransducer * HfstTransducer::harmonize_(const HfstTransducer &another)
 
     // Prevent flag diacritics from being harmonized by inserting them to
     // the alphabet.
-    StringSet this_alphabet    = this->get_alphabet();
-    StringSet another_alphabet = another.get_alphabet();
+    const auto& this_alphabet = this->get_alphabet();
+    const auto& another_alphabet = another.get_alphabet();
 
-    for (StringSet::const_iterator it = another_alphabet.begin();
-     it != another_alphabet.end();
-     ++it)
+    for (const auto& it : another_alphabet)
       {
-    if (FdOperation::is_diacritic(*it) && this_alphabet.count(*it) == 0)
-      {
-        this->insert_to_alphabet(*it);
-      }
+        if (FdOperation::is_diacritic(it) && this_alphabet.count(it) == 0)
+          {
+            this->insert_to_alphabet(it);
+          }
       }
 
-    for (StringSet::const_iterator it = this_alphabet.begin();
-     it != this_alphabet.end();
-     ++it)
+    for (const auto& it : this_alphabet)
       {
-    if (FdOperation::is_diacritic(*it) && another_alphabet.count(*it) == 0)
-      {
-        another.insert_to_alphabet(*it);
-      }
+        if (FdOperation::is_diacritic(it) && another_alphabet.count(it) == 0)
+          {
+            another.insert_to_alphabet(it);
+          }
       }
 
     switch(this->type)
@@ -910,9 +901,9 @@ HfstTransducer::HfstTransducer(const StringVector & sv,
     type(type), anonymous(false), is_trie(false), name("")
 {
   StringPairVector spv;
-  for (StringVector::const_iterator it = sv.begin(); it != sv.end(); it++)
+  for (const auto & it : sv)
     {
-      spv.push_back(StringPair(*it, *it));
+      spv.push_back({it, it});
     }
   *this = HfstTransducer(spv, type);
 }
@@ -923,14 +914,12 @@ HfstTransducer::HfstTransducer(const StringPairVector & spv,
 {
     if (! is_implementation_type_available(type))
       throw ImplementationTypeNotAvailableException("ImplementationTypeNotAvailableException", __FILE__, __LINE__, type);
-    
-    for (StringPairVector::const_iterator it = spv.begin();
-     it != spv.end(); it++)
+
+    for (const auto& it : spv)
       {
-    if (it->first == "" || it->second == "")
-      HFST_THROW_MESSAGE
-        (EmptyStringException,
-         "HfstTransducer(const StringPairVector&, ImplementationType)");
+        if (it.first == "" || it.second == "")
+          HFST_THROW_MESSAGE(EmptyStringException,
+                             "HfstTransducer(const StringPairVector&, ImplementationType)");
       }
 
     switch (type)
@@ -984,13 +973,11 @@ HfstTransducer::HfstTransducer(const StringPairSet & sps,
     if (! is_implementation_type_available(type))
       throw ImplementationTypeNotAvailableException("ImplementationTypeNotAvailableException", __FILE__, __LINE__, type);
 
-    for (StringPairSet::const_iterator it = sps.begin();
-     it != sps.end(); it++)
+    for (const auto& sp : sps)
       {
-    if (it->first == "" || it->second == "")
-      HFST_THROW_MESSAGE
-        (EmptyStringException,
-         "HfstTransducer(const StringPairSet&, ImplementationType, bool)");
+        if (sp.first == "" || sp.second == "")
+          HFST_THROW_MESSAGE(EmptyStringException,
+                             "HfstTransducer(const StringPairSet&, ImplementationType, bool)");
       }
 
     switch (type)
@@ -1043,18 +1030,15 @@ HfstTransducer::HfstTransducer(const std::vector<StringPairSet> & spsv,
     if (! is_implementation_type_available(type))
       throw ImplementationTypeNotAvailableException("ImplementationTypeNotAvailableException", __FILE__, __LINE__, type);
 
-    for (std::vector<StringPairSet>::const_iterator it = spsv.begin();
-     it != spsv.end(); it++)
+    for (const auto& it : spsv)
       {
-    for (StringPairSet::const_iterator IT = it->begin();
-         IT != it->end(); IT++)
-      {
-        if (IT->first == "" || IT->second == "")
-          HFST_THROW_MESSAGE
-        (EmptyStringException,
-         "HfstTransducer(const std::vector<StringPairSet>&, "
-         " ImplementationType)");
-      }
+        for (const auto& pair : it)
+          {
+            if (pair.first == "" || pair.second == "")
+              HFST_THROW_MESSAGE(
+                  EmptyStringException,
+                  "HfstTransducer(const std::vector<StringPairSet>&, ImplementationType)");
+          }
       }
 
     switch (type)
@@ -1110,16 +1094,13 @@ HfstTransducer::HfstTransducer(const std::string& upper_utf8_str,
     if (! is_implementation_type_available(type))
       throw ImplementationTypeNotAvailableException("ImplementationTypeNotAvailableException", __FILE__, __LINE__, type);
 
-    if (upper_utf8_str == "" ||
-    lower_utf8_str == "")
-      HFST_THROW_MESSAGE
-    (EmptyStringException,
-     "HfstTransducer(const std::string&, const std::string&, "
-     "const HfstTokenizer&, ImplementationType");
+    if (upper_utf8_str == "" || lower_utf8_str == "")
+      HFST_THROW_MESSAGE(EmptyStringException,
+                         "HfstTransducer(const std::string&, const std::string&, "
+                         "const HfstTokenizer&, ImplementationType");
 
-    StringPairVector spv =
-    multichar_symbol_tokenizer.tokenize
-    (upper_utf8_str,lower_utf8_str);
+    StringPairVector spv = multichar_symbol_tokenizer.tokenize(upper_utf8_str, lower_utf8_str);
+
     switch (type)
     {
 #if HAVE_SFST
@@ -1177,13 +1158,11 @@ HfstTransducer::HfstTransducer(const HfstTransducer &another):
     if (! is_implementation_type_available(type))
       throw ImplementationTypeNotAvailableException("ImplementationTypeNotAvailableException", __FILE__, __LINE__, type);
 
-    for (map<string,string>::const_iterator prop = another.props.begin();
-         prop != another.props.end();
-         ++prop)
+    for (const auto & prop : another.props)
       {
-        if ((prop->first != "type"))
+        if ((prop.first != "type"))
           {
-            this->props[prop->first] = prop->second;
+            this->props[prop.first] = prop.second;
           }
       }
     switch (type)
@@ -1719,15 +1698,15 @@ static HfstTransducer * new_filter
 static void substitute_escaped_flags(HfstTransducer * filter)
 {
   StringSet alpha = filter->get_alphabet();
-  for (StringSet::const_iterator it = alpha.begin(); it != alpha.end(); it++)
+  for (const auto& it : alpha)
     {
-      if (it->size() > 1)
+      if (it.size() > 1)
         {
-          if (it->at(0) == '_' && it->at(1) == '@')
+          if (it.at(0) == '_' && it.at(1) == '@')
             {
-              string str(*it);
-              str.erase(0,1);
-              filter->substitute(*it, str);
+              string str(it);
+              str.erase(0, 1);
+              filter->substitute(it, str);
             }
         }
     }
@@ -1872,27 +1851,25 @@ static HfstTransducer * get_flag_filter
   bool flag_found = false;
   HfstTransducer * filter = NULL;
 
-  for (StringSet::const_iterator f = flags.begin();
-       f != flags.end(); f++)
+  for (const auto & f : flags)
     {
-      HfstTransducer self("_" + *f, type); // escape flags
+      HfstTransducer self("_" + f, type); // escape flags
       HfstTransducer succeed_flags(type);
       HfstTransducer fail_flags(type);
       
-      char op = FdOperation::get_operator(*f)[0];
-      if ((flag == "" || FdOperation::get_feature(*f) == flag)
+      char op = FdOperation::get_operator(f)[0];
+      if ((flag == "" || FdOperation::get_feature(f) == flag)
           && (op == 'U' || op == 'R' || op == 'D'))        // Equal flag?
         {
-          for (StringSet::const_iterator ff = flags.begin();
-               ff != flags.end(); ff++)
+          for (const auto & flag : flags)
             {
-              int fstatus = is_valid_flag_combination(*f, *ff);
+              int fstatus = is_valid_flag_combination(f, flag);
 
               if (fstatus == 1) {
-                fail_flags.disjunct(HfstTransducer("_" + *ff, type));
+                fail_flags.disjunct(HfstTransducer("_" + flag, type));
                 flag_found = true;
               } else if (fstatus == 2) {
-                succeed_flags.disjunct(HfstTransducer("_" + *ff, type));
+                succeed_flags.disjunct(HfstTransducer("_" + flag, type));
                 flag_found = true;
               } else {
                 ;
@@ -1903,7 +1880,7 @@ static HfstTransducer * get_flag_filter
       
       if (flag_found) {
         HfstTransducer * newfilter = new_filter
-          (fail_flags, succeed_flags, self, (FdOperation::get_operator(*f)[0] == 'R'));
+          (fail_flags, succeed_flags, self, (FdOperation::get_operator(f)[0] == 'R'));
 
         // intersect filter with newfilter
         if (filter == NULL)
@@ -1981,9 +1958,9 @@ HfstTransducer &HfstTransducer::eliminate_flag(const std::string & flag)
   HfstBasicTransducer basic(*this);
   StringSet flags = basic.get_flags();
   bool feature_found = false;
-  for (StringSet::const_iterator it = flags.begin(); it != flags.end(); it++)
+  for (const auto & it : flags)
     {
-      if (FdOperation::get_feature(*it) == flag)
+      if (FdOperation::get_feature(it) == flag)
         {
           feature_found = true;
           break;
@@ -2368,9 +2345,9 @@ HfstTransducer &HfstTransducer::negate()
   HfstTransducer idstar("@_IDENTITY_SYMBOL_@", this->type);
   // diacritics will not be harmonized in subtract
   StringSet flags = idstar.insert_missing_diacritics_to_alphabet_from(*this);
-  for (StringSet::const_iterator it = flags.begin(); it != flags.end(); it++)
+  for (const auto & flag : flags)
     {
-      HfstTransducer tr(*it, this->type);
+      HfstTransducer tr(flag, this->type);
       idstar.disjunct(tr);
     }
   idstar.repeat_star();
@@ -2567,10 +2544,9 @@ int HfstTransducer::longest_path_size(bool obey_flags) const
 static std::string match_any_n_times(unsigned int n, const StringSet & flags)
 {
   std::string match_any(" [ ? ");
-  for (StringSet::const_iterator it = flags.begin();
-       it != flags.end(); it++)
+  for (const auto & flag : flags)
     {
-      match_any = match_any + "| \"" + *it + "\" ";
+      match_any = match_any + "| \"" + flag + "\" ";
     }
   match_any += " ] ";
 
@@ -2600,13 +2576,12 @@ bool HfstTransducer::extract_longest_paths
   StringSet flags = net.get_flags();
 
   // go through each length of accepted paths in descending order
-  for (std::vector<unsigned int>::const_iterator length = path_lengths.begin();
-       length != path_lengths.end(); length++)
+  for (unsigned int path_length : path_lengths)
     {
       // create a transducer [ any any ... any any ] where the number of transitions
       // that accept any symbol (including flags) is equal to current length
       // of accepted paths
-      std::string match_length = match_any_n_times(*length, flags);
+      std::string match_length = match_any_n_times(path_length, flags);
 
       hfst::xre::XreCompiler xre(this->get_type());
       HfstTransducer * length_tr = xre.compile(match_length.c_str());
@@ -2814,13 +2789,12 @@ StringSet HfstTransducer::insert_missing_diacritics_to_alphabet_from(const HfstT
   StringSet another_alphabet = another.get_alphabet();
   StringSet missing_flags;
 
-  for (StringSet::const_iterator it = another_alphabet.begin();
-       it != another_alphabet.end(); it++)
+  for (const auto & it : another_alphabet)
     {
-      if (this_alphabet.find(*it) == this_alphabet.end())
+      if (this_alphabet.find(it) == this_alphabet.end())
         {
-          if (FdOperation::is_diacritic(*it))
-            missing_flags.insert(*it);
+          if (FdOperation::is_diacritic(it))
+            missing_flags.insert(it);
         }
     }
   this->insert_to_alphabet(missing_flags);
@@ -2833,19 +2807,18 @@ void HfstTransducer::insert_missing_symbols_to_alphabet_from(const HfstTransduce
   StringSet another_alphabet = another.get_alphabet();
   StringSet missing_symbols;
 
-  for (StringSet::const_iterator it = another_alphabet.begin();
-       it != another_alphabet.end(); it++)
+  for (const auto & it : another_alphabet)
     {
-      if (this_alphabet.find(*it) == this_alphabet.end())
+      if (this_alphabet.find(it) == this_alphabet.end())
         {
           if (! only_special_symbols)
             {
-              missing_symbols.insert(*it);
+              missing_symbols.insert(it);
             }
           else
             {
-              if (is_special_symbol(*it))
-                missing_symbols.insert(*it);
+              if (is_special_symbol(it))
+                missing_symbols.insert(it);
             }
         }
     }
@@ -2875,13 +2848,12 @@ bool HfstTransducer::check_for_missing_flags_in
     StringSet this_alphabet = get_alphabet();
     StringSet another_alphabet = another.get_alphabet();
 
-    for (StringSet::const_iterator it = another_alphabet.begin();
-         it != another_alphabet.end(); it++)
+    for (const auto & it : another_alphabet)
       {
-        if ( FdOperation::is_diacritic(*it) &&
-             (this_alphabet.find(*it) == this_alphabet.end()) )
+        if ( FdOperation::is_diacritic(it) &&
+             (this_alphabet.find(it) == this_alphabet.end()) )
           {
-            missing_flags.insert(*it);
+            missing_flags.insert(it);
             retval = true;
             if (return_on_first_miss)
               { return retval; }
@@ -2901,11 +2873,10 @@ void HfstTransducer::insert_freely_missing_flags_from
 
       for (unsigned int s = 0; s <= (unsigned int)basic.get_max_state(); ++s)
         {
-          for (StringSet::const_iterator it = missing_flags.begin();
-               it != missing_flags.end(); it++)
+          for (const auto & missing_flag : missing_flags)
             {
               basic.add_transition
-                (s, HfstBasicTransition(s,*it,*it,0.0));
+                (s, HfstBasicTransition(s,missing_flag,missing_flag,0.0));
             }
         }
 
@@ -2916,10 +2887,9 @@ void HfstTransducer::insert_freely_missing_flags_from
 bool has_flags(const HfstTransducer &fst)
 {
   StringSet alphabet = fst.get_alphabet();
-  for (StringSet::const_iterator it = alphabet.begin();
-       it != alphabet.end(); it++)
+  for (const auto & it : alphabet)
     {
-      if (FdOperation::is_diacritic(*it))
+      if (FdOperation::is_diacritic(it))
         { return true; }
     }
   return false;
@@ -2954,29 +2924,24 @@ void rename_flag_diacritics(HfstTransducer &fst,const std::string &suffix)
 
   hfst::implementations::HfstState s = 0;
 
-  for (HfstBasicTransducer::const_iterator it = basic_fst.begin();
-       it != basic_fst.end();
-       ++it)
+  for (const auto & states : basic_fst)
     {
-      for (hfst::implementations::HfstBasicTransitions::const_iterator jt =
-             it->begin();
-           jt != it->end();
-           ++jt)
+      for (const auto & transition : states)
         {
           basic_fst_copy.add_transition
             (s,
              HfstBasicTransition
-             (jt->get_target_state(),
+             (transition.get_target_state(),
 
-              FdOperation::is_diacritic(jt->get_input_symbol())  ?
-              add_suffix_to_feature_name(jt->get_input_symbol(),suffix) :
-              jt->get_input_symbol(),
+              FdOperation::is_diacritic(transition.get_input_symbol())  ?
+              add_suffix_to_feature_name(transition.get_input_symbol(),suffix) :
+              transition.get_input_symbol(),
 
-              FdOperation::is_diacritic(jt->get_output_symbol())  ?
-              add_suffix_to_feature_name(jt->get_output_symbol(),suffix) :
-              jt->get_output_symbol(),
+              FdOperation::is_diacritic(transition.get_output_symbol())  ?
+              add_suffix_to_feature_name(transition.get_output_symbol(),suffix) :
+              transition.get_output_symbol(),
 
-              jt->get_weight()));
+              transition.get_weight()));
         }
 
       if (basic_fst.is_final_state(s))
@@ -2995,17 +2960,12 @@ void HfstTransducer::twosided_flag_diacritics()
 
   hfst::implementations::HfstState s = 0;
 
-  for (HfstBasicTransducer::const_iterator it = basic_fst.begin();
-       it != basic_fst.end();
-       ++it)
+  for (const auto & states : basic_fst)
     {
-      for (hfst::implementations::HfstBasicTransitions::const_iterator jt =
-             it->begin();
-           jt != it->end();
-           ++jt)
+      for (const auto & transition : states)
         {
-          std::string istr = jt->get_input_symbol();
-          std::string ostr = jt->get_output_symbol();
+          const auto & istr = transition.get_input_symbol();
+          const auto & ostr = transition.get_output_symbol();
           bool istr_is_flag = FdOperation::is_diacritic(istr);
           bool ostr_is_flag = FdOperation::is_diacritic(ostr);
 
@@ -3033,14 +2993,14 @@ void HfstTransducer::twosided_flag_diacritics()
               basic_fst_copy.add_transition
                 (new_state,
                  HfstBasicTransition
-                 (jt->get_target_state(), in, out, jt->get_weight()/*?*/));
+                 (transition.get_target_state(), in, out, transition.get_weight()/*?*/));
             }
           else
             {
               basic_fst_copy.add_transition
                 (s,
                  HfstBasicTransition
-                 (jt->get_target_state(), istr, ostr, jt->get_weight()));
+                 (transition.get_target_state(), istr, ostr, transition.get_weight()));
             }
         }
 
@@ -3080,29 +3040,24 @@ void encode_flag_diacritics(HfstTransducer &fst)
 
   hfst::implementations::HfstState s = 0;
 
-  for (HfstBasicTransducer::const_iterator it = basic_fst.begin();
-       it != basic_fst.end();
-       it++)
+  for (const auto & states : basic_fst)
     {
-      for (hfst::implementations::HfstBasicTransitions::const_iterator jt =
-             it->begin();
-           jt != it->end();
-           jt++)
+      for (const auto & transition : states)
         {
           basic_fst_copy.add_transition
             (s,
              HfstBasicTransition
-             (jt->get_target_state(),
+             (transition.get_target_state(),
 
-              FdOperation::is_diacritic(jt->get_input_symbol())  ?
-              encode_flag(jt->get_input_symbol()) :
-              jt->get_input_symbol(),
+              FdOperation::is_diacritic(transition.get_input_symbol())  ?
+              encode_flag(transition.get_input_symbol()) :
+              transition.get_input_symbol(),
 
-              FdOperation::is_diacritic(jt->get_output_symbol())  ?
-              encode_flag(jt->get_output_symbol()) :
-              jt->get_output_symbol(),
+              FdOperation::is_diacritic(transition.get_output_symbol())  ?
+              encode_flag(transition.get_output_symbol()) :
+              transition.get_output_symbol(),
 
-              jt->get_weight()));
+              transition.get_weight()));
         }
 
       if (basic_fst.is_final_state(s))
@@ -3113,13 +3068,13 @@ void encode_flag_diacritics(HfstTransducer &fst)
 
   // copy alphabet, encode all flags
   StringSet alpha = basic_fst.get_alphabet();
-  for (StringSet::const_iterator it = alpha.begin(); it != alpha.end(); it++)
+  for (const auto & it : alpha)
     {
-      if (it->size() > 4)
+      if (it.size() > 4)
         {
-          if ((it->at(0) == '%') && (it->at(it->size()-1) == '%'))
+          if ((it.at(0) == '%') && (it.at(it.size()-1) == '%'))
             {
-              std::string str(*it);
+              std::string str(it);
               str[0] = '@';
               str[str.size()-1] = '@';
               if (FdOperation::is_diacritic(str))
@@ -3129,7 +3084,7 @@ void encode_flag_diacritics(HfstTransducer &fst)
                 }
             }
         }
-      String symbol = *it;
+      String symbol = it;
       if (FdOperation::is_diacritic(symbol))
         symbol = encode_flag(symbol);
       basic_fst_copy.add_symbol_to_alphabet(symbol);
@@ -3147,30 +3102,25 @@ void decode_flag_diacritics(HfstTransducer &fst)
 
   hfst::implementations::HfstState s = 0;
 
-  for (HfstBasicTransducer::const_iterator it = basic_fst.begin();
-       it != basic_fst.end();
-       it++)
+  for (const auto & states : basic_fst)
     {
-      for (hfst::implementations::HfstBasicTransitions::const_iterator jt =
-             it->begin();
-           jt != it->end();
-           jt++)
+      for (const auto & transition : states)
         {
-          std::string istr = decode_flag(jt->get_input_symbol());
+          std::string istr = decode_flag(transition.get_input_symbol());
           if (!FdOperation::is_diacritic(istr))
-            istr = jt->get_input_symbol();
+            istr = transition.get_input_symbol();
           
-          std::string ostr = decode_flag(jt->get_output_symbol());
+          std::string ostr = decode_flag(transition.get_output_symbol());
           if (!FdOperation::is_diacritic(ostr))
-            ostr = jt->get_output_symbol();
+            ostr = transition.get_output_symbol();
 
           basic_fst_copy.add_transition
             (s,
              HfstBasicTransition
-             (jt->get_target_state(),
+             (transition.get_target_state(),
               istr,
               ostr,
-              jt->get_weight()));
+              transition.get_weight()));
         }
 
       if (basic_fst.is_final_state(s))
@@ -3181,11 +3131,11 @@ void decode_flag_diacritics(HfstTransducer &fst)
 
   // copy alphabet, decode all flags
   StringSet alpha = basic_fst.get_alphabet();
-  for (StringSet::const_iterator it = alpha.begin(); it != alpha.end(); it++)
+  for (const auto & it : alpha)
     {
-      std::string symbol = decode_flag(*it);
+      std::string symbol = decode_flag(it);
       if (!FdOperation::is_diacritic(symbol))
-        symbol = *it;
+        symbol = it;
       basic_fst_copy.add_symbol_to_alphabet(symbol);
     }
 
@@ -3603,9 +3553,8 @@ HfstTransducer &HfstTransducer::substitute
   }
   catch (const FunctionNotImplementedException & e) {
     (void)e;
-    for (HfstSymbolSubstitutions::const_iterator it =
-           substitutions.begin(); it != substitutions.end(); it++) {
-      net->substitute(it->first, it->second, true, true);
+    for (const auto & substitution : substitutions) {
+      net->substitute(substitution.first, substitution.second, true, true);
     }
   }
   
@@ -3930,10 +3879,10 @@ HfstTransducer &HfstTransducer::merge
   hfst::xre::XreCompiler xre_(args);
   xre_.set_verbosity(false);
 
-  for (std::set<std::string>::const_iterator it = markers_added.begin(); it != markers_added.end(); it++)
+  for (const auto & it : markers_added)
     {
-      std::string marker = *it;
-      std::string symbol(1, it->at(1)); // @X@ -> X
+      std::string marker = it;
+      std::string symbol(1, it.at(1)); // @X@ -> X
       std::string worsener_string("[ ? | \"" + marker +  "\" ?:? ]* \"" + marker + "\":" + symbol + " ?:0 [ ? | \"" + marker + "\" ?:? | \"" + marker + "\":" + symbol + " ?:0 ]* ;");
 
       HfstTransducer * worsener = xre_.compile(worsener_string);
@@ -4193,11 +4142,8 @@ HfstTransducer get_flag_path_restriction(const StringSet &_1_flags,
 
   // All _1_flags are allowed as long as no _2_flags with no
   // intervening symbols were observed.
-  for (StringSet::const_iterator it = _1_flags.begin();
-       it != _1_flags.end();
-       ++it)
+  for (auto dollar_flag : _1_flags)
     {
-      std::string dollar_flag = *it;
       dollar_flag.at(0) = '$';
       dollar_flag.at(dollar_flag.size() - 1) = '$';
 
@@ -4211,11 +4157,8 @@ HfstTransducer get_flag_path_restriction(const StringSet &_1_flags,
 
   // If _2_flags are observed, _1_flags are illegal before an
   // intervening regular symbol is seen.
-  for (StringSet::const_iterator it = _2_flags.begin();
-       it != _2_flags.end();
-       ++it)
+  for (auto dollar_flag : _2_flags)
     {
-      std::string dollar_flag = *it;
       dollar_flag.at(0) = '$';
       dollar_flag.at(dollar_flag.size() - 1) = '$';
 
@@ -4247,21 +4190,19 @@ HfstTransducer &HfstTransducer::remove_illegal_flag_paths(void)
   StringSet _2_flags;
 
   // Gather _1 and _2 flag diacritics.
-  for (StringSet::const_iterator it = alphabet.begin();
-       it != alphabet.end();
-       ++it)
+  for (const auto & it : alphabet)
     {
-      if (! FdOperation::is_diacritic(*it))
+      if (! FdOperation::is_diacritic(it))
         { continue; }
 
-      if (it->find("_1.") != std::string::npos)
+      if (it.find("_1.") != std::string::npos)
         {
-          _1_flags.insert(*it);
+          _1_flags.insert(it);
         }
 
-      if (it->find("_2.") != std::string::npos)
+      if (it.find("_2.") != std::string::npos)
         {
-          _2_flags.insert(*it);
+          _2_flags.insert(it);
         }
     }
 
@@ -4274,12 +4215,10 @@ HfstTransducer &HfstTransducer::remove_illegal_flag_paths(void)
   HfstSymbolSubstitutions subst;
   HfstSymbolSubstitutions back_subst;
   
-  for (StringSet::const_iterator it = _1_flags.begin();
-       it != _1_flags.end();
-       ++it)
+  for (const auto & _1_flag : _1_flags)
     {
-      std::string at_flag = *it;
-      std::string dollar_flag = *it;
+      std::string at_flag = _1_flag;
+      std::string dollar_flag = _1_flag;
       dollar_flag.at(0) = '$';
       dollar_flag.at(dollar_flag.size() - 1) = '$';
 
@@ -4287,12 +4226,10 @@ HfstTransducer &HfstTransducer::remove_illegal_flag_paths(void)
       back_subst[dollar_flag] = at_flag;
     }
 
-  for (StringSet::const_iterator it = _2_flags.begin();
-       it != _2_flags.end();
-       ++it)
+  for (const auto & _2_flag : _2_flags)
     {
-      std::string at_flag = *it;
-      std::string dollar_flag = *it;
+      std::string at_flag = _2_flag;
+      std::string dollar_flag = _2_flag;
       dollar_flag.at(0) = '$';
       dollar_flag.at(dollar_flag.size() - 1) = '$';
 
@@ -4525,14 +4462,12 @@ HfstTransducer &HfstTransducer::shuffle(const HfstTransducer &another, bool)
   // Transform alphabets of transducers into string pair sets for function
   // insert_freely
   StringPairSet this_alphabet_pairset;
-  for (StringSet::const_iterator it = this_alphabet.begin();
-       it != this_alphabet.end(); it++) {
-    this_alphabet_pairset.insert(StringPair(*it, *it));
+  for (const auto & it : this_alphabet) {
+    this_alphabet_pairset.insert({ it, it });
   }
   StringPairSet another_alphabet_pairset;
-  for (StringSet::const_iterator it = another_alphabet.begin();
-       it != another_alphabet.end(); it++) {
-    another_alphabet_pairset.insert(StringPair(*it, *it));
+  for (const auto & it : another_alphabet) {
+    another_alphabet_pairset.insert({ it, it });
   }
 
   // Freely insert any number of any symbol in the first transducer
@@ -5759,29 +5694,27 @@ HfstTokenizer HfstTransducer::create_tokenizer()
     HfstTokenizer tok;
 
     if (this->type == SFST_TYPE)
-    {
+      {
         StringPairSet sps = this->get_symbol_pairs();
-        for (StringPairSet::const_iterator it = sps.begin();
-             it != sps.end(); it++)
-    {
-            if (it->first.size() > 1)
-        tok.add_multichar_symbol(it->first);
-            if (it->second.size() > 1)
-        tok.add_multichar_symbol(it->second);
-    }
-    }
+        for (const auto& sp : sps)
+          {
+            if (sp.first.size() > 1)
+              tok.add_multichar_symbol(sp.first);
+            if (sp.second.size() > 1)
+              tok.add_multichar_symbol(sp.second);
+          }
+      }
     else
-    {
+      {
         hfst::implementations::HfstBasicTransducer t(*this);
         t.prune_alphabet();
         StringSet alpha = t.get_alphabet();
-        for (StringSet::iterator it = alpha.begin();
-             it != alpha.end(); it++)
-    {
-            if (it->size() > 1)
-        tok.add_multichar_symbol(*it);
-    }
-    }
+        for (const auto& it : alpha)
+          {
+            if (it.size() > 1)
+              tok.add_multichar_symbol(it);
+          }
+      }
 
     return tok;
 }
