@@ -195,7 +195,7 @@ FloatVector parse_coefficients(void)
 
       std::getline(coeff_in,line);
       
-      if (line == "")
+      if (line.empty())
         { continue; }
 
       float coefficient = get_coefficient(line);

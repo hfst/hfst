@@ -244,7 +244,7 @@ bool handle_case(const std::string & names, const std::string & arguments,
                           bool skip_ambiguous_cases)
 {
   // Apropos with no arguments -> return help message for apropos.
-  if (help_mode == HELP_MODE_APROPOS && text == "")
+  if (help_mode == HELP_MODE_APROPOS && text.empty())
     {
       return get_help_message("apropos", message, HELP_MODE_ONE_COMMAND);
     }

@@ -525,7 +525,7 @@ PmatchObject * compile_like_arc(std::string word,
             break;
         }
     }
-    if (this_word.word == "") {
+    if (this_word.word.empty()) {
         // got no matches
         PmatchString * word_o = new PmatchString(word);
         word_o->multichar = true;
@@ -561,7 +561,7 @@ PmatchObject * compile_like_arc(std::string word1, std::string word2,
     WordVector this_word2;
     for (std::vector<WordVector>::iterator it = word_vectors.begin();
          (it != word_vectors.end() &&
-          (this_word1.word == "" || this_word2.word == "")); ++it) {
+          (this_word1.word.empty() || this_word2.word.empty())); ++it) {
         if (word1 == it->word) {
             this_word1 = *it;
         }
@@ -569,7 +569,7 @@ PmatchObject * compile_like_arc(std::string word1, std::string word2,
             this_word2 = *it;
         }
     }
-    if (this_word1.word == "" && this_word2.word == "") {
+    if (this_word1.word.empty() && this_word2.word.empty()) {
         // got no matches
         PmatchString * word1_o = new PmatchString(word1);
         PmatchString * word2_o = new PmatchString(word2);
@@ -578,10 +578,10 @@ PmatchObject * compile_like_arc(std::string word1, std::string word2,
         return new PmatchBinaryOperation(Disjunct, word1_o, word2_o);
     }
 
-    if (this_word1.word == "" || this_word2.word == "") {
+    if (this_word1.word.empty() || this_word2.word.empty()) {
         // just one match
         pmatchwarning("only one match for arguments to Like() operation, using nearest neighbours");
-        WordVector this_word = (this_word1.word == "" ? this_word2 : this_word1);
+        WordVector this_word = (this_word1.word.empty() ? this_word2 : this_word1);
         std::vector<std::pair<WordVector, WordVecFloat> > top_n = get_top_n(nwords, word_vectors, this_word);
         HfstTokenizer tok;
         HfstTransducer * retval = new HfstTransducer(format);

@@ -266,7 +266,7 @@ process_stream(HfstInputStream& instream, FILE* outf)
                 ostr << transducer_n;
                 std::string alt_namestr = "NO_NAME_" + ostr.str();
 
-                if (namestr == "") {
+                if (namestr.empty()) {
                   namestr = alt_namestr;
                   if (!silent) {
                     fprintf(stderr, "Transducer has no name, giving it a name '%s'...\n", namestr.c_str()); }

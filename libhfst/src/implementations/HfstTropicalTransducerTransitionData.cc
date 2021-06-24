@@ -99,7 +99,7 @@ namespace hfst {
 
       unsigned int HfstTropicalTransducerTransitionData::get_number(const std::string &symbol)
       {
-        if(symbol == "") { // FAIL
+        if(symbol.empty()) { // FAIL
           Symbol2NumberMap::iterator it = symbol2number_map.find(symbol);
           if (it == symbol2number_map.end()) {
             std::cerr << "ERROR: No number for the empty symbol\n"
@@ -143,7 +143,7 @@ namespace hfst {
     HfstTropicalTransducerTransitionData::HfstTropicalTransducerTransitionData(HfstTropicalTransducerTransitionData::SymbolType isymbol,
                                                                                HfstTropicalTransducerTransitionData::SymbolType osymbol,
                                                                                HfstTropicalTransducerTransitionData::WeightType weight) {
-      if (isymbol == "" || osymbol == "")
+      if (isymbol.empty() || osymbol.empty())
         HFST_THROW_MESSAGE
           (EmptyStringException,
            "HfstTropicalTransducerTransitionData"
@@ -206,7 +206,7 @@ namespace hfst {
       return (symbol.compare("@_IDENTITY_SYMBOL_@") == 0);
     }
     bool HfstTropicalTransducerTransitionData::is_valid_symbol(const SymbolType &symbol) {
-      if (symbol == "")
+      if (symbol.empty())
         return false;
       return true;
     }

@@ -1280,7 +1280,7 @@ namespace hfst {
   }
   bool TropicalWeightInputStream::is_bad(void) const
   {
-    if (filename == string())
+    if (filename.empty())
       { return std::cin.bad(); }
     else
       { return input_stream.bad(); }
@@ -1289,7 +1289,7 @@ namespace hfst {
   {
     if(is_eof())
       return false;
-    if (filename == string())
+    if (filename.empty())
       { return std::cin.good(); }
     else
       { return input_stream.good(); }
@@ -1329,7 +1329,7 @@ namespace hfst {
     FstHeader header;
     try
       {
-        if (filename == string())
+        if (filename.empty())
           {
             header.Read(input_stream,"STDIN");
             t = static_cast<StdVectorFst*>
@@ -1508,7 +1508,7 @@ namespace hfst {
   (const std::string &symbol)
   {
 
-    assert(! (symbol == ""));
+    assert(! (symbol.empty()));
 
     StdVectorFst * t = new StdVectorFst;
     SymbolTable st = create_symbol_table("");
@@ -1527,8 +1527,8 @@ namespace hfst {
     (const std::string &isymbol, const std::string &osymbol)
   {
 
-    assert(! (isymbol == ""));
-    assert(! (osymbol == ""));
+    assert(! (isymbol.empty()));
+    assert(! (osymbol.empty()));
 
     StdVectorFst * t = new StdVectorFst;
     SymbolTable st = create_symbol_table("");
@@ -1617,8 +1617,8 @@ namespace hfst {
       {
         StateId s2 = t->AddState();
 
-    assert(! (it->first == ""));
-    assert(! (it->second == ""));
+    assert(! (it->first.empty()));
+    assert(! (it->second.empty()));
 
         t->AddArc(s1,StdArc(st.AddSymbol(it->first),
                             st.AddSymbol(it->second),0,s2));
@@ -1646,8 +1646,8 @@ namespace hfst {
            it != sps.end();
            ++it)
         {
-      assert(! (it->first == ""));
-      assert(! (it->second == ""));
+      assert(! (it->first.empty()));
+      assert(! (it->second.empty()));
 
           t->AddArc(s1,StdArc(st.AddSymbol(it->first),
                               st.AddSymbol(it->second),0,s2));
@@ -1674,8 +1674,8 @@ namespace hfst {
         for (StringPairSet::const_iterator it2 = (*it).begin();
              it2 != (*it).end(); it2++ ) {
 
-      assert(! (it2->first == ""));
-      assert(! (it2->second == ""));
+      assert(! (it2->first.empty()));
+      assert(! (it2->second.empty()));
 
           t->AddArc(s1,StdArc(st.AddSymbol(it2->first),
                               st.AddSymbol(it2->second),0,s2));

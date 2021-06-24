@@ -56,7 +56,7 @@ namespace hfst { namespace implementations
   }
   bool HfstOlInputStream::is_bad(void) const
   {
-    if (filename == string())
+    if (filename.empty())
       { return std::cin.bad(); }
     else
       { return input_stream.bad(); }
@@ -66,7 +66,7 @@ namespace hfst { namespace implementations
     if(is_eof())
       return false;
     
-    if (filename == string())
+    if (filename.empty())
       { return std::cin.good(); }
     else
       { return input_stream.good(); }

@@ -36,7 +36,7 @@ namespace hfst { namespace implementations {
     XfsmInputStream::XfsmInputStream(const std::string &filename_):
       filename(std::string(filename_)), net_list(NULL), list_size(-1), list_pos(-1)
     {
-      if (filename == std::string())
+      if (filename.empty())
         { HFST_THROW_MESSAGE
             (FunctionNotImplementedException,
              "XfsmInputStream::XfsmInputStream(\"\") not supported");

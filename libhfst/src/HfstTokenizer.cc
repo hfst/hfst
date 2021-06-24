@@ -106,17 +106,17 @@ const
 }
 
   bool HfstTokenizer::is_skip_symbol(hfst::String &s) const
-{ return (s == "") || (skip_symbol_set.find(s) != skip_symbol_set.end()); }
+{ return (s.empty()) || (skip_symbol_set.find(s) != skip_symbol_set.end()); }
 
 void
 HfstTokenizer::add_multichar_symbol(const std::string& symbol)
-{  if (symbol == "")
+{  if (symbol.empty())
     { return; }
   multi_char_symbols.add(symbol.c_str()); }
 
 void
 HfstTokenizer::add_skip_symbol(const std::string &symbol)
-{ if (symbol == "")
+{ if (symbol.empty())
     { return; }
   multi_char_symbols.add(symbol.c_str());
   skip_symbol_set.insert(symbol.c_str()); }

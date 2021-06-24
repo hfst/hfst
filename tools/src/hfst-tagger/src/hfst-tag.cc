@@ -127,7 +127,7 @@ StringVector get_sentence_vector(void)
 
       // Skip initial empty lines. The first empty line preceeded by a
       // non emtpy line marks the end of the sentence.
-      if (word == "")
+      if (word.empty())
         {
           if (read_non_empty_word)
             { break; }

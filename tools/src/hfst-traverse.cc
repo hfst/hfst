@@ -268,7 +268,7 @@ process_stream(HfstInputStream& instream)
         transducer_n++;
         HfstTransducer trans(instream);
         string trans_name = trans.get_name();
-        if (trans_name == "")
+        if (trans_name.empty())
           {
             trans_name = inputfilename;
           }

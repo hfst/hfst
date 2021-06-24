@@ -911,14 +911,14 @@ public:
 
          for k, v in s.items():
              if _is_string(k):
-                if subst_type == "":
+                if subst_type.empty():
                    subst_type="string"
                 elif subst_type == "string pair":
                    raise RuntimeError('')
                 if not _is_string(v):
                    raise RuntimeError('')
              elif _is_string_pair(k):
-                if subst_type == "":
+                if subst_type.empty():
                    subst_type="string pair"
                 elif subst_type == "string":
                    raise RuntimeError('')
@@ -1051,7 +1051,7 @@ def __init__(self, **kwargs):
             hfst_format = v
         if k == 'type':
             type = v
-    if filename == "":
+    if filename.empty():
         self.this = _libhfst.create_hfst_output_stream("", type, hfst_format)
     else:
         self.this = _libhfst.create_hfst_output_stream(filename, type, hfst_format)
@@ -1221,7 +1221,7 @@ class HfstBasicTransducer {
     std::ostringstream oss;
     $self->write_in_att_format(oss, write_weights);
     std::string retval = oss.str();
-    if (retval == "") // empty transducer must be represented as empty line in python, else read_att fails...
+    if (retval.empty()) // empty transducer must be represented as empty line in python, else read_att fails...
       retval = std::string("\n");
     return retval;
   }
@@ -1429,14 +1429,14 @@ class HfstBasicTransducer {
 
          for k, v in s.items():
              if _is_string(k):
-                if subst_type == "":
+                if subst_type.empty():
                    subst_type="string"
                 elif subst_type == "string pair":
                    raise RuntimeError('')
                 if not _is_string(v):
                    raise RuntimeError('')
              elif _is_string_pair(k):
-                if subst_type == "":
+                if subst_type.empty():
                    subst_type="string pair"
                 elif subst_type == "string":
                    raise RuntimeError('')

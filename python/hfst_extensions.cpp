@@ -21,7 +21,7 @@ namespace hfst {
 
   hfst::HfstOutputStream * create_hfst_output_stream(const std::string & filename, hfst::ImplementationType type, bool hfst_format)
   {
-    if (filename == "") { return new hfst::HfstOutputStream(type, hfst_format); }
+    if (filename.empty()) { return new hfst::HfstOutputStream(type, hfst_format); }
     else { return new hfst::HfstOutputStream(filename, type, hfst_format); }
   }
 

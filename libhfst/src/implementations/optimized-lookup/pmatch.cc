@@ -45,7 +45,7 @@ PmatchAlphabet::PmatchAlphabet(std::istream & inputstream,
                     std::string feature =  hfst::FdOperation::get_feature(symbol_table[i])
                         .substr(14, std::string::npos);
                     std::string value = hfst::FdOperation::get_value(symbol_table[i]);
-                    std::string new_diacritic = s.substr(0, 3) + feature + (value == "" ? "" : "." + value) + "@";
+                    std::string new_diacritic = s.substr(0, 3) + feature + (value.empty() ? "" : "." + value) + "@";
                     fd_table.define_diacritic(i, new_diacritic);
                     // finally go over all other known flag diacritics with the non-globalized feature and
                     // mark them global too

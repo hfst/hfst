@@ -76,15 +76,15 @@ hfst_set_name(hfst::HfstTransducer& dest, const hfst::HfstTransducer& lhs,
       {
         hfst_set_name_maybe_truncate(dest, op + "(" + lhs.get_name() + ", " + rhs.get_name() + ")");
       }
-    else if ((lhs.get_name() == "") && (rhs.get_name() != ""))
+    else if ((lhs.get_name().empty()) && (rhs.get_name() != ""))
       {
         hfst_set_name_maybe_truncate(dest, op + "(UNNAMED, " + rhs.get_name() + ")");
       }
-    else if ((lhs.get_name() != "") && (rhs.get_name() == ""))
+    else if ((lhs.get_name() != "") && (rhs.get_name().empty()))
       {
         hfst_set_name_maybe_truncate(dest, op + "(" + lhs.get_name() + ", UNNAMED)");
       }
-    else if ((lhs.get_name() == "") && (rhs.get_name() == ""))
+    else if ((lhs.get_name().empty()) && (rhs.get_name().empty()))
       {
         hfst_set_name_maybe_truncate(dest, op + "(UNNAMED, UNNAMED)");
       }
@@ -138,7 +138,7 @@ hfst_set_formula(hfst::HfstTransducer& dest, const hfst::HfstTransducer& lhs,
                           " " + op + " " +
                           rhs.get_property("formulaic-definition"));
       }
-    else if ((lhs.get_property("formulaic-definition") == "") &&
+    else if ((lhs.get_property("formulaic-definition").empty()) &&
              (rhs.get_property("formulaic-definition") != ""))
       {
         hfst_set_formula_maybe_truncate(dest,
@@ -146,7 +146,7 @@ hfst_set_formula(hfst::HfstTransducer& dest, const hfst::HfstTransducer& lhs,
                           rhs.get_property("formulaic-definition"));
       }
     else if ((lhs.get_property("formulaic-definition") != "") &&
-             (rhs.get_property("formulaic-definition") == ""))
+             (rhs.get_property("formulaic-definition").empty()))
       {
         hfst_set_formula_maybe_truncate(dest,
                           lhs.get_property("formulaic-definition") +

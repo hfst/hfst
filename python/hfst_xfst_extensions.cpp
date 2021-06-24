@@ -53,11 +53,11 @@ int hfst_compile_xfst(hfst::xfst::XfstCompiler & comp, std::string input, const 
         int retval = comp.parse_line(input);
         hfst::set_warning_stream(&std::cerr);
         
-        if (output_stream == "") {
+        if (output_stream.empty()) {
           hfst::hfst_xfst_string_one = os1->str();
           delete os1;
         }
-        if (error_stream == "") {
+        if (error_stream.empty()) {
           hfst::hfst_xfst_string_two = os2->str();
           delete os2;
         }

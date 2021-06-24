@@ -231,7 +231,7 @@ ProcTransducerAlphabet::check_for_overlapping() const
       while(true)
       {
         std::string ch = TokenIOStream::read_utf8_char(s);
-        if(ch == "")
+        if(ch.empty())
           break;
         else
           chars.push_back(ch);
@@ -572,7 +572,7 @@ ProcTransducerAlphabet::caps_helper(const char* in, int& case_res)
   while(true)
   {
     std::string c = TokenIOStream::read_utf8_char(str);
-    if(c == "")
+    if(c.empty())
       break;
     
     std::string switched = caps_helper_single(c.c_str(), (tmp==-2?case_res:tmp));

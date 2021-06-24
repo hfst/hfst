@@ -141,7 +141,7 @@ int main(void)
 {
   // new_string(...)
   std::string s1 = new_string(0);
-  assert(s1 == "");
+  assert(s1.empty());
   s1 = new_string(1);
   assert(s1.size() == 1);
   assert(s1[0] == 0);
@@ -150,9 +150,9 @@ int main(void)
 
   // remove_sign(..)
   std::string s2 = remove_sign("",'a');
-  assert(s2 == "");
+  assert(s2.empty());
   s2 = remove_sign("a",'a');
-  assert(s2 == "");
+  assert(s2.empty());
   s2 = remove_sign("a",'b');
   assert(s2 == "a");
   s2 = remove_sign("fooa",'a');
@@ -166,7 +166,7 @@ int main(void)
 
   // unescape(...)
   std::string s3 = unquote("\"\"");
-  assert(s3 == "");
+  assert(s3.empty());
   s3 = unquote("\"a\"");
   assert(s3 == "a");
   s3 = unquote("\"ab\"");
@@ -195,7 +195,7 @@ int main(void)
 
   // unescape(...)
   std::string s4 = unescape("");
-  assert(s4 == "");
+  assert(s4.empty());
   s4 = unescape("foo");
   assert(s4 == "foo");
   s4 = unescape("%foo");
@@ -256,7 +256,7 @@ int main(void)
     { /* nothing */ }
 
   // remove_white_space(...)
-  assert(remove_white_space("") == "");
+  assert(remove_white_space("").empty());
   assert(remove_white_space("foo") == "foo");
   assert(remove_white_space("foo ") == "foo");
   assert(remove_white_space(" foo") == "foo");

@@ -1302,7 +1302,7 @@
                try
                  {
                    linestr = get_stripped_line(is, file, linecount);
-                   if (linestr == "") // prolog separator
+                   if (linestr.empty()) // prolog separator
                      {
                        return retval;
                      }
@@ -3030,7 +3030,7 @@
          {
            if (! FdOperation::is_diacritic(symbol))
              return false;
-           if (flag == "")
+           if (flag.empty())
              return true;
            else if (FdOperation::get_feature(symbol) == flag)
              return true;

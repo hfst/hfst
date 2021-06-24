@@ -466,8 +466,8 @@ namespace xfst {
               negative_values.insert(feat);
               break;
             case 'R': // require
-              if (val == "") { // empty require
-                if (values[feat] == "")
+              if (val.empty()) { // empty require
+                if (values[feat].empty())
                   { return false; }
                 else { // nonempty require
                   if (is_negatively_set || (values[feat] != val)) { return false; }
@@ -475,7 +475,7 @@ namespace xfst {
               }
               break;
             case 'D': // disallow
-              if (val == "") { // empty disallow
+              if (val.empty()) { // empty disallow
                 if (values[feat] != "") {
                   return false;
                 }
@@ -490,7 +490,7 @@ namespace xfst {
               values[feat] = "";
               break;
             case 'U': // unification
-              if(values[feat] == "" || /* if the feature is unset or */
+              if(values[feat].empty() || /* if the feature is unset or */
                  ((!is_negatively_set) && (values[feat] == val)) || /* the feature is at
                                                                      this value already
                                                                      or */
@@ -1746,7 +1746,7 @@ namespace xfst {
   XfstCompiler::add_loaded_definition(HfstTransducer * t)
   {
     std::string def_name = t->get_name();
-    if (def_name == "")
+    if (def_name.empty())
       {
         error() << "warning: loaded transducer definition has no name, skipping it" << std::endl;
         flush(&error());
@@ -3578,7 +3578,7 @@ namespace xfst {
         {
           HfstTransducer * tr = stack_.top();
           std::string name = tr->get_name();
-          if (name == "")
+          if (name.empty())
             name = "NO_NAME";
           HfstBasicTransducer fsm(*tr);
           fsm.write_in_prolog_format(*oss, name, variables_["print-weight"] == "ON");

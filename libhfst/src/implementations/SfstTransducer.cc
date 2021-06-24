@@ -35,7 +35,7 @@ namespace hfst { namespace implementations {
     SfstInputStream::SfstInputStream(const std::string &filename_):
       filename(std::string(filename_)), is_minimal(false)
   {
-    if (filename == std::string())
+    if (filename.empty())
       { input_file = stdin; }
     else {
       input_file = hfst::hfst_fopen(filename.c_str(),"r");

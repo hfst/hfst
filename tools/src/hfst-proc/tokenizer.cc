@@ -266,7 +266,7 @@ TokenIOStream::make_token(bool was_escaped)
   // the next thing in the stream is not a symbol
   // (extract_symbol moved the stream back to before anything was read)
   std::string ch = read_utf8_char();
-  if(null_flush && ch == "") {
+  if(null_flush && ch.empty()) {
     do_null_flush();
   }
   if(was_escaped) {
