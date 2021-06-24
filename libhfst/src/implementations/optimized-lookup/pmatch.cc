@@ -100,15 +100,9 @@ void PmatchAlphabet::add_symbol(const std::string & symbol)
         symbol2lists[symbol_table.size()] = hfst::size_t_to_ushort(symbol_lists.size());
         symbol_lists.push_back(SymbolNumberVector(exclusionary_lists.begin(),
                                                   exclusionary_lists.end()));
-#if defined(_MSC_VER) || defined(NO_CPLUSPLUS_11)
-        for (SymbolNumberVector::const_iterator exc = exclusionary_lists.begin(); exc != exclusionary_lists.end(); exc++) {
-          symbol_list_members[list2symbols[*exc]].push_back(hfst::size_t_to_uint(symbol_table.size()));
-        }
-#else
 	for(const auto & exc: exclusionary_lists) {
           symbol_list_members[list2symbols[exc]].push_back(symbol_table.size());
         }
-#endif
     }
     TransducerAlphabet::add_symbol(symbol);
 }
@@ -836,18 +830,8 @@ bool PmatchAlphabet::has_rtn(std::string const & name) const
     if (name == "TOP") {
         return true;
     }
-#ifdef NO_CPLUSPLUS_11
-    hfst_ol::RtnNameMap::const_iterator it = rtn_names.find(name);
-    if (it != rtn_names.end())
-    {
-        return it->second < rtns.size() && rtns[it->second] != NULL;
-    } else {
-        return false;
-    }
-#else	
     return rtn_names.count(name) != 0 &&
         rtn_names.at(name) < rtns.size() && rtns[rtn_names.at(name)] != NULL;
-#endif
 }
 
 bool PmatchAlphabet::has_rtn(SymbolNumber symbol) const

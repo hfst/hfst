@@ -5,17 +5,8 @@
 #  include <config.h>
 #endif
 
-#ifdef INCLUDE_TR1_UNORDERED_MAP_AND_SET
- #include <tr1/unordered_map>
-#else
- #include <unordered_map>
-#endif
-
-#ifdef USE_TR1_UNORDERED_MAP_AND_SET
-  using std::tr1::unordered_map;
-#else
-  using std::unordered_map;
-#endif
+#include <unordered_map>
+using std::unordered_map;
 
 #include <string>
 #include <vector>

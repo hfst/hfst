@@ -175,16 +175,6 @@ AC_ARG_WITH([readline],
             [with_readline=$withval],
             [with_readline=no])
 AM_CONDITIONAL([WANT_READLINE], [test x$with_readline != xno])
-# make c++11 features optional; this will disable some functions and make compilation slower
-AC_ARG_WITH([c++11],
-            [AS_HELP_STRING([--with-c++11],
-                            [enable c++11 features @<:@default=yes@:>@])],
-            [with_cplusplus_11=$withval],
-            [with_cplusplus_11=yes])
-AS_IF([test "x$with_cplusplus_11" == "xno"], [AC_DEFINE([NO_CPLUSPLUS_11], [1],
-                                              [Define not to have c++11 support])])
-AS_IF([test "x$with_cplusplus_11" == "xno"], [AC_DEFINE([INCLUDE_TR1_UNORDERED_MAP_AND_SET], [1], [Define unordered container header])])
-AS_IF([test "x$with_cplusplus_11" == "xno"], [AC_DEFINE([USE_TR1_UNORDERED_MAP_AND_SET], [1], [Define unordered container namespace])])
 # make it possible to disable loading entries from shared object (openfst back-end feature),
 # since this adds a dependecy on dl library
 AC_ARG_ENABLE([load_so_entries],

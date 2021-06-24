@@ -7,21 +7,11 @@
 
 #include "HfstTransducer.h"
 
-#ifdef INCLUDE_TR1_UNORDERED_MAP_AND_SET
- #include <tr1/unordered_map>
- #include <tr1/unordered_set>
-#else
- #include <unordered_map>
- #include <unordered_set>
-#endif
+#include <unordered_map>
+#include <unordered_set>
 
-#ifdef USE_TR1_UNORDERED_MAP_AND_SET
-using std::tr1::unordered_map;
-using std::tr1::unordered_set;
-#else
 using std::unordered_map;
 using std::unordered_set;
-#endif
 
 #include <iostream>
 
