@@ -22,14 +22,13 @@ namespace hfst
 
         ImplementationType type = mappingPairVector[0].first.get_type();
         // Check if all transducer types are the same
-        for ( unsigned int i = 0; i < mappingPairVector.size(); i++ )
-        {
-            if ( mappingPairVector[i].first.get_type() != type
-                    || mappingPairVector[i].second.get_type() != type)
-            {
+        for (const auto& it : mappingPairVector)
+          {
+            if (it.first.get_type() != type || it.second.get_type() != type)
+              {
                 HFST_THROW_MESSAGE(TransducerTypeMismatchException, "Rule mapping");
-            }
-        }
+              }
+          }
 
         HfstTransducerPair contextPair(HfstTransducer("@_EPSILON_SYMBOL_@", TOK, type),
                                        HfstTransducer("@_EPSILON_SYMBOL_@", TOK, type));
@@ -50,27 +49,23 @@ namespace hfst
                      const HfstTransducerPairVector &a_context,
                      ReplaceType a_replType )
       {
-          // Check if all transducer types are the same
+        // Check if all transducer types are the same
         ImplementationType type = mappingPairVector[0].first.get_type();
-        for ( unsigned int i = 0; i < mappingPairVector.size(); i++ )
-        {
-          if ( mappingPairVector[i].first.get_type() != type
-                  || mappingPairVector[i].second.get_type() != type)
+        for (const auto& it : mappingPairVector)
           {
-              HFST_THROW_MESSAGE(TransducerTypeMismatchException, "Rule mapping");
+            if (it.first.get_type() != type || it.second.get_type() != type)
+              {
+                HFST_THROW_MESSAGE(TransducerTypeMismatchException, "Rule mapping");
+              }
           }
-        }
-        for ( unsigned int j = 0; j < a_context.size(); j++ )
-        {
-            if ( a_context[j].first.get_type() != type
-                || a_context[j].second.get_type() != type )
-            {
+        for (const auto& it : a_context)
+          {
+            if (it.first.get_type() != type || it.second.get_type() != type)
+              {
                 HFST_THROW_MESSAGE(TransducerTypeMismatchException, "Rule context");
-            }
-        }
+              }
+          }
 
-        
-          
         //HfstTransducerPairVector tmpV = mappingPairVector;
         //tmpV[0].first = encodeFlagDiacritics(tmpV[0].first);
         
@@ -122,20 +117,20 @@ namespace hfst
          HfstTransducerPairVector tmpM = this->mapping;
         
         //cerr << "\n mapping size: " << tmpM.size() << endl;
-        for ( unsigned int i = 0; i < tmpM.size(); i++ )
+        for (auto & it : tmpM)
         {
-            tmpM[i].first = encodeFlagDiacritics(tmpM[i].first);
-            tmpM[i].second = encodeFlagDiacritics(tmpM[i].second);
+            it.first = encodeFlagDiacritics(it.first);
+            it.second = encodeFlagDiacritics(it.second);
         }
         
         
         HfstTransducerPairVector tmpC = this->context;
         
         //cerr << "\n context size: " << tmpC.size() << endl;
-        for ( unsigned int i = 0; i < tmpC.size(); i++ )
+        for (auto & it : tmpC)
         {
-            tmpC[i].first = encodeFlagDiacritics(tmpC[i].first);
-            tmpC[i].second = encodeFlagDiacritics(tmpC[i].second);
+            it.first = encodeFlagDiacritics(it.first);
+            it.second = encodeFlagDiacritics(it.second);
         }
         
         this->mapping = tmpM;  
@@ -165,25 +160,23 @@ namespace hfst
 
       out << "mapping:" << std::endl;
       unsigned int index = 1;
-      for (HfstTransducerPairVector::const_iterator it = r.mapping.begin();
-           it != r.mapping.end(); it++)
+      for (const auto & it : r.mapping)
         {
           out << "#" << index << " (right side):" << std::endl;
-          out << it->first;
+          out << it.first;
           out << "#" << index << " (left side):" << std::endl;
-          out << it->second;
+          out << it.second;
           index++;
         }
 
       out << "context:" << std::endl;
       index = 1;
-      for (HfstTransducerPairVector::const_iterator it = r.context.begin();
-           it != r.context.end(); it++)
+      for (const auto & it : r.context)
         {
           out << "#" << index << " (right side):" << std::endl;
-          out << it->first;
+          out << it.first;
           out << "#" << index << " (left side):" << std::endl;
-          out << it->second;
+          out << it.second;
           index++;
         }
 
@@ -202,12 +195,10 @@ namespace hfst
         StringSet removeFromAlphabet;
         //printf("alphabet lexicons: \n");
         StringSet transducerAlphabet = tr.get_alphabet();
-        for (StringSet::const_iterator s = transducerAlphabet.begin();
-                       s != transducerAlphabet.end();
-                       ++s)
+        for (const auto & s : transducerAlphabet)
         {
          
-            String alph = *s;
+            String alph = s;
             String alphFirst3 = alph.substr(0,3);
          //   String alphLast = alph.back();
 
@@ -224,8 +215,8 @@ namespace hfst
 
                 replace(alph.begin(), alph.end(), '@', '$');
                 //std::cout << alph << '\n';
-                realFlagstoFakeFlags.insert(StringPair(*s, alph));
-                removeFromAlphabet.insert(*s);
+                realFlagstoFakeFlags.insert(StringPair(s, alph));
+                removeFromAlphabet.insert(s);
             }
         }
     
@@ -247,12 +238,10 @@ namespace hfst
         //printf("alphabet lexicons: \n");
         StringSet transducerAlphabet = tr.get_alphabet();
         StringSet removeFromAlphabet;
-        for (StringSet::const_iterator s = transducerAlphabet.begin();
-                       s != transducerAlphabet.end();
-                       ++s)
+        for (const auto & s : transducerAlphabet)
         {
          
-            String alph = *s;
+            String alph = s;
             String alphFirst3 = alph.substr(0,3);
          //   String alphLast = alph.back();
 
@@ -269,8 +258,8 @@ namespace hfst
 
                 replace(alph.begin(), alph.end(), '$', '@');
                 //std::cout << alph << '\n';
-                fakeFlagsToRealFlags.insert(StringPair(*s, alph));
-                removeFromAlphabet.insert(*s);
+                fakeFlagsToRealFlags.insert(StringPair(s, alph));
+                removeFromAlphabet.insert(s);
             }
         }
     
@@ -414,7 +403,7 @@ namespace hfst
          // HfstTransducer epsilon("@_EPSILON_SYMBOL_@", TOK, type);
 
 
-          for ( unsigned int i = 0; i < ContextVector.size(); i++ )
+          for (const auto & i : ContextVector)
           {
 
             // Expand context with mapping
@@ -429,14 +418,14 @@ namespace hfst
             identityStar.repeat_star();
 
             HfstTransducer firstContext( identityStar);
-            firstContext.concatenate(ContextVector[i].first);
+            firstContext.concatenate(i.first);
             firstContext.transform_weights(&zero_weight);
             firstContext.optimize();
 
             insertFreelyAllTheBrackets( firstContext, optional );
 
             // Rc =  (Rc .*) << {<,>}
-            HfstTransducer secondContext(ContextVector[i].second);
+            HfstTransducer secondContext(i.second);
             secondContext.concatenate(identityStar);
             secondContext.transform_weights(&zero_weight);
             secondContext.optimize();
@@ -516,11 +505,9 @@ namespace hfst
             // to firstContext
             StringSet firstContextAlphabet = firstContext.get_alphabet();
             bool hasBoundary = false;
-            for (StringSet::const_iterator s = firstContextAlphabet.begin();
-                      s != firstContextAlphabet.end();
-                      ++s)
+            for (const auto & s : firstContextAlphabet)
             {
-                if( boundaryMarker.compare(s->c_str()) == 0 )
+                if( boundaryMarker.compare(s.c_str()) == 0 )
                     hasBoundary = true;
             }
 
@@ -543,11 +530,9 @@ namespace hfst
             // to secondContext
             StringSet secondContextAlphabet = secondContext.get_alphabet();
             hasBoundary = false;
-            for (StringSet::const_iterator s = secondContextAlphabet.begin();
-                      s != secondContextAlphabet.end();
-                      ++s)
+            for (const auto & s : secondContextAlphabet)
             {
-                if( boundaryMarker.compare(s->c_str()) == 0 )
+                if( boundaryMarker.compare(s.c_str()) == 0 )
                     hasBoundary = true;
             }
 
@@ -686,12 +671,10 @@ namespace hfst
             {
                 //printf("alphabet: \n");
                 StringSet transducerAlphabet = mappingPairVector[0].first.get_alphabet();
-                for (StringSet::const_iterator s = transducerAlphabet.begin();
-                               s != transducerAlphabet.end();
-                               ++s)
+                for (const auto & s : transducerAlphabet)
                     {
                         //printf("%s \n", s->c_str());
-                        mapping.insert_to_alphabet(s->c_str());
+                        mapping.insert_to_alphabet(s.c_str());
                     }
                 //printf("------------------ \n");
             }
@@ -1019,13 +1002,10 @@ namespace hfst
                   //printf("alphabet: \n");
                   StringSet transducerAlphabet 
                     = mappingPairVector[0].first.get_alphabet();
-                  for (StringSet::const_iterator s 
-                         = transducerAlphabet.begin();
-                       s != transducerAlphabet.end();
-                       ++s)
+                  for (const auto & s : transducerAlphabet)
                     {
                       //printf("%s \n", s->c_str());
-                      mapping.insert_to_alphabet(s->c_str());
+                      mapping.insert_to_alphabet(s.c_str());
                     }
                   //printf("------------------ \n");
                 }
@@ -1138,19 +1118,16 @@ namespace hfst
 
             if (ruletmp.get_replType() != REPL_UP)
               {
-                for (HfstTransducerPairVector::iterator cont_it = cont.begin();
-                     cont_it != cont.end(); cont_it++)
+                for (auto & cont_it : cont)
                   {
-                    for (StringSet::const_iterator sit 
-                           = marker_symbols.begin();
-                         sit != marker_symbols.end(); sit++)
+                    for (const auto & marker_symbol : marker_symbols)
                       {
-                        if (getMarkerNumber(*sit) != i)
+                        if (getMarkerNumber(marker_symbol) != i)
                           {
-                            StringPair marker_pair(*sit, *sit);
+                            StringPair marker_pair(marker_symbol, marker_symbol);
                             // 'false' makes sure harmonization is not done
-                            cont_it->first.insert_freely(marker_pair, false);
-                            cont_it->second.insert_freely(marker_pair, false);
+                            cont_it.first.insert_freely(marker_pair, false);
+                            cont_it.second.insert_freely(marker_pair, false);
                           }
                       }
                   }
@@ -2113,11 +2090,8 @@ namespace hfst
           //if the transdcuer is optional, LM2 and RM2 are not there
           bool optional = true;
           StringSet transducerAlphabet = t.get_alphabet();
-          for (StringSet::const_iterator s = transducerAlphabet.begin();
-                         s != transducerAlphabet.end();
-                         ++s)
+          for (auto alph : transducerAlphabet)
           {
-              String alph = *s;
               if ( alph == leftMarker2)
               {
                   optional = false;
@@ -2435,19 +2409,11 @@ namespace hfst
       // replace left
       HfstTransducer replace_left( const Rule &rule, bool optional)
       {
-          HfstTransducerPairVector mappingPairVector = rule.get_mapping();
-          //HfstTransducer newMapping = rule.get_mapping();
-          //newMapping.invert().optimize();
-
           HfstTransducerPairVector newMappingPairVector;
-          for ( unsigned int i = 0; i < mappingPairVector.size(); i++ )
+          for (auto & it : rule.get_mapping())
           {
-              // in every mapping pair invert first and second
-              //HfstTransducer newMapping = rule.get_mapping();
-            HfstTransducer first = mappingPairVector[i].first;
-            HfstTransducer second = mappingPairVector[i].second;
-            newMappingPairVector.push_back(HfstTransducerPair(second, first));
-
+            // in every mapping pair invert first and second
+            newMappingPairVector.push_back({ it.second, it.first });
           }
 
           Rule newRule ( newMappingPairVector, rule.get_context(), rule.get_replType());
@@ -2461,25 +2427,18 @@ namespace hfst
       {
           std::vector<Rule> leftRuleVector;
 
-          for ( unsigned int i = 0; i < ruleVector.size(); i++ )
+          for (const auto & rule : ruleVector)
           {
-
-              HfstTransducerPairVector mappingPairVector = ruleVector[i].get_mapping();
-              //HfstTransducer newMapping = rule.get_mapping();
-              //newMapping.invert().optimize();
+              const auto & mappingPairVector = rule.get_mapping();
 
               HfstTransducerPairVector newMappingPairVector;
-              for ( unsigned int j = 0; j < mappingPairVector.size(); j++ )
+              for (auto & it : mappingPairVector)
               {
-                  // in every mapping pair invert first and second
-                  //HfstTransducer newMapping = rule.get_mapping();
-                HfstTransducer first = mappingPairVector[j].first;
-                HfstTransducer second = mappingPairVector[j].second;
-                newMappingPairVector.push_back(HfstTransducerPair(second, first));
-
+                // in every mapping pair invert first and second
+                newMappingPairVector.push_back({ it.second, it.first });
               }
 
-              Rule newRule(newMappingPairVector, ruleVector[i].get_context(), ruleVector[i].get_replType());
+              Rule newRule(newMappingPairVector, rule.get_context(), rule.get_replType());
 
               leftRuleVector.push_back(newRule);
           }

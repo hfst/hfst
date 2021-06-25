@@ -24,10 +24,8 @@ Rule::Rule(const std::string &name,
   center(center)
 {
   OtherSymbolTransducerVector contexts_copy = contexts;
-  for (OtherSymbolTransducerVector::iterator it = contexts_copy.begin();
-       it != contexts_copy.end();
-       ++it)
-    { context.apply(&HfstTransducer::disjunct,*it); }
+  for (auto & it : contexts_copy)
+    { context.apply(&HfstTransducer::disjunct,it); }
   this->center.harmonize_diacritics(context);
 }
 
@@ -38,14 +36,12 @@ Rule::Rule(const std::string &name,
   rule_transducer(TWOLC_UNKNOWN)
 {
   rule_transducer.apply(&HfstTransducer::repeat_star);
-  for (RuleVector::const_iterator it = v.begin();
-       it != v.end();
-       ++it)
+  for (auto it : v)
     {
-      if (! (*it)->empty())
+      if (! it->empty())
     {
       rule_transducer.apply
-        (&HfstTransducer::intersect,(*it)->rule_transducer);
+        (&HfstTransducer::intersect,it->rule_transducer);
       is_empty = false;
     }
     }
@@ -146,9 +142,9 @@ OtherSymbolTransducer Rule::get_center(const SymbolPairVector &v)
   unknown.apply(&HfstTransducer::repeat_star);
   OtherSymbolTransducer diamond(TWOLC_DIAMOND);
   OtherSymbolTransducer center_pair_transducer;
-  for (SymbolPairVector::const_iterator it = v.begin(); it != v.end(); ++it)
+  for (const auto & it : v)
     {
-      OtherSymbolTransducer pair(it->first,it->second);
+      OtherSymbolTransducer pair(it.first,it.second);
       center_pair_transducer.
     apply(&HfstTransducer::disjunct,pair);
     }
@@ -180,15 +176,13 @@ void Rule::add_missing_symbols_freely(const SymbolRange &diacritics)
 {
   std::set<std::string> symbol_set =
     HfstBasicTransducer(rule_transducer.get_transducer()).get_alphabet();
-  for (SymbolRange::const_iterator it = diacritics.begin();
-       it != diacritics.end();
-       ++it)
+  for (const auto & diacritic : diacritics)
     {
-      if (symbol_set.find(*it) == symbol_set.end())
+      if (symbol_set.find(diacritic) == symbol_set.end())
     {
-      rule_transducer.add_symbol_to_alphabet(*it);
+      rule_transducer.add_symbol_to_alphabet(diacritic);
       rule_transducer.apply(&HfstTransducer::insert_freely,
-                SymbolPair(*it,*it), true); }
+                SymbolPair(diacritic,diacritic), true); }
     }
   
 }

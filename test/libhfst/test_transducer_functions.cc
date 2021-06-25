@@ -53,9 +53,8 @@ bool compare_alphabets(const HfstTransducer &t1, const HfstTransducer &t2)
   // DEBUG
   if (not retval)
     {
-      for (StringSet::const_iterator it = alpha1.begin();
-       it != alpha1.end(); it++) {
-    std::cerr << *it << std::endl;
+      for (const auto & it : alpha1) {
+    std::cerr << it << std::endl;
       }
       std::cerr << "--" << std::endl;
       for (StringSet::const_iterator it = alpha2.begin();
@@ -78,11 +77,11 @@ bool compare_string_vectors(const StringVector &v1, const StringVector &v2,
       std::string v1_string;
       std::string v2_string;
 
-      for (unsigned int i=0; i<v1.size(); i++) {
-    v1_string.append(v1[i]);
+      for (const auto & i : v1) {
+    v1_string.append(i);
       }
-      for (unsigned int i=0; i<v2.size(); i++) {
-    v2_string.append(v2[i]);
+      for (const auto & i : v2) {
+    v2_string.append(i);
       }
       // fprintf(stderr, "####### comparing strings '%s' and '%s'...\n", v1_string.c_str(), v2_string.c_str() ); // debug
       return (v1_string.compare(v2_string) == 0);
@@ -109,13 +108,12 @@ bool do_hfst_lookup_paths_contain(const HfstOneLevelPaths &results,
 {
   bool found=false;
   float weight=0;
-  for (HfstOneLevelPaths::const_iterator it = results.begin();
-       it != results.end(); it++)
+  for (const auto & result : results)
     {
-      if (compare_string_vectors(it->second, expected_path, true))
+      if (compare_string_vectors(result.second, expected_path, true))
     {
       found = true;
-      weight = it->first;
+      weight = result.first;
     }
     }
   if (found == false) {
@@ -139,13 +137,12 @@ bool do_results_contain(const HfstTwoLevelPaths &paths,
             float weight=0,
             bool test_path_weight=false)
 {
-  for (HfstTwoLevelPaths::const_iterator it = paths.begin();
-       it != paths.end(); it++)
+  for (const auto & path : paths)
     {
       std::string path_istring;
       std::string path_ostring;
-      for (StringPairVector::const_iterator IT = it->second.begin();
-       IT != it->second.end(); IT++)
+      for (StringPairVector::const_iterator IT = path.second.begin();
+       IT != path.second.end(); IT++)
     {
       if (IT->first.compare("@_EPSILON_SYMBOL_@") != 0)
         path_istring.append(IT->first);
@@ -158,8 +155,8 @@ bool do_results_contain(const HfstTwoLevelPaths &paths,
     {
       if (not test_path_weight)
         return true;
-      if (it->first > (weight - 0.01) &&
-          it->first < (weight + 0.01))
+      if (path.first > (weight - 0.01) &&
+          path.first < (weight + 0.01))
         return true;
     }
     }
@@ -178,10 +175,9 @@ bool do_results_contain(const HfstTwoLevelPaths &paths,
 
 void print_string_vector(const StringVector &sv)
 {
-  for (StringVector::const_iterator it = sv.begin();
-       it != sv.end(); it++)
+  for (const auto & it : sv)
     {
-      fprintf(stderr, "\"%s\" ", it->c_str());
+      fprintf(stderr, "\"%s\" ", it.c_str());
     }
 }
 
@@ -193,10 +189,9 @@ void print_lookup_path(const HfstOneLevelPath &path)
 
 void print_lookup_paths(const HfstOneLevelPaths &paths)
 {
-  for (HfstOneLevelPaths::const_iterator it = paths.begin();
-       it != paths.end(); it++)
+  for (const auto & path : paths)
     {
-      print_lookup_path(*it);
+      print_lookup_path(path);
       fprintf(stderr, "\n");
     }
 }
@@ -372,13 +367,12 @@ int main(int argc, char **argv)
       {
         std::string istring;
         std::string ostring;
-        for(StringPairVector::const_iterator IT = it->second.begin();
-        IT != it->second.end(); IT++)
+        for(const auto & IT : it->second)
           {
-        if (IT->first.compare("@_EPSILON_SYMBOL_@") != 0)
-          istring.append(IT->first);
-        if (IT->second.compare("@_EPSILON_SYMBOL_@") != 0)
-          ostring.append(IT->second);
+        if (IT.first.compare("@_EPSILON_SYMBOL_@") != 0)
+          istring.append(IT.first);
+        if (IT.second.compare("@_EPSILON_SYMBOL_@") != 0)
+          ostring.append(IT.second);
           }
         StringPair sp(istring, ostring);
 

@@ -113,14 +113,13 @@ namespace hfst
       }
 
       // one of the ranges was '.'
-      for(SfstAlphabet::const_iterator it=TheAlphabet.begin();
-      it!=TheAlphabet.end(); it++) {
-    if ((r1 == NULL || in_range(it->first, r1)) &&
-        (r2 == NULL || in_range(it->second, r2))) {
+      for(const auto & it : TheAlphabet) {
+    if ((r1 == NULL || in_range(it.first, r1)) &&
+        (r2 == NULL || in_range(it.second, r2))) {
 
       sps.insert(StringPair(
-              std::string(TheAlphabet.code2symbol(it->first)),
-              std::string(TheAlphabet.code2symbol(it->second)) ) );
+              std::string(TheAlphabet.code2symbol(it.first)),
+              std::string(TheAlphabet.code2symbol(it.second)) ) );
     }
       }
     }
@@ -245,9 +244,9 @@ namespace hfst
 
 
     Range *result=NULL;
-    for( size_t i=0; i<sym.size(); i++ ) {
+    for(unsigned int i : sym) {
       Range *tmp = new Range;
-      tmp->character = sym[i];
+      tmp->character = i;
       tmp->next = result;
       result = tmp;
     }
@@ -413,8 +412,7 @@ namespace hfst
 
     // go through all symbol pairs in TheAlphabet and copy them to sps
     StringPairSet sps;
-    for( SfstAlphabet::const_iterator it=TheAlphabet.begin(); it!=TheAlphabet.end(); it++ ) {
-      SfstAlphabet::NumberPair l=*it;
+    for(auto l : TheAlphabet) {
       sps.insert(StringPair( TheAlphabet.code2symbol(l.first),
                  TheAlphabet.code2symbol(l.second)) );
     }
@@ -439,8 +437,8 @@ namespace hfst
 
     // transducer agreement variable names
     std::vector<char*> name;
-    for( RVarSet::iterator it=RS.begin(); it!=RS.end(); it++) {
-      name.push_back(*it);
+    for(auto it : RS) {
+      name.push_back(it);
     }
     RS.clear();
 
@@ -449,12 +447,12 @@ namespace hfst
     // HfstTokenizer TOK = t->create_tokenizer(); // no effect on performance
 
     // replace all agreement variables
-    for( size_t i=0; i<name.size(); i++ ) {
+    for(auto & i : name) {
       //fprintf(stderr, "substituting transducer agreement variable \"%s\"\n", name[i]);
       HfstTransducer *nt = new HfstTransducer(t->get_type()); // an initially empty transducer
 
       // enumerate all paths of the transducer
-      HfstTransducer *vt=var_value(strdup(name[i])); // var_value frees its argument
+      HfstTransducer *vt=var_value(strdup(i)); // var_value frees its argument
       std::vector<HfstTransducer*> transducer_paths;
 
       if (t->type == SFST_TYPE) {
@@ -471,29 +469,29 @@ namespace hfst
     delete vt;
 
     // transform paths to a vector of transducers
-    for (HfstTwoLevelPaths::const_iterator it = paths.begin(); it != paths.end(); it++) {
-      HfstTransducer * path = new HfstTransducer(it->second, t->get_type());
+    for (const auto & it : paths) {
+      HfstTransducer * path = new HfstTransducer(it.second, t->get_type());
       //HfstTransducer * path
       //  = new HfstTransducer(wp.istring, wp.ostring, TOK, t->get_type());
-      path->set_final_weights(it->first);
+      path->set_final_weights(it.first);
       transducer_paths.push_back(path);
     }
       }
 
 
       // insert each path
-      for( size_t j=0; j<transducer_paths.size(); j++ ) {
+      for(auto & transducer_path : transducer_paths) {
     //fprintf(stderr, "  substituting transducer agreement variable \"%s\" with transducer:\n", name[i]);
     //cerr << *(transducer_paths[j]);
     HfstTransducer ti(*t);
     //printf("in transducer:\n");
     //cerr << ti;
-    ti.substitute(StringPair(std::string(name[i]), std::string(name[i])), *(transducer_paths[j]));
+    ti.substitute(StringPair(std::string(i), std::string(i)), *transducer_path);
     //fprintf(stderr, "  ...substituted\n");
-    delete transducer_paths[j];
+    delete transducer_path;
     nt->disjunct(ti);
       }
-      free(name[i]); // svar_value was given a copy of name[i], so the value is freed here
+      free(i); // svar_value was given a copy of name[i], so the value is freed here
 
       delete t;
       t = nt;
@@ -501,15 +499,15 @@ namespace hfst
 
 
     name.clear();
-    for( RVarSet::iterator it=RSS.begin(); it!=RSS.end(); it++)
-      name.push_back(*it);
+    for(auto it : RSS)
+      name.push_back(it);
     RSS.clear();
 
     // replace all agreement variables
-    for( size_t i=0; i<name.size(); i++ ) {
+    for(auto & i : name) {
       //printf("substituting range agreement variable \"%s\"\n", name[i]);
       HfstTransducer *nt = new HfstTransducer(t->get_type());
-      Range *r=svar_value(strdup(name[i]));  // svar_value frees its argument
+      Range *r=svar_value(strdup(i));  // svar_value frees its argument
 
       // insert each character
       while (r != NULL) {
@@ -518,14 +516,14 @@ namespace hfst
     HfstTransducer ti(*t);
     // agreement variable marker should always appear on both sides of the tape..
     //printf("substituting agreement range variable %s with %s\n", name[i], TheAlphabet.code2symbol(r->character));
-    ti.substitute(std::string(name[i]), TheAlphabet.code2symbol(r->character));
+    ti.substitute(std::string(i), TheAlphabet.code2symbol(r->character));
     nt->disjunct(ti);
 
     Range *next = r->next;
     delete r;
     r = next;
       }
-      free(name[i]);  // svar_value was given a copy of name[i], so the value is freed here
+      free(i);  // svar_value was given a copy of name[i], so the value is freed here
       delete t;
       t = nt;
     }
@@ -536,8 +534,7 @@ namespace hfst
   HfstTransducer * SfstCompiler::restriction( HfstTransducer * t, Twol_Type type, Contexts *c, int direction ) {
 
     StringPairSet sps;
-    for( SfstAlphabet::const_iterator it=TheAlphabet.begin(); it!=TheAlphabet.end(); it++ ) {
-      SfstAlphabet::NumberPair l=*it;
+    for(auto l : TheAlphabet) {
       sps.insert(StringPair( TheAlphabet.code2symbol(l.first),
                  TheAlphabet.code2symbol(l.second)) );
     }
@@ -576,8 +573,7 @@ namespace hfst
     HfstTransducerPair tr_pair(*(lc), *(rc));
 
     StringPairSet sps;
-    for( SfstAlphabet::const_iterator it=TheAlphabet.begin(); it!=TheAlphabet.end(); it++ ) {
-      SfstAlphabet::NumberPair l=*it;
+    for(auto l : TheAlphabet) {
       sps.insert(StringPair( TheAlphabet.code2symbol(l.first),
                  TheAlphabet.code2symbol(l.second)) );
     }
@@ -594,13 +590,12 @@ namespace hfst
       }
 
       // one of the ranges was '.'
-      for(SfstAlphabet::const_iterator it=TheAlphabet.begin();
-      it!=TheAlphabet.end(); it++) {
-    if ((r1 == NULL || in_range(it->first, r1)) &&
-        (r2 == NULL || in_range(it->second, r2))) {
+      for(const auto & it : TheAlphabet) {
+    if ((r1 == NULL || in_range(it.first, r1)) &&
+        (r2 == NULL || in_range(it.second, r2))) {
       mappings.insert( StringPair(
-                      TheAlphabet.code2symbol(it->first),
-                      TheAlphabet.code2symbol(it->second) ) );
+                      TheAlphabet.code2symbol(it.first),
+                      TheAlphabet.code2symbol(it.second) ) );
     }
       }
     }
@@ -757,8 +752,7 @@ namespace hfst
 
     HfstTransducerPair tr_pair(*(contexts->left), *(contexts->right));
     StringPairSet sps;
-    for( SfstAlphabet::const_iterator it=TheAlphabet.begin(); it!=TheAlphabet.end(); it++ ) {
-      SfstAlphabet::NumberPair l=*it;
+    for(auto l : TheAlphabet) {
       sps.insert(StringPair( TheAlphabet.code2symbol(l.first),
                  TheAlphabet.code2symbol(l.second)) );
     }
@@ -783,8 +777,7 @@ namespace hfst
   HfstTransducer * SfstCompiler::replace(HfstTransducer * mapping, Repl_Type repl_type, bool optional) {
 
     StringPairSet sps;
-    for( SfstAlphabet::const_iterator it=TheAlphabet.begin(); it!=TheAlphabet.end(); it++ ) {
-      SfstAlphabet::NumberPair l=*it;
+    for(auto l : TheAlphabet) {
       sps.insert(StringPair( TheAlphabet.code2symbol(l.first),
                  TheAlphabet.code2symbol(l.second)) );
     }
@@ -854,10 +847,10 @@ namespace hfst
 
     // delete the variable values
     //std::vector<char*> s;
-    for( VarMap::iterator it=VM.begin(); it != VM.end(); it++ ) {
+    for(auto & it : VM) {
       //s.push_back(it->first);
-      delete it->second;
-      it->second = NULL;
+      delete it.second;
+      it.second = NULL;
     }
     VM.clear();
     //for( size_t i=0; i<s.size(); i++ )
@@ -884,18 +877,18 @@ namespace hfst
     if (false || tr->type == SFST_TYPE)
       {
     StringPairSet sps = tr->get_symbol_pairs();
-    for (StringPairSet::const_iterator it = sps.begin(); it != sps.end(); it ++)
+    for (const auto & sp : sps)
       {
         unsigned int inumber, onumber;
 
-        if (it->first.compare("<>") == 0)
+        if (sp.first.compare("<>") == 0)
           inumber=0;
         else
-          inumber = TheAlphabet.symbol2code(it->first.c_str());
-        if (it->second.compare("<>") == 0)
+          inumber = TheAlphabet.symbol2code(sp.first.c_str());
+        if (sp.second.compare("<>") == 0)
           onumber=0;
         else
-          onumber = TheAlphabet.symbol2code(it->second.c_str());
+          onumber = TheAlphabet.symbol2code(sp.second.c_str());
 
         TheAlphabet.insert(SfstAlphabet::NumberPair(inumber,onumber));
       }
@@ -906,20 +899,17 @@ namespace hfst
 
       HfstBasicTransducer t(*tr);
 
-      for (HfstBasicTransducer::const_iterator it = t.begin();
-       it != t.end(); it++)
+      for (const auto & it : t)
     {
-      for (hfst::implementations::HfstBasicTransitions::const_iterator tr_it
-         = it->begin();
-           tr_it != it->end(); tr_it++)
+      for (const auto & tr_it : it)
         {
           TheAlphabet.insert(SfstAlphabet::NumberPair
                   (
                    TheAlphabet.symbol2code
-                   (tr_it->get_input_symbol().c_str())
+                   (tr_it.get_input_symbol().c_str())
                    ,
                    TheAlphabet.symbol2code
-                   (tr_it->get_output_symbol().c_str())
+                   (tr_it.get_output_symbol().c_str())
                    )
                  );
         }

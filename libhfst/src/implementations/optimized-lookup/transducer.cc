@@ -308,8 +308,8 @@ HfstOneLevelPaths * Transducer::lookup_fd(const StringVector & s, ssize_t limit,
                                           double time_cutoff)
 {
     std::string input_str;
-    for (StringVector::const_iterator it = s.begin(); it != s.end(); ++it) {
-        input_str.append(*it);
+    for (const auto & it : s) {
+        input_str.append(it);
     }
     return lookup_fd(input_str, limit, time_cutoff);
 }
@@ -345,8 +345,8 @@ bool Transducer::is_lookup_infinitely_ambiguous(const std::string & s)
 bool Transducer::is_lookup_infinitely_ambiguous(const StringVector & s)
 {
     std::string input_str;
-    for (StringVector::const_iterator it = s.begin(); it != s.end(); ++it) {
-        input_str.append(*it);
+    for (const auto & it : s) {
+        input_str.append(it);
     }
     return is_lookup_infinitely_ambiguous(input_str);
 }
@@ -370,13 +370,11 @@ HfstOneLevelPaths * Transducer::lookup_fd(const char * s, ssize_t limit,
     //current_weight += s.second;
     get_analyses(0, 0, 0);
     //current_weight -= s.second;
-    for (HfstTwoLevelPaths::iterator it = lookup_paths->begin();
-         it != lookup_paths->end(); ++it) {
+    for (const auto & lookup_path : *lookup_paths) {
         HfstOneLevelPath output_path;
-        output_path.first = it->first;
-        for (StringPairVector::const_iterator v_it = (it->second).begin();
-             v_it != (it->second).end(); ++v_it) {
-            output_path.second.push_back(v_it->second);
+        output_path.first = lookup_path.first;
+        for (const auto & v_it : (lookup_path.second)) {
+            output_path.second.push_back(v_it.second);
         }
         results->insert(output_path);
     }

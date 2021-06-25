@@ -356,22 +356,18 @@ int main( int argc, char **argv )
                                                      max_number_of_forms,
                                                      generate_threshold);
         
-        for (StringVectorVector::const_iterator it = paradigms.begin();
-         it != paradigms.end();
-         ++it)
+        for (const auto & paradigm : paradigms)
           {
-        (*out) << *it << std::endl;
+        (*out) << paradigm << std::endl;
           }
       }
     else
       {
-        for (StringVectorVector::iterator it = guesses.begin();
-         it != guesses.end();
-         ++it)
+        for (auto & guesse : guesses)
           {
-        std::reverse(it->begin(), it->end());
+        std::reverse(guesse.begin(), guesse.end());
 
-        (*out) << line << "\t" << *it << std::endl;
+        (*out) << line << "\t" << guesse << std::endl;
           }
       }
     (*out) << std::endl;

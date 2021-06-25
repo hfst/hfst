@@ -711,11 +711,9 @@ namespace hfst
     if (header_data[2].first.compare("name") == 0) {
       name = header_data[2].second;
     }
-    for (StringPairVector::const_iterator prop = header_data.begin();
-         prop != header_data.end();
-         ++prop)
+    for (const auto & prop : header_data)
       {
-        props[prop->first] = prop->second;
+        props[prop.first] = prop.second;
       }
   }
     

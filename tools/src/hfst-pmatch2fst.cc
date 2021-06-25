@@ -267,11 +267,10 @@ process_stream(HfstOutputStream& outstream)
     for (std::map<std::string, HfstTransducer *>::const_iterator it =
              definitions.begin(); it != definitions.end(); ++it) {
         hfst::StringSet string_set = it->second->get_alphabet();
-        for (hfst::StringSet::const_iterator sym = string_set.begin();
-             sym != string_set.end(); ++sym) {
-            if (symbols_seen.count(*sym) == 0) {
-                harmonizer.disjunct(HfstTransducer(*sym, compilation_format));
-                symbols_seen.insert(*sym);
+        for (const auto & sym : string_set) {
+            if (symbols_seen.count(sym) == 0) {
+                harmonizer.disjunct(HfstTransducer(sym, compilation_format));
+                symbols_seen.insert(sym);
             }
         }
     }
@@ -310,9 +309,8 @@ process_stream(HfstOutputStream& outstream)
         output_tmp = hfst::implementations::ConversionFunctions::
             hfst_ol_to_hfst_transducer(harmonized_tmp);
         output_tmp->set_name("TOP");
-        for(std::map<std::string, std::string>::iterator it = properties.begin();
-            it != properties.end(); ++it) {
-            output_tmp->set_property(it->first, it->second);
+        for(auto & propertie : properties) {
+            output_tmp->set_property(propertie.first, propertie.second);
         }
         outstream << *output_tmp;
         delete definitions["TOP"];
@@ -327,14 +325,13 @@ process_stream(HfstOutputStream& outstream)
             std::cerr << "converted in " << duration << " seconds\n";
         }
     
-        for (std::map<std::string, HfstTransducer *>::iterator it =
-                 definitions.begin(); it != definitions.end(); ++it) {
+        for (auto & definition : definitions) {
             if (verbose) {
-                std::cerr << "Converting " << it->first << "... ";
+                std::cerr << "Converting " << definition.first << "... ";
                 timer = clock();
             }
             intermediate_tmp = hfst::implementations::ConversionFunctions::
-                hfst_transducer_to_hfst_basic_transducer(*(it->second));
+                hfst_transducer_to_hfst_basic_transducer(*(definition.second));
             harmonized_tmp = hfst::implementations::ConversionFunctions::
                 hfst_basic_transducer_to_hfst_ol(intermediate_tmp,
                                                  true, // weighted
@@ -342,9 +339,9 @@ process_stream(HfstOutputStream& outstream)
                                                  &harmonizer); // harmonize with this
             output_tmp = hfst::implementations::ConversionFunctions::
                 hfst_ol_to_hfst_transducer(harmonized_tmp);
-            output_tmp->set_name(it->first);
+            output_tmp->set_name(definition.first);
             outstream << *output_tmp;;
-            delete it->second;
+            delete definition.second;
             delete intermediate_tmp;
             delete output_tmp;
             if (verbose) {

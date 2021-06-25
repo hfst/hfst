@@ -17,10 +17,8 @@ SentenceTagger::SentenceTagger(const std::string &lexical_model_filename,
 
 SentenceTagger::~SentenceTagger(void)
 {
-  for (ModelPointerVector::iterator it = models.begin();
-       it != models.end();
-       ++it)
-    { delete *it; }
+  for (auto & model : models)
+    { delete model; }
 
   delete sequence_tagger;
 }

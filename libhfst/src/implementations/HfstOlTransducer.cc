@@ -314,10 +314,9 @@ void HfstOlInputStream::ignore(unsigned int n)
     hfst_ol::TransitionTableIndexSet transitions
       = t->get_transitions_from_state(s);
     std::vector<hfst_ol::TransitionTableIndex> sorted_transitions;
-    for(hfst_ol::TransitionTableIndexSet::const_iterator it
-          =transitions.begin();it!=transitions.end();it++)
+    for(unsigned int it : transitions)
     {
-      const hfst_ol::Transition& transition = t->get_transition(*it);
+      const hfst_ol::Transition& transition = t->get_transition(it);
       size_t i;
       for( i=0; i<sorted_transitions.size(); i++ )
         if(all_visitations[transition.get_target()] <
@@ -327,7 +326,7 @@ void HfstOlInputStream::ignore(unsigned int n)
       sorted_transitions.push_back(hfst_ol::NO_TABLE_INDEX);
       for( size_t k=sorted_transitions.size()-1; k>i; k-- )
         sorted_transitions[k] = sorted_transitions[k-1];
-      sorted_transitions[i] = *it;
+      sorted_transitions[i] = it;
     }
     
     bool res = true;

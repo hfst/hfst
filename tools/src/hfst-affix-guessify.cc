@@ -195,13 +195,11 @@ process_stream(HfstInputStream& instream, HfstOutputStream& outstream)
                                         hfst::internal_identity,
                                         weight);
           repl->add_transition(guess_state, guess_arc);
-          for (StringSet::const_iterator x = alpha.begin();
-               x != alpha.end();
-               ++x)
+          for (const auto & x : alpha)
             {
               HfstBasicTransition x_arc(guess_state,
-                                        *x,
-                                        *x,
+                                        x,
+                                        x,
                                         weight);
               repl->add_transition(guess_state, x_arc);
             }
@@ -220,25 +218,20 @@ process_stream(HfstInputStream& instream, HfstOutputStream& outstream)
                                             hfst::internal_identity,
                                             weight);
               repl->add_transition(guess_state, guess_arc);
-              for (StringSet::const_iterator x = alpha.begin();
-                   x != alpha.end();
-                   ++x)
+              for (const auto & x : alpha)
                 {
                   HfstBasicTransition x_arc(d,
-                                            *x,
-                                            *x,
+                                            x,
+                                            x,
                                             weight);
                   repl->add_transition(guess_state, x_arc);
                 }
-              for (hfst::implementations::HfstBasicTransitions::const_iterator arc =
-                   i->begin();
-                   arc != i->end();
-                   ++arc)
+              for (const auto & arc : *i)
                 {
-                  HfstBasicTransition newarc(arc->get_target_state() + 1,
-                                             arc->get_input_symbol(),
-                                             arc->get_output_symbol(),
-                                             arc->get_weight());
+                  HfstBasicTransition newarc(arc.get_target_state() + 1,
+                                             arc.get_input_symbol(),
+                                             arc.get_output_symbol(),
+                                             arc.get_weight());
                   repl->add_transition(d, newarc);
                 }
               ++i;

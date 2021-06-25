@@ -200,14 +200,12 @@ main_loop(HfstBasicTransducer trans)
                 fprintf(message_out,
                         "<Nothing, you've hit a dead end here>\n");
               }
-            for (hfst::implementations::HfstBasicTransitions::const_iterator arc = trans[p->second].begin();
-                 arc != trans[p->second].end();
-                 ++arc)
+            for (const auto & arc : trans[p->second])
               {
                 fprintf(message_out, "%s\t%s\n",
-                        arc->get_input_symbol().c_str(),
-                        arc->get_output_symbol().c_str());
-                _rl_arcs.push_back(arc->get_input_symbol());
+                        arc.get_input_symbol().c_str(),
+                        arc.get_output_symbol().c_str());
+                _rl_arcs.push_back(arc.get_input_symbol());
               }
           }
         char* label = hfst_readline("traverse> ");
@@ -220,16 +218,14 @@ main_loop(HfstBasicTransducer trans)
              p != paths.end();
              ++p)
           {
-            for (hfst::implementations::HfstBasicTransitions::const_iterator arc = trans[p->second].begin();
-                 arc != trans[p->second].end();
-                 ++arc)
+            for (const auto & arc : trans[p->second])
               {
-                if (arc->get_input_symbol() == label)
+                if (arc.get_input_symbol() == label)
                   {
-                    string newpath = p->first + arc->get_input_symbol() +
-                        ":" + arc->get_output_symbol() + " ";
+                    string newpath = p->first + arc.get_input_symbol() +
+                        ":" + arc.get_output_symbol() + " ";
                     new_paths.insert(pair<string,HfstState>(newpath,
-                                                            arc->get_target_state()));
+                                                            arc.get_target_state()));
                   }
               }
           }

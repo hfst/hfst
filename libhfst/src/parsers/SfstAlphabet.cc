@@ -30,15 +30,18 @@ namespace hfst {
 
     SfstAlphabet::SfstAlphabet(const SfstAlphabet &alpha)
     {
-      for (CharMap::const_iterator it = alpha.cm.begin(); it != alpha.cm.end(); it++) {
-    cm[it->first] = sfst_basic::fst_strdup(it->second);
-      }
-      for (SymbolMap::const_iterator it = alpha.sm.begin(); it != alpha.sm.end(); it++) {
-    sm[sfst_basic::fst_strdup(it->first)] = it->second;
-      }
-      for (NumberPairSet::const_iterator it = alpha.pairs.begin(); it != alpha.pairs.end(); it++) {
-    pairs.insert(NumberPair(it->first, it->second));
-      }
+      for (auto it : alpha.cm)
+        {
+          cm[it.first] = sfst_basic::fst_strdup(it.second);
+        }
+      for (auto it : alpha.sm)
+        {
+          sm[sfst_basic::fst_strdup(it.first)] = it.second;
+        }
+      for (const auto& it : alpha.pairs)
+        {
+          pairs.insert(NumberPair(it.first, it.second));
+        }
     }
 
     SfstAlphabet::~SfstAlphabet() {
@@ -46,13 +49,13 @@ namespace hfst {
       pairs.clear();
       sm.clear();
 
-      size_t i, n=0;
-      for( CharMap::iterator it=cm.begin(); it!=cm.end(); it++ )
-    s[n++] = it->second;
+      size_t i, n = 0;
+      for (auto& it : cm)
+        s[n++] = it.second;
       cm.clear();
 
-      for( i=0; i<n; i++ )
-    free(s[i]);
+      for (i = 0; i < n; i++)
+        free(s[i]);
       delete[] s;
     }
 
@@ -62,15 +65,17 @@ namespace hfst {
 
     //bool SfstAlphabet::contains_special_symbols(StringPair sp);
 
-    void SfstAlphabet::print_pairs(FILE *file) {
-      for (NumberPairSet::const_iterator it = pairs.begin(); it != pairs.end(); it++)
-    fprintf(file, "%s:%s\n", code2symbol(it->first), code2symbol(it->second));
+    void SfstAlphabet::print_pairs(FILE* file)
+    {
+      for (const auto& pair : pairs)
+        fprintf(file, "%s:%s\n", code2symbol(pair.first), code2symbol(pair.second));
     }
 
-    void SfstAlphabet::print() {
+    void SfstAlphabet::print()
+    {
       printf("alphabet..\n");
-      for( CharMap::iterator it=cm.begin(); it!=cm.end(); it++ )
-    printf("%i\t%s\n",it->first,it->second);
+      for (auto& it : cm)
+        printf("%i\t%s\n", it.first, it.second);
       printf("..alphabet\n");
     }
 
@@ -147,19 +152,22 @@ namespace hfst {
       }
     }
 
-    void SfstAlphabet::complement( std::vector<unsigned int> &sym ) {
+    void SfstAlphabet::complement(std::vector<unsigned int>& sym)
+    {
       std::vector<unsigned int> result;
-      for( CharMap::const_iterator it=cm.begin(); it!=cm.end(); it++ ) {
-    unsigned int c = it->first;
-    if (c != 0 && c != 1 && c != 2) { // no special symbols
-      size_t i;
-      for( i=0; i<sym.size(); i++ )
-        if (sym[i] == c)
-          break;
-      if (i == sym.size())
-        result.push_back(c);
-    }
-      }
+      for (auto it : cm)
+        {
+          unsigned int c = it.first;
+          if (c != 0 && c != 1 && c != 2)
+            {  // no special symbols
+              size_t i;
+              for (i = 0; i < sym.size(); i++)
+                if (sym[i] == c)
+                  break;
+              if (i == sym.size())
+                result.push_back(c);
+            }
+        }
       sym.swap(result);
     }
 

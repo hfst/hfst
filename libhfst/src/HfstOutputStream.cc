@@ -195,21 +195,21 @@ namespace hfst
 
   void HfstOutputStream::append(std::vector<char> &str, const std::string &s)
   {
-    for (unsigned int i=0; i<s.length(); i++)
-      str.push_back(s[i]);
+    for (char c : s)
+      str.push_back(c);
     str.push_back('\0');
   }
 
   void HfstOutputStream::write(const std::string &s)
   {
-    for (unsigned int i=0; i<s.length(); i++)
-      write(s[i]);
+    for (char c : s)
+      write(c);
   }
 
   void HfstOutputStream::write(const std::vector<char> &s)
   {
-    for (unsigned int i=0; i<s.size(); i++)
-      write(s[i]);
+    for (char c : s)
+      write(c);
   }
 
   void HfstOutputStream::write(const char &c)

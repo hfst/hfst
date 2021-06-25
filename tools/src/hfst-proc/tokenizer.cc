@@ -337,8 +337,8 @@ SymbolNumberVector
 TokenIOStream::to_symbols(const TokenVector& t) const
 {
   SymbolNumberVector res;
-  for(TokenVector::const_iterator it=t.begin(); it!=t.end(); it++)
-    res.push_back(to_symbol(*it));
+  for(auto it : t)
+    res.push_back(to_symbol(it));
   return res;
 }
 
@@ -346,11 +346,11 @@ std::string
 TokenIOStream::escape(const std::string& str) const
 {
   std::string res = "";
-  for(std::string::const_iterator it=str.begin(); it!=str.end(); it++)
+  for(char it : str)
   {
-    if(escaped_chars.find(*it) != escaped_chars.end())
+    if(escaped_chars.find(it) != escaped_chars.end())
       res += '\\';
-    res += *it;
+    res += it;
   }
   return res;
 }
@@ -376,8 +376,8 @@ TokenIOStream::put_token(const Token& t)
 void
 TokenIOStream::put_tokens(const TokenVector& t)
 {
-  for(TokenVector::const_iterator it=t.begin(); it!=t.end(); it++)
-    put_token(*it);
+  for(auto it : t)
+    put_token(it);
 }
 void
 TokenIOStream::put_symbols(const SymbolNumberVector& s, CapitalizationState caps)
@@ -415,7 +415,7 @@ std::string
 TokenIOStream::tokens_to_string(const TokenVector& t, bool raw) const
 {
   std::string res;
-  for(TokenVector::const_iterator it=t.begin(); it!=t.end(); it++)
-    res += token_to_string(*it,raw);
+  for(auto it : t)
+    res += token_to_string(it,raw);
   return res;
 }

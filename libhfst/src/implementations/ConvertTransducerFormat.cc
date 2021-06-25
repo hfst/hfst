@@ -55,10 +55,9 @@ namespace hfst { namespace implementations
   {
     NumberVector retval;
     retval.reserve(coding_vector.size());
-    for (StringVector::const_iterator it = coding_vector.begin();
-     it != coding_vector.end(); it++) {
-      if (*it != "")
-    retval.push_back(get_number(*it));
+    for (const auto & it : coding_vector) {
+      if (it != "")
+    retval.push_back(get_number(it));
       else // a gap in indexing
     retval.push_back(0);
     }

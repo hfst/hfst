@@ -23,8 +23,8 @@ LookupState::init(LookupPath* initial)
 void
 LookupState::lookup(const SymbolNumberVector& input, CapitalizationMode mode)
 {
-  for(SymbolNumberVector::const_iterator it=input.begin(); it!=input.end(); it++)
-    step(*it, mode);
+  for(unsigned short it : input)
+    step(it, mode);
 }
 
 void
@@ -62,18 +62,17 @@ LookupState::step(const SymbolNumber input, CapitalizationMode mode)
 void
 LookupState::clear_paths()
 {
-  for(LookupPathVector::const_iterator it = paths.begin(); it!=paths.end(); it++)
-    delete *it;
+  for(auto path : paths)
+    delete path;
   paths.clear();
 }
 
 bool
 LookupState::is_final() const
 {
-  for(LookupPathVector::const_iterator i=paths.begin();
-      i!=paths.end(); ++i)
+  for(auto path : paths)
   {
-    TransitionTableIndex index = (*i)->get_index();
+    TransitionTableIndex index = path->get_index();
     if(indexes_transition_index_table(index))
     {
       if(transducer.get_index(index).final())
@@ -92,18 +91,18 @@ const LookupPathVector
 LookupState::get_finals() const
 {
   LookupPathVector finals;
-  for(LookupPathVector::const_iterator i=paths.begin(); i!=paths.end(); ++i)
+  for(auto path : paths)
   {
-    TransitionTableIndex index = (*i)->get_index();
+    TransitionTableIndex index = path->get_index();
     if(indexes_transition_index_table(index))
     {
       if(transducer.get_index(index).final())
-        finals.push_back(*i);
+        finals.push_back(path);
     }
     else
     {
       if(transducer.get_transition(index).final())
-        finals.push_back(*i);
+        finals.push_back(path);
     }
   }
   return finals;
@@ -115,10 +114,10 @@ LookupState::get_finals_set() const
   if(printDebuggingInformationFlag)
     std::cout << "Calculating final paths" << std::endl;
   LookupPathSet finals(LookupPath::compare_pointers);
-  for(LookupPathVector::const_iterator i=paths.begin(); i!=paths.end(); ++i)
+  for(auto path : paths)
   {
     bool is_final;
-    TransitionTableIndex index = (*i)->get_index();
+    TransitionTableIndex index = path->get_index();
     
     if(indexes_transition_index_table(index))
       is_final = transducer.get_index(index).final();
@@ -130,20 +129,20 @@ LookupState::get_finals_set() const
       if(printDebuggingInformationFlag)
       {
         std::cout << "  Final path found:";
-        for(SymbolNumberVector::const_iterator itr=(*i)->get_output_symbols().begin();itr!=(*i)->get_output_symbols().end(); itr++)
-          std::cout << " " << *itr;
+        for(unsigned short itr : path->get_output_symbols())
+          std::cout << " " << itr;
         std::cout << std::endl;
       }
-      std::pair<LookupPathSet::iterator,bool> loc = finals.insert(*i);
+      std::pair<LookupPathSet::iterator,bool> loc = finals.insert(path);
       
       if(loc.second == false) // if this form was already in the set
       {
         if(printDebuggingInformationFlag)
           std::cout << "  Duplicate LookupPath found" << std::endl;
-        if(*i < *(loc.first)) // if this form has a lower weight than the one there
+        if(path < *(loc.first)) // if this form has a lower weight than the one there
         {
           finals.erase(loc.first);
-          finals.insert(*i);
+          finals.insert(path);
         }
       }
     }
@@ -169,9 +168,9 @@ LookupState::replace_paths(const LookupPathVector& new_paths)
 void
 LookupState::try_epsilons()
 {
-  for(size_t i=0; i<paths.size(); i++)
+  for(auto & i : paths)
   {
-    const LookupPath& path = *paths[i];
+    const LookupPath& path = *i;
     
     if(indexes_transition_index_table(path.get_index()))
       try_epsilon_index(path);
@@ -241,9 +240,9 @@ LookupState::apply_input(const SymbolNumber input, const SymbolNumber altinput)
     return;
   }
   
-  for(size_t i=0; i<paths.size(); i++)
+  for(auto & i : paths)
   {
-    LookupPath& path = *paths[i];
+    LookupPath& path = *i;
     
     if(indexes_transition_index_table(path.get_index()))
     {

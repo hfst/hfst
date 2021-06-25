@@ -28,17 +28,15 @@ int getopt_long(int argc, char * /*const*/ argv [], const char * optstring,
   if (optind > (argc-1))
     {
       unsigned int i=1;
-      for (std::vector<char *>::const_iterator it = other_arguments.begin();
-           it != other_arguments.end(); it++)
+      for (auto other_argument : other_arguments)
         {
-          argv[i] = *it;
+          argv[i] = other_argument;
           i++;
         }
       optind = (int)i;
-      for (std::vector<char *>::const_iterator it = free_arguments.begin();
-           it != free_arguments.end(); it++)
+      for (auto free_argument : free_arguments)
         {
-          argv[i] = *it;
+          argv[i] = free_argument;
           i++;
         }
       return -1;
@@ -52,17 +50,15 @@ int getopt_long(int argc, char * /*const*/ argv [], const char * optstring,
       if (optind > (argc-1))
         {
           unsigned int i=1;
-          for (std::vector<char *>::const_iterator it = other_arguments.begin();
-               it != other_arguments.end(); it++)
+          for (auto other_argument : other_arguments)
             {
-              argv[i] = *it;
+              argv[i] = other_argument;
               i++;
             }
           optind = (int)i;
-          for (std::vector<char *>::const_iterator it = free_arguments.begin();
-               it != free_arguments.end(); it++)
+          for (auto free_argument : free_arguments)
             {
-              argv[i] = *it;
+              argv[i] = free_argument;
               i++;
             }
           return -1;
@@ -145,7 +141,7 @@ int getopt_long(int argc, char * /*const*/ argv [], const char * optstring,
                     }
                   else
                     {
-                      optopt = NULL;
+                      optopt = 0;
                       return longopts->val;
                     }
                 }
@@ -159,7 +155,7 @@ int getopt_long(int argc, char * /*const*/ argv [], const char * optstring,
                 }
               else
                 {
-                  optopt = NULL;
+                  optopt = 0;
                   return longopts->val;
                 }
             }

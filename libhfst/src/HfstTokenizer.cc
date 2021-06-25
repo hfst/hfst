@@ -46,10 +46,10 @@ namespace hfst
 
   MultiCharSymbolTrie::~MultiCharSymbolTrie(void)
   {
-    for (MultiCharSymbolTrieVector::iterator it = symbol_rests.begin();
-         it != symbol_rests.end();
-         ++it)
-      { delete *it; }
+    for (auto& it : symbol_rests)
+      {
+        delete it;
+      }
   }
 
   void MultiCharSymbolTrie::add(const char * p)
@@ -210,10 +210,8 @@ StringPairVector HfstTokenizer::tokenize
   if (input_spv.size() < output_spv.size())
     {
       StringPairVector::iterator jt = output_spv.begin();
-      for (StringPairVector::iterator it = input_spv.begin();
-           it != input_spv.end();
-           ++it)
-        { spv.push_back(StringPair(it->first,
+      for (auto & it : input_spv)
+        { spv.push_back(StringPair(it.first,
                                     jt->first));
           ++jt; }
       for ( ; jt != output_spv.end(); ++jt)
@@ -222,11 +220,9 @@ StringPairVector HfstTokenizer::tokenize
   else
     {
       StringPairVector::iterator it = input_spv.begin();
-      for (StringPairVector::iterator jt = output_spv.begin();
-           jt != output_spv.end();
-           ++jt)
+      for (auto & jt : output_spv)
         { spv.push_back(StringPair(it->first,
-                                   jt->first));
+                                   jt.first));
           ++it; }
       for ( ; it != input_spv.end(); ++it)
         { spv.push_back(StringPair(it->first,internal_epsilon)); }
@@ -249,11 +245,9 @@ StringPairVector HfstTokenizer::tokenize
   if (input_spv.size() < output_spv.size())
     {
       StringPairVector::iterator jt = output_spv.begin();
-      for (StringPairVector::iterator it = input_spv.begin();
-           it != input_spv.end();
-           ++it)
+      for (auto & it : input_spv)
         {
-          StringPair sp(it->first, jt->first);
+          StringPair sp(it.first, jt->first);
           warn_about_pair(sp);
           spv.push_back(sp);
           ++jt; }
@@ -265,10 +259,8 @@ StringPairVector HfstTokenizer::tokenize
   else
     {
       StringPairVector::iterator it = input_spv.begin();
-      for (StringPairVector::iterator jt = output_spv.begin();
-           jt != output_spv.end();
-           ++jt)
-        { StringPair sp(it->first, jt->first);
+      for (auto & jt : output_spv)
+        { StringPair sp(it->first, jt.first);
           warn_about_pair(sp);
           spv.push_back(sp);
           ++it; }

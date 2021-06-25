@@ -174,13 +174,12 @@ const LocationVector keep_n_best_weight(LocationVector const & locations, const 
     int classes_found = -1;
     hfst_ol::Weight last_weight_class = 0.0;
     LocationVector goodweight;
-    for (LocationVector::const_iterator it = locations.begin();
-         it != locations.end(); ++it) {
-        if(it->output.empty()) {
-            goodweight.push_back(*it);
+    for (const auto & location : locations) {
+        if(location.output.empty()) {
+            goodweight.push_back(location);
             continue;
         }
-        hfst_ol::Weight current_weight = it->weight;
+        hfst_ol::Weight current_weight = location.weight;
         if (classes_found == -1) // we're just starting
         {
             classes_found = 1;
@@ -196,7 +195,7 @@ const LocationVector keep_n_best_weight(LocationVector const & locations, const 
             break;
         }
         else {
-            goodweight.push_back(*it);
+            goodweight.push_back(location);
         }
     }
     return goodweight;
@@ -453,21 +452,19 @@ const LocationVector locate_fullmatch(hfst_ol::PmatchContainer & container,
     // if(sublocs.size() != 1) {
     //     std::cerr << "Warning: '" << form << "' only tokenisable by further splitting."<<std::endl;
     // }
-    for(LocationVectorVector::const_iterator it = sublocs.begin();
-        it != sublocs.end(); ++it) {
-        if (it->empty()
-            || (it->size() == 1 && it->at(0).output.compare("@_NONMATCHING_@") == 0)
+    for(const auto & subloc : sublocs) {
+        if (subloc.empty()
+            || (subloc.size() == 1 && subloc.at(0).output.compare("@_NONMATCHING_@") == 0)
             // keep only those that cover the full form
-            || it->at(0).input.length() != form.length()) {
+            || subloc.at(0).input.length() != form.length()) {
             continue;
         }
-        LocationVector loc = keep_n_best_weight(dedupe_locations(*it, s), s);
-        for (LocationVector::const_iterator loc_it = loc.begin();
-             loc_it != loc.end(); ++loc_it) {
-            if(!loc_it->output.empty()
-               && loc_it->weight < std::numeric_limits<float>::max()) {
+        LocationVector loc = keep_n_best_weight(dedupe_locations(subloc, s), s);
+        for (const auto & loc_it : loc) {
+            if(!loc_it.output.empty()
+               && loc_it.weight < std::numeric_limits<float>::max()) {
                 // TODO: why aren't the <W:inf> excluded earlier?
-                loc_filtered.push_back(*loc_it);
+                loc_filtered.push_back(loc_it);
             }
         }
     }
@@ -491,9 +488,8 @@ void print_location_vector_giellacg(hfst_ol::PmatchContainer & container,
     }
     // Output regular analyses first, making a note of backtracking points.
     std::set<SplitPoints> backtrack;
-    for (LocationVector::const_iterator loc_it = locations.begin();
-         loc_it != locations.end(); ++loc_it) {
-        SplitPoints bt_points = print_reading_giellacg(&(*loc_it), 1, false, outstream, s).first;
+    for (const auto & location : locations) {
+        SplitPoints bt_points = print_reading_giellacg(&location, 1, false, outstream, s).first;
         if(!bt_points.empty()) {
             backtrack.insert(bt_points);
         }
@@ -504,35 +500,34 @@ void print_location_vector_giellacg(hfst_ol::PmatchContainer & container,
     // The rest of the function handles possible backtracking:
     hfst::StringVector in_syms = locations.at(0).input_symbol_strings;
 
-    for(std::set<SplitPoints>::const_iterator bt_points = backtrack.begin();
-        bt_points != backtrack.end(); ++bt_points) {
+    for(const auto & bt_points : backtrack) {
 
         // First, for every set of backtrack points, we split on every
         // point in that N+1-sized set (the backtrack points include
         // start/end points), and create an N-sized vector splitlocs of
         // resulting analyses
         LocationVectorVector splitlocs;
-        hfst::StringVector words = split_at(in_syms, &*(bt_points));
-        for(hfst::StringVector::const_iterator it = words.begin(); it != words.end(); ++it) {
+        hfst::StringVector words = split_at(in_syms, &bt_points);
+        for(const auto & word : words) {
             // Trim left/right spaces:
-            const size_t first = find_first_not_of_def(*it, ' ', 0);
-            const size_t last = 1 + find_last_not_of_def(*it, ' ', it->length() - 1);
-            string form = it->substr(first, last-first);
+            const size_t first = find_first_not_of_def(word, ' ', 0);
+            const size_t last = 1 + find_last_not_of_def(word, ' ', word.length() - 1);
+            string form = word.substr(first, last-first);
             LocationVector loc = locate_fullmatch(container, form, s);
             if(loc.size() == 0 && s.verbose) {
                 std::cerr << "Warning: The analysis of \"<" << locations.at(0).input << ">\" has backtracking around the substring \"<" << form << ">\", but that substring has no analyses." << std::endl;
                 // but push it anyway, since we want exactly one subvector per splitpoint
             }
-            if(form.length() != it->length()) { // Ensure the spaces we ignored when looking up are output in the form:
+            if(form.length() != word.length()) { // Ensure the spaces we ignored when looking up are output in the form:
                 vector<string> lspace = vector<string>(first, " ");
-                vector<string> rspace = vector<string>(it->length()-last, " ");
-                for(LocationVector::iterator lvit = loc.begin(); lvit != loc.end(); ++lvit) {
-                    lvit->input = form;
-                    vector<string>& syms = lvit->input_symbol_strings;
+                vector<string> rspace = vector<string>(word.length()-last, " ");
+                for(auto & lvit : loc) {
+                    lvit.input = form;
+                    vector<string>& syms = lvit.input_symbol_strings;
                     syms.insert(syms.begin(), lspace.begin(), lspace.end());
                     syms.insert(syms.end(), rspace.begin(), rspace.end());
-                    for(vector<size_t>::iterator ip = lvit->input_parts.begin(); ip != lvit->input_parts.end(); ++ip) {
-                        *ip += first;
+                    for(unsigned long & input_part : lvit.input_parts) {
+                        input_part += first;
                     }
                 }
             }
@@ -565,8 +560,8 @@ void print_location_vector_giellacg(hfst_ol::PmatchContainer & container,
             // (ignore splitpoints of splitpoints)
             const size_t new_indent = print_reading_giellacg(&loc, indent, true, out.at(depth), s).second;
             if(depth == bottom) {
-                for(vector<std::ostringstream>::const_iterator it = out.begin(); it != out.end(); ++it) {
-                    outstream << it->str();
+                for(const auto & it : out) {
+                    outstream << it.str();
                 }
             }
             if(depth < bottom) {
@@ -679,22 +674,21 @@ void print_location_vector(hfst_ol::PmatchContainer & container,
         outstream << "\"<";
         print_escaping_backslashes(locations.at(0).input, outstream);
         outstream << ">\"" << std::endl;
-        for (LocationVector::const_iterator loc_it = locations.begin();
-             loc_it != locations.end(); ++loc_it) {
+        for (const auto & location : locations) {
             // For the most common case, eg. analysis strings that begin with the original input,
             // we try to do what cg tools expect and surround the original input with double quotes.
             // Otherwise we omit the double quotes and assume the rule writer knows what he's doing.
-            if (loc_it->output.find(loc_it->input) == 0) {
+            if (location.output.find(location.input) == 0) {
                 // The nice case obtains
                 outstream << "\t\"";
-                print_escaping_backslashes(loc_it->input, outstream);
+                print_escaping_backslashes(location.input, outstream);
                 outstream << "\"" <<
-                    loc_it->output.substr(loc_it->input.size(), std::string::npos);
+                    location.output.substr(location.input.size(), std::string::npos);
             } else {
-                outstream << "\t" << loc_it->output;
+                outstream << "\t" << location.output;
             }
             if (s.print_weights) {
-                outstream << "\t" << loc_it->weight;
+                outstream << "\t" << location.weight;
             }
             outstream << std::endl;
         }
@@ -705,10 +699,9 @@ void print_location_vector(hfst_ol::PmatchContainer & container,
         print_location_vector_giellacg(container, locations, outstream, s);
     } else if (s.output_format == xerox) {
         float best_weight = std::numeric_limits<float>::max();
-        for (LocationVector::const_iterator loc_it = locations.begin();
-             loc_it != locations.end(); ++loc_it) {
-            if (best_weight > loc_it->weight) {
-                best_weight = loc_it->weight;
+        for (const auto & location : locations) {
+            if (best_weight > location.weight) {
+                best_weight = location.weight;
             }
         }
         bool printed_something = false;
@@ -738,11 +731,10 @@ void print_location_vector(hfst_ol::PmatchContainer & container,
     } else if (s.output_format == conllu) {
         hfst_ol::Weight lowest_weight = hfst_ol::INFINITE_WEIGHT;
         hfst_ol::Location best_location;
-        for (LocationVector::const_iterator loc_it = locations.begin();
-             loc_it != locations.end(); ++loc_it) {
-            if (loc_it->weight < lowest_weight) {
-                best_location = *loc_it;
-                lowest_weight = loc_it->weight;
+        for (const auto & location : locations) {
+            if (location.weight < lowest_weight) {
+                best_location = location;
+                lowest_weight = location.weight;
             }
 //            if (loc_it->tag == "@MULTIWORD@"
 //            outstream << loc_it->input << "\t" << loc_it->output;
@@ -764,17 +756,16 @@ void print_location_vector(hfst_ol::PmatchContainer & container,
     } else if (s.output_format == finnpos) {
         std::set<std::string> tags;
         std::set<std::string> lemmas;
-            for (LocationVector::const_iterator loc_it = locations.begin();
-                 loc_it != locations.end(); ++loc_it) {
+            for (const auto & location : locations) {
                 // Assume the last space is where the tags begin
-                size_t tags_start_at = loc_it->output.find_last_of(" ");
+                size_t tags_start_at = location.output.find_last_of(" ");
                 if (tags_start_at != std::string::npos) {
-                    std::string lemma = loc_it->output.substr(0, tags_start_at);
+                    std::string lemma = location.output.substr(0, tags_start_at);
                     if (lemma.find_first_of(" ") == std::string::npos) {
                         // can't have spaces in lemmas
                         lemmas.insert(lemma);
                     }
-                    std::string tag = loc_it->output.substr(tags_start_at + 1);
+                    std::string tag = location.output.substr(tags_start_at + 1);
                     if (tag.find_first_of(" ") == std::string::npos) {
                         // or tags
                         tags.insert(tag);
@@ -787,9 +778,8 @@ void print_location_vector(hfst_ol::PmatchContainer & container,
             outstream << "_";
         } else {
             std::string accumulator;
-            for (std::set<std::string>::const_iterator it = lemmas.begin();
-                 it != lemmas.end(); ++it) {
-                accumulator.append(*it);
+            for (const auto & lemma : lemmas) {
+                accumulator.append(lemma);
                 accumulator.append(" ");
             }
             outstream << accumulator.substr(0, accumulator.size() - 1);
@@ -799,9 +789,8 @@ void print_location_vector(hfst_ol::PmatchContainer & container,
             outstream << "_";
         } else {
             std::string accumulator;
-            for (std::set<std::string>::const_iterator it = tags.begin();
-                 it != tags.end(); ++it) {
-                accumulator.append(*it);
+            for (const auto & tag : tags) {
+                accumulator.append(tag);
                 accumulator.append(" ");
             }
             outstream << accumulator.substr(0, accumulator.size() - 1);
@@ -825,17 +814,16 @@ void match_and_print(hfst_ol::PmatchContainer & container,
         return;
     }
     int token_number = 1;
-    for(LocationVectorVector::const_iterator it = locations.begin();
-        it != locations.end(); ++it) {
-        if ((it->size() == 1 && it->at(0).output.compare("@_NONMATCHING_@") == 0)) {
+    for(const auto & location : locations) {
+        if ((location.size() == 1 && location.at(0).output.compare("@_NONMATCHING_@") == 0)) {
             if (s.print_all) {
-                print_nonmatching_sequence(it->at(0).input, outstream, s);
+                print_nonmatching_sequence(location.at(0).input, outstream, s);
             }
             continue;
             // All nonmatching cases have been handled
         }
         print_location_vector(container,
-                              keep_n_best_weight(dedupe_locations(*it, s), s),
+                              keep_n_best_weight(dedupe_locations(location, s), s),
                               outstream,
                               token_number,
                               s);

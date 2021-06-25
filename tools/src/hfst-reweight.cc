@@ -378,28 +378,25 @@ do_reweight(HfstTransducer& trans)
                 rebuilt[source_state] = state_count;
                 state_count++;
               }
-            for (hfst::implementations::HfstBasicTransitions::const_iterator arc =
-                 state->begin();
-                 arc != state->end();
-                 ++arc)
+            for (const auto & arc : *state)
               {
-                if (rebuilt.find(arc->get_target_state()) == rebuilt.end())
+                if (rebuilt.find(arc.get_target_state()) == rebuilt.end())
                   {
                     replication.add_state(state_count);
-                    if (original.is_final_state(arc->get_target_state()))
+                    if (original.is_final_state(arc.get_target_state()))
                       {
-			float nuweight = reweight(original.get_final_weight(arc->get_target_state()), 0, 0);
+			float nuweight = reweight(original.get_final_weight(arc.get_target_state()), 0, 0);
 			replication.set_final_weight(state_count, nuweight);
                       }
-                    rebuilt[arc->get_target_state()] = state_count;
+                    rebuilt[arc.get_target_state()] = state_count;
                     state_count++;
                   }
-                HfstBasicTransition nu(rebuilt[arc->get_target_state()],
-                                       arc->get_input_symbol(),
-                                       arc->get_output_symbol(),
-                                       reweight(arc->get_weight(),
-                                                arc->get_input_symbol().c_str(),
-                                                arc->get_output_symbol().c_str()));
+                HfstBasicTransition nu(rebuilt[arc.get_target_state()],
+                                       arc.get_input_symbol(),
+                                       arc.get_output_symbol(),
+                                       reweight(arc.get_weight(),
+                                                arc.get_input_symbol().c_str(),
+                                                arc.get_output_symbol().c_str()));
                 replication.add_transition(rebuilt[source_state], nu);
               }
             source_state++;

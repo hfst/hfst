@@ -20,12 +20,12 @@ TokenVector
 OutputFormatter::clear_superblanks(const TokenVector& tokens) const
 {
   TokenVector output_tokens;
-  for(TokenVector::const_iterator it=tokens.begin(); it!=tokens.end(); it++)
+  for(auto token : tokens)
   {
-    if(it->type == Superblank)
+    if(token.type == Superblank)
       output_tokens.push_back(Token::as_symbol(token_stream.get_alphabet().get_blank_symbol()));
     else
-      output_tokens.push_back(*it);
+      output_tokens.push_back(token);
   }
   return output_tokens;
 }
@@ -37,9 +37,9 @@ OutputFormatter::filter_compound_analyses(LookupPathSet& finals) const
   std::vector<int> boundary_counts;
 
   // first look to find the analysis with the fewest compound boundaries
-  for(LookupPathSet::const_iterator it=finals.begin(); it!=finals.end(); it++)
+  for(auto final : finals)
   {
-    int num = token_stream.get_alphabet().num_compound_boundaries((*it)->get_output_symbols());
+    int num = token_stream.get_alphabet().num_compound_boundaries(final->get_output_symbols());
     boundary_counts.push_back(num);
     if(num < fewest_boundaries)
       fewest_boundaries = num;
@@ -67,9 +67,9 @@ OutputFormatter::preprocess_finals(const LookupPathSet& finals) const
 {
   LookupPathSet goodcmp_finals(LookupPathW::compare_weights);
   // insertion sort :)
-  for (LookupPathSet::const_iterator it = finals.begin(); it != finals.end(); ++it)
+  for (auto final : finals)
   {
-      goodcmp_finals.insert(*it);
+      goodcmp_finals.insert(final);
   }
   if(do_compound_filtering)
   {
@@ -86,9 +86,9 @@ OutputFormatter::preprocess_finals(const LookupPathSet& finals) const
   int classes_found = -1;
   Weight last_weight_class = 0.0;
   LookupPathSet goodweight_finals(LookupPathW::compare_weights);
-  for(LookupPathSet::const_iterator it = goodcmp_finals.begin(); it != goodcmp_finals.end(); it++)
+  for(auto goodcmp_final : goodcmp_finals)
   {
-          LookupPathW* pw = dynamic_cast<LookupPathW*>(*it);
+          LookupPathW* pw = dynamic_cast<LookupPathW*>(goodcmp_final);
     if(pw != NULL) {
       Weight current_weight = pw->get_weight();
       if (classes_found == -1) // we're just starting
@@ -106,7 +106,7 @@ OutputFormatter::preprocess_finals(const LookupPathSet& finals) const
         break;
       }
     }
-    goodweight_finals.insert(*it);
+    goodweight_finals.insert(goodcmp_final);
   }
   // Keep no more than maxAnalyses
   LookupPathSet clipped_finals(LookupPathW::compare_weights);
@@ -126,12 +126,12 @@ TransliterateOutputFormatter::process_finals(const LookupPathSet& finals, Capita
   ProcResult results;
   LookupPathSet new_finals = preprocess_finals(finals);
 
-  for(LookupPathSet::const_iterator it=new_finals.begin(); it!=new_finals.end(); it++)
+  for(auto new_final : new_finals)
   {
     std::ostringstream res;
-    res << token_stream.get_alphabet().symbols_to_string((*it)->get_output_symbols(), caps);
-    if(dynamic_cast<const LookupPathW*>(*it) != NULL && displayWeightsFlag)
-      res << '~' << dynamic_cast<const LookupPathW*>(*it)->get_weight() << '~';
+    res << token_stream.get_alphabet().symbols_to_string(new_final->get_output_symbols(), caps);
+    if(dynamic_cast<const LookupPathW*>(new_final) != NULL && displayWeightsFlag)
+      res << '~' << dynamic_cast<const LookupPathW*>(new_final)->get_weight() << '~';
 
     results.push_back(res.str());
   }
@@ -146,16 +146,16 @@ TransliterateOutputFormatter::print_word(const TokenVector& surface_form,
   // analysis output, but should be output directly afterwards
   TokenVector output_surface_form;
   std::vector<unsigned int> superblanks;
-  for(TokenVector::const_iterator it=surface_form.begin(); it!=surface_form.end(); it++)
+  for(auto it : surface_form)
   {
-    if(it->type == Superblank)
+    if(it.type == Superblank)
     {
-      output_surface_form.push_back(Token::as_symbol(token_stream.to_symbol(*it)));
-      superblanks.push_back(it->superblank_index);
+      output_surface_form.push_back(Token::as_symbol(token_stream.to_symbol(it)));
+      superblanks.push_back(it.superblank_index);
     }
     else 
     {
-      output_surface_form.push_back(*it);
+      output_surface_form.push_back(it);
     }
   }
 
@@ -165,19 +165,19 @@ TransliterateOutputFormatter::print_word(const TokenVector& surface_form,
   }
 
   bool first = true;
-  for(ProcResult::const_iterator it=analyzed_forms.begin(); it!=analyzed_forms.end(); it++)
+  for(const auto & analyzed_form : analyzed_forms)
   {
     if(!first) 
     {
       token_stream.ostream() << "/" ;
     }
-    token_stream.ostream() << *it;
+    token_stream.ostream() << analyzed_form;
     first = false;
   }
 
-  for(size_t i=0;i<superblanks.size();i++)
+  for(unsigned int superblank : superblanks)
   {
-    token_stream.ostream() << token_stream.get_superblank(superblanks[i]);
+    token_stream.ostream() << token_stream.get_superblank(superblank);
   }
 }
 void
@@ -196,12 +196,12 @@ ApertiumOutputFormatter::process_finals(const LookupPathSet& finals, Capitalizat
   ProcResult results;
   LookupPathSet new_finals = preprocess_finals(finals);
 
-  for(LookupPathSet::const_iterator it=new_finals.begin(); it!=new_finals.end(); it++)
+  for(auto new_final : new_finals)
   {
     std::ostringstream res;
-    res << token_stream.get_alphabet().symbols_to_string((*it)->get_output_symbols(), caps);
-    if (dynamic_cast<const LookupPathW *>(*it) != NULL && displayWeightsFlag) {
-      res << '~' << dynamic_cast<const LookupPathW *>(*it)->get_weight() << '~';
+    res << token_stream.get_alphabet().symbols_to_string(new_final->get_output_symbols(), caps);
+    if (dynamic_cast<const LookupPathW *>(new_final) != NULL && displayWeightsFlag) {
+      res << '~' << dynamic_cast<const LookupPathW *>(new_final)->get_weight() << '~';
     }
     results.push_back(res.str());
   }
@@ -218,15 +218,15 @@ ApertiumOutputFormatter::print_word(const TokenVector& surface_form,
   // analysis output, but should be output directly afterwards
   TokenVector output_surface_form;
   std::vector<unsigned int> superblanks;
-  for(TokenVector::const_iterator it=surface_form.begin(); it!=surface_form.end(); ++it)
+  for(auto it : surface_form)
   {
-    if(it->type == Superblank)
+    if(it.type == Superblank)
     {
-      output_surface_form.push_back(Token::as_symbol(token_stream.to_symbol(*it)));
-      superblanks.push_back(it->superblank_index);
+      output_surface_form.push_back(Token::as_symbol(token_stream.to_symbol(it)));
+      superblanks.push_back(it.superblank_index);
     }
     else
-      output_surface_form.push_back(*it);
+      output_surface_form.push_back(it);
   }
 
   if(printDebuggingInformationFlag) {
@@ -235,13 +235,13 @@ ApertiumOutputFormatter::print_word(const TokenVector& surface_form,
 
   token_stream.ostream() << '^';
   token_stream.write_escaped(output_surface_form);
-  for(ProcResult::const_iterator it=analyzed_forms.begin(); it!=analyzed_forms.end(); ++it) {
-    token_stream.ostream() << "/" << *it;
+  for(const auto & analyzed_form : analyzed_forms) {
+    token_stream.ostream() << "/" << analyzed_form;
   }
   token_stream.ostream() << "$";
 
-  for(size_t i=0;i<superblanks.size();i++) {
-    token_stream.ostream() << token_stream.get_superblank(superblanks[i]);
+  for(unsigned int superblank : superblanks) {
+    token_stream.ostream() << token_stream.get_superblank(superblank);
   }
 }
 
@@ -345,8 +345,8 @@ CGOutputFormatter::process_finals(const LookupPathSet& finals, CapitalizationSta
   ProcResult results;
   LookupPathSet new_finals = preprocess_finals(finals);
 
-  for(LookupPathSet::const_iterator it=new_finals.begin(); it!=new_finals.end(); it++)
-    results.push_back(process_final((*it)->get_output_symbols(), caps));
+  for(auto new_final : new_finals)
+    results.push_back(process_final(new_final->get_output_symbols(), caps));
 
   return results;
 }
@@ -359,8 +359,8 @@ CGOutputFormatter::print_word(const TokenVector& surface_form,
                          << token_stream.tokens_to_string(clear_superblanks(surface_form))
                          << ">\"" << std::endl;
 
-  for(ProcResult::const_iterator it=analyzed_forms.begin(); it!=analyzed_forms.end(); it++)
-    token_stream.ostream() << "\t" << *it << std::endl;
+  for(const auto & analyzed_form : analyzed_forms)
+    token_stream.ostream() << "\t" << analyzed_form << std::endl;
 }
 
 void
@@ -380,12 +380,12 @@ XeroxOutputFormatter::process_finals(const LookupPathSet& finals, Capitalization
   ProcResult results;
   LookupPathSet new_finals = preprocess_finals(finals);
 
-  for(LookupPathSet::const_iterator it=new_finals.begin(); it!=new_finals.end(); it++)
+  for(auto new_final : new_finals)
   {
     std::ostringstream res;
-    res << token_stream.get_alphabet().symbols_to_string((*it)->get_output_symbols(), caps);
-    if(dynamic_cast<const LookupPathW*>(*it) != NULL && displayWeightsFlag)
-      res << "\t" << dynamic_cast<const LookupPathW*>(*it)->get_weight();
+    res << token_stream.get_alphabet().symbols_to_string(new_final->get_output_symbols(), caps);
+    if(dynamic_cast<const LookupPathW*>(new_final) != NULL && displayWeightsFlag)
+      res << "\t" << dynamic_cast<const LookupPathW*>(new_final)->get_weight();
 
     results.push_back(res.str());
   }
@@ -398,8 +398,8 @@ XeroxOutputFormatter::print_word(const TokenVector& surface_form,
 {
   std::string surface = token_stream.tokens_to_string(clear_superblanks(surface_form));
 
-  for(ProcResult::const_iterator it=analyzed_forms.begin(); it!=analyzed_forms.end(); it++)
-    token_stream.ostream() << surface << "\t" << *it << std::endl;
+  for(const auto & analyzed_form : analyzed_forms)
+    token_stream.ostream() << surface << "\t" << analyzed_form << std::endl;
   token_stream.ostream() << std::endl;
 }
 

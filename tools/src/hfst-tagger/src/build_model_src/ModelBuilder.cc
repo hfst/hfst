@@ -79,15 +79,12 @@ void ModelBuilder::complete_model
 {
   const hfst::implementations::HfstBasicTransitions &transitions = model_fst[s];
   
-  for (hfst::implementations::HfstBasicTransitions::const_iterator it =
-	 transitions.begin();
-       it != transitions.end();
-       ++it)
+  for (const auto & transition : transitions)
     {
-      if (it->get_target_state() == START_STATE)
+      if (transition.get_target_state() == START_STATE)
 	{ continue; }
 
-      complete_model(it->get_target_state(),
+      complete_model(transition.get_target_state(),
 		     default_state_vector_it + 1,
 		     penalty_weight);
     }

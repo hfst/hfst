@@ -79,15 +79,12 @@ inline void SequenceTagger::process_configuration
 
   // Iterate throught the sentence transitions, get corresponding model
   // transitions and construct the composition of the transitions in result.
-  for (Symbol2TransitionDataMap::const_iterator it =
-	 sentence_transitions.begin();
-       it != sentence_transitions.end();
-       ++it)
+  for (auto sentence_transition : sentence_transitions)
     {
-      Symbol symbol             = it->first;
+      Symbol symbol             = sentence_transition.first;
 
-      Weight sentence_weight = it->second.weight;
-      State  sentence_target = it->second.target;
+      Weight sentence_weight = sentence_transition.second.weight;
+      State  sentence_target = sentence_transition.second.target;
 
       TransitionData model_transition =
 	sequence_model_component.get_transition(model_state,symbol);

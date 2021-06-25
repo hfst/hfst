@@ -35,9 +35,8 @@ void RuleVariables::add_values(const std::vector<std::string> &values)
 {
   if (current_variable_block.empty())
     { throw EmptyContainer(); }
-  for (std::vector<std::string>::const_iterator it = values.begin();
-       it != values.end(); ++it)
-    { add_value(*it); }
+  for (const auto & value : values)
+    { add_value(value); }
 }
 
 void RuleVariables::set_matcher(Matcher matcher)

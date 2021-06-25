@@ -154,15 +154,14 @@ void match_and_print(hfst_ol::PmatchContainer & container,
     } else {
         hfst_ol::LocationVectorVector locations = container.locate(input_text, time_cutoff, weight_cutoff);
         bool printed_something = false;
-        for(hfst_ol::LocationVectorVector::const_iterator it = locations.begin();
-            it != locations.end(); ++it) {
-            if (it->at(0).output.compare("@_NONMATCHING_@") != 0) {
+        for(const auto & location : locations) {
+            if (location.at(0).output.compare("@_NONMATCHING_@") != 0) {
                 printed_something = true;
 #ifndef _MSC_VER
-                outstream << it->at(0).start << "|" << it->at(0).length << "|"
-                          << it->at(0).output << "|" << it->at(0).tag;
+                outstream << location.at(0).start << "|" << location.at(0).length << "|"
+                          << location.at(0).output << "|" << location.at(0).tag;
                 if (print_weights) {
-                    outstream << "|" << it->at(0).weight;
+                    outstream << "|" << location.at(0).weight;
                 }
                 outstream << std::endl;
 #else

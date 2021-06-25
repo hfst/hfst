@@ -160,14 +160,13 @@ int main(int argc, char **argv)
     for (HfstBasicTransducer::const_iterator it = t.begin();
      it != t.end(); it++ )
       {
-    for (hfst::implementations::HfstBasicTransitions::const_iterator tr_it
-           = it->begin(); tr_it != it->end(); tr_it++)
+    for (const auto & tr_it : *it)
       {
         std::cerr << source_state << "\t"
-              << tr_it->get_target_state() << "\t"
-              << tr_it->get_input_symbol() << "\t"
-              << tr_it->get_output_symbol() << "\t"
-              << tr_it->get_weight() << std::endl;
+              << tr_it.get_target_state() << "\t"
+              << tr_it.get_input_symbol() << "\t"
+              << tr_it.get_output_symbol() << "\t"
+              << tr_it.get_weight() << std::endl;
       }
 
     if (t.is_final_state(source_state))

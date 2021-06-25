@@ -249,16 +249,17 @@ HfstState get_target(const std::string &isymbol,
 {
   HfstState identity_target = -1;
 
-  for (hfst::implementations::HfstBasicTransitions::const_iterator it = t[s].begin();
-       it != t[s].end();
-       ++it)
+  for (const auto& arc : t[s])
     {
-      if (it->get_input_symbol() == isymbol and
-      it->get_output_symbol() == osymbol)
-    { return it->get_target_state(); }
-      if (it->get_input_symbol() == "@_IDENTITY_SYMBOL_@" and
-      it->get_output_symbol() == "@_IDENTITY_SYMBOL_@")
-    { identity_target = it->get_target_state(); }
+      if (arc.get_input_symbol() == isymbol and arc.get_output_symbol() == osymbol)
+        {
+          return arc.get_target_state();
+        }
+      if (arc.get_input_symbol() == "@_IDENTITY_SYMBOL_@" and
+          arc.get_output_symbol() == "@_IDENTITY_SYMBOL_@")
+        {
+          identity_target = arc.get_target_state();
+        }
     }
 
   if
@@ -278,18 +279,20 @@ int test(const StringPairVector &tokenized_pair_string,
      const SymbolSet &known_symbols)
 {
   HfstState s = 0;
-  for (StringPairVector::const_iterator it = tokenized_pair_string.begin();
-       it != tokenized_pair_string.end();
-       ++it)
+  for (const auto& it : tokenized_pair_string)
     {
-      s = get_target(it->first,it->second,s,t,known_symbols);
+      s = get_target(it.first, it.second, s, t, known_symbols);
       if (s == (unsigned int)-1)
-    {
-      if (positive)
-        { return 1; }
-      else
-        { return 0; }
-    }
+        {
+          if (positive)
+            {
+              return 1;
+            }
+          else
+            {
+              return 0;
+            }
+        }
     }
 
   if (is_final_state(s,t) and positive)
@@ -306,16 +309,13 @@ HfstTransducer get_transducer(const StringPairVector &tokenized_pair_string)
 {
   HfstBasicTransducer t;
   HfstState s = 0;
-  for (StringPairVector::const_iterator it = tokenized_pair_string.begin();
-       it != tokenized_pair_string.end();
-       ++it)
+  for (const auto& it : tokenized_pair_string)
     {
       HfstState target = t.add_state();
-      t.add_transition
-    (s,HfstBasicTransition(target,it->first,it->second,0.0));
+      t.add_transition(s, HfstBasicTransition(target, it.first, it.second, 0.0));
       s = target;
     }
-  t.set_final_weight(s,0.0);
+  t.set_final_weight(s, 0.0);
   return HfstTransducer(t,TROPICAL_OPENFST_TYPE);
 }
 
@@ -395,16 +395,14 @@ int test(const StringPairVector &tokenized_pair_string,
 
   size_t ind = 0;
 
-  for (BasicTransducerVector::const_iterator it = grammar.begin();
-       it != grammar.end();
-       ++it)
+  for (const auto & it : grammar)
     {
-      int new_exit_code = test(tokenized_pair_string,*it,positive,outfile,
+      int new_exit_code = test(tokenized_pair_string,it,positive,outfile,
                    known_symbols);
 
       if (positive and new_exit_code == 1)
     { print_failure_info
-        (tokenized_pair_string,*it,names.at(ind),outfile,known_symbols); }
+        (tokenized_pair_string,it,names.at(ind),outfile,known_symbols); }
       
       if (positive and positive_exit_code == 0)
     { positive_exit_code = new_exit_code; }
@@ -466,15 +464,12 @@ bool is_empty_or_comment(const char * line)
 
 void get_symbols(HfstBasicTransducer &t,SymbolSet &known_symbols)
 {
-  for (HfstBasicTransducer::const_iterator it = t.begin(); it != t.end(); ++it)
+  for (const auto & it : t)
     {
-      for (hfst::implementations::HfstBasicTransitions::const_iterator jt =
-         it->begin();
-       jt != it->end();
-       ++jt)
+      for (const auto & jt : it)
     {
-      known_symbols.insert(jt->get_input_symbol());
-      known_symbols.insert(jt->get_output_symbol());
+      known_symbols.insert(jt.get_input_symbol());
+      known_symbols.insert(jt.get_output_symbol());
     }
     }
 }
@@ -531,10 +526,8 @@ process_stream(HfstInputStream& inputstream, FILE* outstream)
       {
     verbose_printf("Defining known symbols.\n");
     get_symbols(grammar[0],known_symbols);
-    for (SymbolSet::const_iterator it = known_symbols.begin();
-         it != known_symbols.end();
-         ++it)
-      { verbose_printf("Symbol %s\n",it->c_str()); }
+    for (const auto & known_symbol : known_symbols)
+      { verbose_printf("Symbol %s\n",known_symbol.c_str()); }
       }
 
     char* line = 0;

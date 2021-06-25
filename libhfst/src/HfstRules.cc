@@ -166,16 +166,14 @@ namespace hfst
 
       // calculate [ a:. ]
       StringPairSet input_to_any;
-      for (StringPairSet::iterator it = mappings.begin();
-           it != mappings.end(); it++)
+      for (const auto & mapping : mappings)
         {
-          for (StringPairSet::iterator alpha_it = alphabet.begin();
-               alpha_it != alphabet.end(); alpha_it++)
+          for (const auto & alpha_it : alphabet)
             {
-              if (alpha_it->first == it->first)
+              if (alpha_it.first == mapping.first)
                 {
                   input_to_any.insert(StringPair
-                                      (alpha_it->first, alpha_it->second));
+                                      (alpha_it.first, alpha_it.second));
                 }
             }
         }
@@ -558,20 +556,19 @@ namespace hfst
       // all transducers in the set have the same type.
       ImplementationType type=ERROR_TYPE;
       bool type_defined=false;
-      for (HfstTransducerPairVector::const_iterator it = contexts.begin();
-           it != contexts.end(); it++)
+      for (const auto & context : contexts)
         {
           if (! type_defined) {
-            type = it->first.get_type();
+            type = context.first.get_type();
             type_defined=true;
           }
           else {
-            if (type != it->first.get_type()) {
+            if (type != context.first.get_type()) {
               HFST_THROW_MESSAGE(TransducerTypeMismatchException,
                                  "rules::restriction");
             }
           }
-          if (type != it->second.get_type()) {
+          if (type != context.second.get_type()) {
             HFST_THROW_MESSAGE(TransducerTypeMismatchException,
                                "rules::restriction");
       }
@@ -605,16 +602,15 @@ namespace hfst
       // context transducer
       // pi_star + left[i] + mt + tmp + mt + + right[i] + pi_star
       HfstTransducer l2(type);
-      for (HfstTransducerPairVector::const_iterator it = contexts.begin();
-           it != contexts.end(); it++)
+      for (const auto & context : contexts)
         {
           HfstTransducer ct(internal_epsilon, type);
           ct.concatenate(pi_star);
-          ct.concatenate(it->first);
+          ct.concatenate(context.first);
           ct.concatenate(mt);
           ct.concatenate(tmp);
           ct.concatenate(mt);
-          ct.concatenate(it->second);
+          ct.concatenate(context.second);
           ct.concatenate(pi_star);
           l2.disjunct(ct);
         }

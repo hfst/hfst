@@ -36,12 +36,10 @@ HfstStrings2FstTokenizer::HfstStrings2FstTokenizer
   }
   add_multichar_symbol_head( SPACE_ESCAPE );
 
-  for (StringVector::const_iterator it = multichar_symbols.begin();
-       it != multichar_symbols.end();
-       ++it)
+  for (const auto & symbol : multichar_symbols)
     {
-      add_multichar_symbol_head(*it);
-      add_multichar_symbol(*it);
+      add_multichar_symbol_head(symbol);
+      add_multichar_symbol(symbol);
     }
 
 }
