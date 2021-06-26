@@ -251,7 +251,7 @@ The HFST library may link to numerous FST handling backends with varying
 licences. If you are going to redistribute the HFST library you compiled, make
 sure there are no clashes in the licences of the linked libraries.
 
-If you are checking out the development versions from SVN you must first create
+If you are checking out the development versions from GIT you must first create
 and install the necessary autotools files from the host system:
 
   autoreconf -i
