@@ -392,6 +392,7 @@ public:
                        SymbolNumber symbol_count,
                        bool preserve_diacritic_strings = true);
     TransducerAlphabet(const SymbolTable& st);
+    virtual ~TransducerAlphabet() {}
   
     void display() const;
   
