@@ -173,9 +173,8 @@ hfst_ol::PmatchContainer make_naive_tokenizer(HfstTransducer * dictionary)
     std::set_difference(tokenizer_syms.begin(), tokenizer_syms.end(),
                         dict_syms.begin(), dict_syms.end(),
                         std::inserter(tokenizer_minus_dict, tokenizer_minus_dict.begin()));
-    for (std::vector<std::string>::const_iterator it = tokenizer_minus_dict.begin();
-         it != tokenizer_minus_dict.end(); ++it) {
-        dictionary->insert_to_alphabet(*it);
+    for (const auto & it : tokenizer_minus_dict) {
+        dictionary->insert_to_alphabet(it);
     }
     hfst::HfstBasicTransducer * tokenizer_basic = hfst::implementations::ConversionFunctions::
         hfst_transducer_to_hfst_basic_transducer(*tokenizer);

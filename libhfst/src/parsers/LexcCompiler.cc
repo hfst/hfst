@@ -465,26 +465,26 @@ LexcCompiler::addStringEntry(const string& data,
     // "@ZERO@" -> "0"    (everywhere)
     std::string zero("@ZERO@");
     size_t start_pos = 0;
-    for (StringPairVector::iterator it = newVector.begin(); it != newVector.end(); it++)
+    for (auto& it : newVector)
       {
-	if (it->first == "0")
-	  {
-	    it->first = "@0@";
-	  }
-	start_pos = it->first.find(zero);
-	if(start_pos != std::string::npos)
-	  {
-	    it->first.replace(start_pos, zero.length(), "0");
-	  }
-	if (it->second == "0")
-	  {
-	    it->second = "@0@";
-	  }
-	start_pos = it->second.find(zero);
-	if(start_pos != std::string::npos)
-	  {
-	    it->second.replace(start_pos, zero.length(), "0");
-	  }
+        if (it.first == "0")
+          {
+            it.first = "@0@";
+          }
+        start_pos = it.first.find(zero);
+        if (start_pos != std::string::npos)
+          {
+            it.first.replace(start_pos, zero.length(), "0");
+          }
+        if (it.second == "0")
+          {
+            it.second = "@0@";
+          }
+        start_pos = it.second.find(zero);
+        if (start_pos != std::string::npos)
+          {
+            it.second.replace(start_pos, zero.length(), "0");
+          }
       }
     stringsTrie_.disjunct(newVector, hfst::double_to_float(weight));
 
@@ -596,12 +596,12 @@ LexcCompiler::addStringPairEntry(const string& upper, const string& lower,
         vector<string> two;
         
 
-        for(StringPairVector::iterator it = tmp.begin() ; it < tmp.end(); ++it)
+        for(const auto & it : tmp)
         {
-            if (it->first != "@_EPSILON_SYMBOL_@" )
-                one.push_back(it->first);
-            if (it->second != "@_EPSILON_SYMBOL_@" )
-                two.push_back(it->second);
+            if (it.first != "@_EPSILON_SYMBOL_@" )
+                one.push_back(it.first);
+            if (it.second != "@_EPSILON_SYMBOL_@" )
+                two.push_back(it.second);
         }
         
         
@@ -609,16 +609,16 @@ LexcCompiler::addStringPairEntry(const string& upper, const string& lower,
         
         
         std::stringstream ss1;
-        for(size_t i = 0; i < med_vectors.first.size(); ++i)
+        for(const auto & it : med_vectors.first)
         {
-          ss1 << med_vectors.first[i];
+          ss1 << it;
         }
         std::string as1 = ss1.str();
         
-         std::stringstream ss2;
-        for(size_t i = 0; i < med_vectors.second.size(); ++i)
+        std::stringstream ss2;
+        for(const auto & it : med_vectors.second)
         {
-          ss2 << med_vectors.second[i];
+          ss2 << it;
         }
         std::string as2 = ss2.str();
         
@@ -672,26 +672,26 @@ LexcCompiler::addStringPairEntry(const string& upper, const string& lower,
     }
     std::string zero("@ZERO@");
     size_t start_pos = 0;
-    for (StringPairVector::iterator it = newVector.begin(); it != newVector.end(); it++)
+    for (auto& it : newVector)
       {
-	if (it->first == "0")
-	  {
-	    it->first = "@0@";
-	  }
-	start_pos = it->first.find(zero);
-	if(start_pos != std::string::npos)
-	  {
-	    it->first.replace(start_pos, zero.length(), "0");
-	  }
-	if (it->second == "0")
-	  {
-	    it->second = "@0@";
-	  }
-	start_pos = it->second.find(zero);
-	if(start_pos != std::string::npos)
-	  {
-	    it->second.replace(start_pos, zero.length(), "0");
-	  }
+        if (it.first == "0")
+          {
+            it.first = "@0@";
+          }
+        start_pos = it.first.find(zero);
+        if (start_pos != std::string::npos)
+          {
+            it.first.replace(start_pos, zero.length(), "0");
+          }
+        if (it.second == "0")
+          {
+            it.second = "@0@";
+          }
+        start_pos = it.second.find(zero);
+        if (start_pos != std::string::npos)
+          {
+            it.second.replace(start_pos, zero.length(), "0");
+          }
       }
 
     stringsTrie_.disjunct(newVector, hfst::double_to_float(weight));
@@ -924,16 +924,14 @@ LexcCompiler::compileLexical()
         HfstTransducer end(endString, tokenizer_, format_);
         lexicons = start.concatenate(lexicons).concatenate(end).optimize();
 
-        for (set<string>::const_iterator s = lexiconNames_.begin();
-             s != lexiconNames_.end();
-             ++s)
+        for (const auto & lexiconName : lexiconNames_)
         {
             if (verbose_)
             {
-              *err << "Morphotaxing... " << *s << " ";
+              *err << "Morphotaxing... " << lexiconName << " ";
               flush(err);
             }
-            string joinerEnc = *s;
+            string joinerEnc = lexiconName;
             joinerEncode(joinerEnc);
 
 
@@ -978,17 +976,15 @@ LexcCompiler::compileLexical()
                       concatenate(endR).
                       optimize();
 
-          for (set<string>::const_iterator s = lexiconNames_.begin();
-               s != lexiconNames_.end();
-               ++s)
+          for (const auto & lexiconName : lexiconNames_)
           {
             if (verbose_)
             {
-              *err << "Morphotaxing... " << *s << " ";
+              *err << "Morphotaxing... " << lexiconName << " ";
               flush(err);
             }
-            string flagPstring = *s;
-            string flagRstring = *s;
+            string flagPstring = lexiconName;
+            string flagRstring = lexiconName;
 
             flagJoinerEncode(flagPstring, false);
             flagJoinerEncode(flagRstring, true);
@@ -1003,15 +999,11 @@ LexcCompiler::compileLexical()
         /// get right side of every pair
         HfstBasicTransducer fsm(lexicons);
         StringSet rightSymbols;
-        // Go through all states
-        for (HfstBasicTransducer::const_iterator it = fsm.begin();
-        it != fsm.end(); it++ )
+        for (const auto & state : fsm)
         {
-            // Go through all transitions
-          for (hfst::implementations::HfstBasicTransitions::const_iterator tr_it
-             = it->begin(); tr_it != it->end(); tr_it++)
+          for (const auto & transition : state)
             {
-                String alph2 = tr_it->get_output_symbol();
+                String alph2 = transition.get_output_symbol();
 
                 String prefix1("@@ANOTHER_EPSILON@@");
                 String prefix2("$_LEXC_JOINER.");
@@ -1031,9 +1023,8 @@ LexcCompiler::compileLexical()
             }
         }
 
-        for ( StringSet::const_iterator it = rightSymbols.begin(); it != rightSymbols.end(); ++it)
+        for (auto alph : rightSymbols)
         {
-            String alph = *it;
             tokenizer_.add_multichar_symbol(alph);
             StringPairVector newVector(tokenizer_.tokenize(alph));
             joinersTrie_.disjunct(newVector, 0);
@@ -1080,25 +1071,23 @@ LexcCompiler::compileLexical()
             lexicons.prune_alphabet();
 
             StringSet transducerAlphabet = lexicons.get_alphabet();
-            for (StringSet::const_iterator s = transducerAlphabet.begin();
-                           s != transducerAlphabet.end();
-                           ++s)
+            for (const auto & s : transducerAlphabet)
             {
               if (debug)
                 {
-                  *err << "handling alpha: '" << *s << "'..." << std::endl;
+                  *err << "handling alpha: '" << s << "'..." << std::endl;
                   flush(err);
                 }
-                String alph = *s;
+                String alph = s;
 
                 if ( alph[0] == '$' && *alph.rbegin() == '$' && alph.size() > 2)
                 {
                     replace(alph.begin(), alph.end(), '$', '@');
 
-                    fakeFlagsToRealFlags.insert(StringPair(*s, alph));
+                    fakeFlagsToRealFlags.insert(StringPair(s, alph));
                     if (debug)
                       {
-                        *err << "debug: inserting fakeFlagsToRealFlags replacement: " << *s << " -> " << alph << std::endl;
+                        *err << "debug: inserting fakeFlagsToRealFlags replacement: " << s << " -> " << alph << std::endl;
                         flush(err);
                       }
                 }
@@ -1205,11 +1194,8 @@ LexcCompiler::compileLexical()
     {
         StringSet transducerAlphabet = rv->get_alphabet();
         StringSet flagD;
-        for (StringSet::const_iterator s = transducerAlphabet.begin();
-             s != transducerAlphabet.end();
-             ++s)
+        for (auto alph : transducerAlphabet)
         {
-            String alph = *s;
             String alph10 = alph.substr(0,10);
             if ( alph10 == "@P.LEXNAME" || alph10 == "@R.LEXNAME" )
             {
@@ -1223,14 +1209,13 @@ LexcCompiler::compileLexical()
         std::string flag_remover_regexp("[ ");
         bool first_flag = true;
         
-        for (StringSet::const_iterator it
-               = flagD.begin(); it != flagD.end(); ++it)
+        for (const auto & it : flagD)
         {
             if (!first_flag)
             {
                 flag_remover_regexp.append("| ");
             }
-            flag_remover_regexp.append("\"").append(*it).append("\" ");
+            flag_remover_regexp.append("\"").append(it).append("\" ");
             first_flag = false;
         }
         flag_remover_regexp.append("]");

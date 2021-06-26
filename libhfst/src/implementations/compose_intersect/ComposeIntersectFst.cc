@@ -83,16 +83,13 @@ namespace hfst
       this->t.sort_arcs();
       std::set<std::string> alphabet = this->t.get_alphabet();
 
-      for (std::set<std::string>::const_iterator it = alphabet.begin();
-       it != alphabet.end();
-       ++it)
-    { symbol_set.insert(HfstTropicalTransducerTransitionData::get_number
-                (*it)); }
+      for (const auto& it : alphabet)
+        {
+          symbol_set.insert(HfstTropicalTransducerTransitionData::get_number(it));
+        }
 
       unsigned int source_state=0;
-      for (HfstBasicTransducer::const_iterator it = this->t.begin();
-       it != this->t.end();
-       ++it)
+      for (const auto & state : this->t)
     {
       transition_map_vector.push_back(SymbolTransitionMap());
       if (this->t.is_final_state(source_state))
@@ -104,24 +101,21 @@ namespace hfst
       SymbolTransitionMap &symbol_transition_map =
         transition_map_vector.back();
       bool identity_found = false;
-      for (std::vector<HfstBasicTransition>::const_iterator jt =
-         it->begin();
-           jt != it->end();
-           ++jt)
+      for (const auto & arc : state)
         {
-          if (jt->get_input_symbol() == "@_IDENTITY_SYMBOL_@")
+          if (arc.get_input_symbol() == "@_IDENTITY_SYMBOL_@")
         {
           identity_found = true;
-          identity_transition_vector.push_back(*jt);
+          identity_transition_vector.push_back(arc);
         }
           else
         { symbol_transition_map
             [input_keys ?
              HfstTropicalTransducerTransitionData::get_number
-             (jt->get_input_symbol()) :
+             (arc.get_input_symbol()) :
              HfstTropicalTransducerTransitionData::get_number
-             (jt->get_output_symbol())].
-            insert(*jt); }
+             (arc.get_output_symbol())].
+            insert(arc); }
         }
       if (! identity_found)
         { identity_transition_vector.push_back

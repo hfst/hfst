@@ -33,12 +33,10 @@ void OtherSymbolTransducer::set_symbol_pairs
   OtherSymbolTransducer::symbol_pairs.clear();
   OtherSymbolTransducer::symbol_pairs.insert(symbol_pairs.begin(),
                          symbol_pairs.end());
-  for (HandySet<SymbolPair>::const_iterator it = symbol_pairs.begin();
-       it != symbol_pairs.end();
-       ++it)
+  for (const auto & symbol_pair : symbol_pairs)
     {
-      OtherSymbolTransducer::input_symbols.insert(it->first);
-      OtherSymbolTransducer::output_symbols.insert(it->second);
+      OtherSymbolTransducer::input_symbols.insert(symbol_pair.first);
+      OtherSymbolTransducer::output_symbols.insert(symbol_pair.second);
     }
   OtherSymbolTransducer::symbol_pairs.insert
     (SymbolPair(TWOLC_DIAMOND,TWOLC_DIAMOND));
@@ -50,15 +48,12 @@ void OtherSymbolTransducer::define_diacritics
   OtherSymbolTransducer::diacritics.clear();
   OtherSymbolTransducer::diacritics.insert
     (diacritics.begin(),diacritics.end());
-  for (HandySet<std::string>::iterator it =
-     OtherSymbolTransducer::diacritics.begin();
-       it != OtherSymbolTransducer::diacritics.end();
-       ++it)
+  for (const auto & diacritic : OtherSymbolTransducer::diacritics)
     {
-      symbol_pairs.erase(SymbolPair(*it,*it));
-      symbol_pairs.erase(SymbolPair(*it,TWOLC_EPSILON));
-      input_symbols.erase(*it);
-      output_symbols.erase(*it);
+      symbol_pairs.erase(SymbolPair(diacritic,diacritic));
+      symbol_pairs.erase(SymbolPair(diacritic,TWOLC_EPSILON));
+      input_symbols.erase(diacritic);
+      output_symbols.erase(diacritic);
     }
 }
 
@@ -70,14 +65,12 @@ OtherSymbolTransducer OtherSymbolTransducer::get_universal(void)
   fst.set_final_weight(target,0.0);
   fst.add_transition(0,HfstBasicTransition
              (target,TWOLC_IDENTITY,TWOLC_IDENTITY,0.0));
-  for (HandySet<SymbolPair>::const_iterator it = symbol_pairs.begin();
-       it != symbol_pairs.end();
-       ++it)
+  for (const auto & symbol_pair : symbol_pairs)
     {
-      if (it->first == TWOLC_DIAMOND)
+      if (symbol_pair.first == TWOLC_DIAMOND)
     { continue; }
       fst.add_transition(0,HfstBasicTransition
-             (target,it->first,it->second,0.0));
+             (target,symbol_pair.first,symbol_pair.second,0.0));
     }
   universal.transducer = HfstTransducer(fst,transducer_type);
   return universal;
@@ -116,26 +109,20 @@ OtherSymbolTransducer::OtherSymbolTransducer
       
       if (input_symbol == HFST_UNKNOWN)
     {
-      for (HandySet<std::string>::const_iterator it =
-         input_symbols.begin();
-           it != input_symbols.end();
-           ++it)
+      for (const auto & input_symbol : input_symbols)
         {
-          if (symbol_pairs.has_element(SymbolPair(*it,output_symbol)))
+          if (symbol_pairs.has_element(SymbolPair(input_symbol,output_symbol)))
         { fst.add_transition
-            (0,HfstBasicTransition(target,*it,output_symbol,0.0)); }
+            (0,HfstBasicTransition(target,input_symbol,output_symbol,0.0)); }
         }
     }
       else if (output_symbol == HFST_UNKNOWN)
     {
-      for (HandySet<std::string>::const_iterator it =
-         output_symbols.begin();
-           it != output_symbols.end();
-           ++it)
+      for (const auto & output_symbol : output_symbols)
         {
-          if (symbol_pairs.has_element(SymbolPair(input_symbol,*it)))
+          if (symbol_pairs.has_element(SymbolPair(input_symbol,output_symbol)))
         { fst.add_transition
-            (0,HfstBasicTransition(target,input_symbol,*it,0.0)); }
+            (0,HfstBasicTransition(target,input_symbol,output_symbol,0.0)); }
         }
     }
       else
@@ -189,13 +176,11 @@ OtherSymbolTransducer &OtherSymbolTransducer::harmonize_diacritics
 
   HandySet<std::string> missing_diacritics;
 
-  for (HandySet<std::string>::const_iterator it = diacritics.begin();
-       it != diacritics.end();
-       ++it)
+  for (const auto & diacritic : diacritics)
     {
-      if (t_alphabet.find(*it) != t_alphabet.end() &&
-      alphabet.find(*it) == alphabet.end())
-    { missing_diacritics.insert(*it); }
+      if (t_alphabet.find(diacritic) != t_alphabet.end() &&
+      alphabet.find(diacritic) == alphabet.end())
+    { missing_diacritics.insert(diacritic); }
     }
   if (missing_diacritics.empty())
     { return *this; }
@@ -205,23 +190,17 @@ OtherSymbolTransducer &OtherSymbolTransducer::harmonize_diacritics
        it != basic.end();
        ++it)
     {
-      for (hfst::implementations::HfstBasicTransitions::const_iterator jt
-        = it->begin();
-      jt != it->end();
-      ++jt)
+      for (const auto & jt : *it)
        {
-      if (jt->get_input_symbol() == TWOLC_IDENTITY)
+      if (jt.get_input_symbol() == TWOLC_IDENTITY)
         {
-          HfstState target = jt->get_target_state();
+          HfstState target = jt.get_target_state();
           
-          for (HandySet<std::string>::iterator kt =
-             missing_diacritics.begin();
-           kt != missing_diacritics.end();
-           ++kt)
+          for (const auto & missing_diacritic : missing_diacritics)
         {
           basic.add_transition(s,
                        HfstBasicTransition
-                       (target,*kt,*kt,0.0));
+                       (target,missing_diacritic,missing_diacritic,0.0));
         }
           break;
         }
@@ -263,12 +242,10 @@ void OtherSymbolTransducer::add_symbol_to_alphabet(const std::string &symbol)
 
 void OtherSymbolTransducer::remove_diacritics_from_output(void)
 {
-  for (HandySet<std::string>::const_iterator it = diacritics.begin();
-       it != diacritics.end();
-       ++it)
+  for (const auto & diacritic : diacritics)
     {
-      apply(&HfstTransducer::substitute,SymbolPair(*it,*it),
-        SymbolPair(*it,TWOLC_EPSILON));
+      apply(&HfstTransducer::substitute,SymbolPair(diacritic,diacritic),
+        SymbolPair(diacritic,TWOLC_EPSILON));
     }
 }
 
@@ -529,37 +506,30 @@ OtherSymbolTransducer OtherSymbolTransducer::get_inverse_of_upper_projection
       new_fst.add_state(state);
       if (fst.is_final_state(state))
     { new_fst.set_final_weight(state,fst.get_final_weight(state)); }
-      for (hfst::implementations::HfstBasicTransitions::const_iterator jt
-         = it->begin();
-       jt != it->end();
-       ++jt)
+      for (const auto & jt : *it)
     {
-      HfstBasicTransition arc = *jt;
+      HfstBasicTransition arc = jt;
       std::string input = arc.get_transition_data().get_input_symbol();
       std::string output = arc.get_transition_data().get_output_symbol();
       HfstState target = arc.get_target_state();
       if (input == HFST_UNKNOWN)
         {
           add_transition(new_fst,state,target,HFST_UNKNOWN,HFST_UNKNOWN);
-          for (HandySet<std::string>::const_iterator kt =
-             output_symbols.begin();
-           kt != output_symbols.end(); ++kt)
+          for (const auto & output_symbol : output_symbols)
         {
-          if (has_symbol(fst,*kt))
-            { add_transition(new_fst,state,target,HFST_UNKNOWN,*kt); }
+          if (has_symbol(fst,output_symbol))
+            { add_transition(new_fst,state,target,HFST_UNKNOWN,output_symbol); }
         }
         }
       else
         {
-          HfstBasicTransition arc = *jt;
+          HfstBasicTransition arc = jt;
           add_transition
         (new_fst,state,arc.get_target_state(),input,output);
-          for (HandySet<SymbolPair>::const_iterator kt =
-             symbol_pairs.begin();
-           kt != symbol_pairs.end(); ++kt)
+          for (const auto & symbol_pair : symbol_pairs)
         {
-          if (kt->first == input && has_symbol(fst,kt->second))
-            { add_transition(new_fst,state,target,input,kt->second); }
+          if (symbol_pair.first == input && has_symbol(fst,symbol_pair.second))
+            { add_transition(new_fst,state,target,input,symbol_pair.second); }
         }
           if (input == TWOLC_EPSILON)
         {
@@ -638,13 +608,10 @@ void OtherSymbolTransducer::get_initial_transition_pairs
 
   HfstBasicTransducer fst(this->transducer);
   HfstBasicTransducer::const_iterator start_state_it = fst.begin();
-  for (hfst::implementations::HfstBasicTransitions::const_iterator jt
-     = start_state_it->begin();
-       jt != start_state_it->end();
-       ++jt)
+  for (const auto & jt : *start_state_it)
     {
-      std::string input = jt->get_transition_data().get_input_symbol();
-      std::string output = jt->get_transition_data().get_output_symbol();
+      std::string input = jt.get_transition_data().get_input_symbol();
+      std::string output = jt.get_transition_data().get_output_symbol();
       pair_container.push_back(SymbolPair(input,output));
     }
 }
@@ -658,29 +625,23 @@ bool have_common_string(HfstState state1,HfstState state2,
   if (fst1.is_final_state(state1) && fst2.is_final_state(state2))
     { return true; }
 
-  const hfst::implementations::HfstBasicTransitions &fst1_transitions = fst1[state1];
-  const hfst::implementations::HfstBasicTransitions &fst2_transitions = fst2[state2];
+  const auto & fst1_transitions = fst1[state1];
+  const auto & fst2_transitions = fst2[state2];
 
   HandyMap<SymbolPair,HfstState> fst1_transition_map;
-  for (hfst::implementations::HfstBasicTransitions::const_iterator it =
-     fst1_transitions.begin();
-       it != fst1_transitions.end();
-       ++it)
-    { fst1_transition_map[SymbolPair(it->get_input_symbol(),
-                     it->get_output_symbol())] =
-    it->get_target_state(); }
-
-  for (hfst::implementations::HfstBasicTransitions::const_iterator it =
-     fst2_transitions.begin();
-       it != fst2_transitions.end();
-       ++it)
+  for (const auto& it : fst1_transitions)
     {
-      SymbolPair symbol_pair = SymbolPair(it->get_input_symbol(),
-                      it->get_output_symbol());
+      fst1_transition_map[{it.get_input_symbol(), it.get_output_symbol()}] = it.get_target_state();
+    }
+
+  for (const auto & it : fst2_transitions)
+    {
+      SymbolPair symbol_pair = SymbolPair(it.get_input_symbol(),
+                      it.get_output_symbol());
       if (fst1_transition_map.has_key(symbol_pair))
     {
       StatePair state_pair(fst1_transition_map[symbol_pair],
-                   it->get_target_state());
+                   it.get_target_state());
       if (! visited_pairs.has_element(state_pair))
         {
           v.push_back(symbol_pair.first + ":" + symbol_pair.second);

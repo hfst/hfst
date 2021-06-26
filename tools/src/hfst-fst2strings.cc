@@ -315,10 +315,9 @@ public:
   {
     std::string istring;
     std::string ostring;
-    for (StringPairVector::const_iterator it = path.second.begin();
-         it != path.second.end(); it++) {
-      istring.append(it->first);
-      ostring.append(it->second);
+    for (const auto & it : path.second) {
+      istring.append(it.first);
+      ostring.append(it.second);
     }
     float weight = path.first;
 
@@ -381,26 +380,25 @@ public:
         if (print_in_pairstring_format)
           {
         bool first_pair=true;
-            for (StringPairVector::const_iterator it = path.second.begin();
-                 it != path.second.end(); it++)
+            for (const auto & it : path.second)
               {
         if ((not filter_fd) ||
-            (not FdOperation::is_diacritic(it->first))) {
+            (not FdOperation::is_diacritic(it.first))) {
           if (print_spaces && not first_pair)
             {
               *out_ << " ";
             }
 
-          *out_ << get_print_format(it->first);
+          *out_ << get_print_format(it.first);
           first_pair=false;
         }
 
-        if (it->first.compare(it->second) != 0)
+        if (it.first.compare(it.second) != 0)
           {
             if ((not filter_fd) ||
-            (not FdOperation::is_diacritic(it->second)))
+            (not FdOperation::is_diacritic(it.second)))
               *out_ << ":"
-                << get_print_format(it->second);
+                << get_print_format(it.second);
           }
               }
             if (display_weights)
@@ -414,20 +412,19 @@ public:
         bool is_automaton=true;
 
         bool first_symbol=true;
-            for (StringPairVector::const_iterator it = path.second.begin();
-                 it != path.second.end(); ++it)
+            for (const auto & it : path.second)
               {
         if ((not filter_fd) ||
-            (not FdOperation::is_diacritic(it->first)))
+            (not FdOperation::is_diacritic(it.first)))
           {
             if (print_spaces && not first_symbol)
               {
             *out_ << " ";
               }
-            if (it->first.compare(it->second) != 0)
+            if (it.first.compare(it.second) != 0)
               is_automaton=false;
 
-            *out_ << get_print_format(it->first);
+            *out_ << get_print_format(it.first);
           }
         first_symbol=false;
           }
@@ -438,17 +435,16 @@ public:
 
         if (not is_automaton) {
           *out_ << ":";
-          for (StringPairVector::const_iterator it = path.second.begin();
-           it != path.second.end(); ++it)
+          for (const auto & it : path.second)
         {
           if ((not filter_fd) ||
-              (not FdOperation::is_diacritic(it->second)))
+              (not FdOperation::is_diacritic(it.second)))
             {
               if (print_spaces)
             {
               *out_ << " ";
             }
-              *out_ << get_print_format(it->second);
+              *out_ << get_print_format(it.second);
             }
         }
         }
@@ -612,10 +608,8 @@ process_stream(HfstInputStream& instream, std::ostream& outstream)
     }
 
     Callback cb(max_random_strings, &outstream);
-    for (HfstTwoLevelPaths::const_iterator it = results.begin();
-         it != results.end(); it++)
+    for (auto path : results)
       {
-        HfstTwoLevelPath path = *it;
         cb(path, true /*final*/);
       }
     verbose_printf("Printed %i random string(s)\n", cb.count);

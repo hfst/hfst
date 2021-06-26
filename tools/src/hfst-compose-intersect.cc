@@ -170,12 +170,9 @@ std::string check_all_symbols(const HfstTransducer &lexicon,
 
   for (HfstState s = 0; s <= rule_b.get_max_state(); ++s)
     {
-      for (hfst::implementations::HfstBasicTransitions::const_iterator it =
-             rule_b[s].begin();
-           it != rule_b[s].end();
-           ++it)
+      for (const auto & it : rule_b[s])
         {
-          const std::string &input_symbol = it->get_input_symbol();
+          const std::string &input_symbol = it.get_input_symbol();
           rule_input_symbols.insert(input_symbol);
         }
     }
@@ -187,12 +184,9 @@ std::string check_all_symbols(const HfstTransducer &lexicon,
 
   for (HfstState s = 0; s <= lexicon_b.get_max_state(); ++s)
     {
-      for (hfst::implementations::HfstBasicTransitions::const_iterator it =
-             lexicon_b[s].begin();
-           it != lexicon_b[s].end();
-           ++it)
+      for (const auto & it : lexicon_b[s])
         {
-          const std::string &output_symbol = it->get_output_symbol();
+          const std::string &output_symbol = it.get_output_symbol();
 
           if (rule_input_symbols.count(output_symbol) == 0)
             { return output_symbol; }
@@ -214,24 +208,18 @@ std::string check_multi_char_symbols
 
   for (HfstState s = 0; s <= rule_b.get_max_state(); ++s)
     {
-      for (hfst::implementations::HfstBasicTransitions::const_iterator it =
-             rule_b[s].begin();
-           it != rule_b[s].end();
-           ++it)
+      for (const auto & it : rule_b[s])
         {
-          const std::string &input_symbol = it->get_input_symbol();
+          const std::string &input_symbol = it.get_input_symbol();
           rule_input_symbols.insert(input_symbol);
         }
     }
 
   for (HfstState s = 0; s <= lexicon_b.get_max_state(); ++s)
     {
-      for (hfst::implementations::HfstBasicTransitions::const_iterator it =
-             lexicon_b[s].begin();
-           it != lexicon_b[s].end();
-           ++it)
+      for (const auto & it : lexicon_b[s])
         {
-          const std::string &output_symbol = it->get_output_symbol();
+          const std::string &output_symbol = it.get_output_symbol();
 
           if (rule_input_symbols.count(output_symbol) == 0)
             {
@@ -249,9 +237,9 @@ std::string check_multi_char_symbols
 
 void harmonize_rules(HfstTransducer & lexicon, std::vector<HfstTransducer> & rules)
 {
-  for (std::vector<HfstTransducer>::iterator it = rules.begin(); it != rules.end(); it++)
+  for (auto & rule : rules)
     {
-      it->harmonize(lexicon);
+      rule.harmonize(lexicon);
     }
   return;
 }

@@ -55,12 +55,10 @@ void remove_flag_diacritics(HfstTransducer &morphological_analyzer,
 {
   HfstSymbolSubstitutions flag_diacritic_epsilon_pairs;
 
-  for (StringSet::const_iterator it = alphabet.begin();
-       it != alphabet.end();
-       ++it)
+  for (const auto & it : alphabet)
     {
-      if (FlagDiacriticTable::is_diacritic(*it))
-        { flag_diacritic_epsilon_pairs[*it] = internal_epsilon; }
+      if (FlagDiacriticTable::is_diacritic(it))
+        { flag_diacritic_epsilon_pairs[it] = internal_epsilon; }
     }
 
   morphological_analyzer.substitute(flag_diacritic_epsilon_pairs);
@@ -73,12 +71,10 @@ StringSet get_cathegory_symbols(const StringSet &alphabet)
 {
   StringSet cathegory_symbols;
   
-  for (StringSet::const_iterator it = alphabet.begin();
-       it != alphabet.end();
-       ++it)
+  for (const auto & it : alphabet)
     {
-      if (is_cathegory_symbol(*it))
-        { cathegory_symbols.insert(*it); }
+      if (is_cathegory_symbol(it))
+        { cathegory_symbols.insert(it); }
     }
 
   return cathegory_symbols;
@@ -97,13 +93,11 @@ HfstTransducer get_prefix_remover(const StringSet &alphabet)
   // Add cathegory symbols as paths in cathegory_symbols_fst and add
   // them to the alphabet of basic_identity so that the identity
   // transitions won't cover cathegory symbols.
-  for (StringSet::const_iterator it = cathegory_symbols.begin();
-       it != cathegory_symbols.end();
-       ++it)
+  for (const auto & cathegory_symbol : cathegory_symbols)
     {
-      HfstTransducer cathegory_symbol_fst(*it,TROPICAL_OPENFST_TYPE);
+      HfstTransducer cathegory_symbol_fst(cathegory_symbol,TROPICAL_OPENFST_TYPE);
       cathegory_symbols_fst.disjunct(cathegory_symbol_fst);
-      basic_identity.add_symbol_to_alphabet(*it);
+      basic_identity.add_symbol_to_alphabet(cathegory_symbol);
     }
   
   cathegory_symbols_fst.minimize();
@@ -134,11 +128,9 @@ HfstTransducer get_invalid_form_filterer(const StringSet &alphabet)
   StringSet cathegory_symbols = get_cathegory_symbols(alphabet);
 
   HfstTransducer cathegory_symbols_fst(TROPICAL_OPENFST_TYPE);
-  for (StringSet::const_iterator it = cathegory_symbols.begin();
-       it != cathegory_symbols.end();
-       ++it)
+  for (const auto & cathegory_symbol : cathegory_symbols)
     {
-      HfstTransducer cathegory_symbol_fst(*it,TROPICAL_OPENFST_TYPE);
+      HfstTransducer cathegory_symbol_fst(cathegory_symbol,TROPICAL_OPENFST_TYPE);
       cathegory_symbols_fst.disjunct(cathegory_symbol_fst);
     }
 
@@ -169,14 +161,12 @@ void rewrite_removed_symbols(HfstTransducer &morphological_analyzer,
   substitution_pairs[ StringPair(internal_epsilon,REMOVED_SYMBOL) ] =
     StringPair(internal_epsilon,internal_epsilon);
 
-  for (StringSet::const_iterator it = alphabet.begin();
-       it != alphabet.end();
-       ++it)
+  for (const auto & it : alphabet)
     {
-      if (*it != internal_epsilon)
+      if (it != internal_epsilon)
         {
-          substitution_pairs[ StringPair(*it,REMOVED_SYMBOL) ] =
-            StringPair(*it, *it);
+          substitution_pairs[ StringPair(it,REMOVED_SYMBOL) ] =
+            StringPair(it, it);
         }
     }
   

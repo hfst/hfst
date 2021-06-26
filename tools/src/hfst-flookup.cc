@@ -561,11 +561,9 @@ is_valid_flag_diacritic_path(StringVector arcs)
     if (!res)
       {
         verbose_printf("blocked by flags: ");
-        for (StringVector::const_iterator s = arcs.begin();
-             s != arcs.end();
-             ++s)
+        for (const auto & arc : arcs)
           {
-            verbose_printf("%s ", s->c_str());
+            verbose_printf("%s ", arc.c_str());
           }
       }
     return res;
@@ -584,58 +582,54 @@ lookup_printf(const char* format, const HfstOneLevelPath* input,
     if (result != NULL)
       {
         bool first = true;
-        for (vector<string>::const_iterator s = result->second.begin();
-             s != result->second.end();
-             ++s)
+        for (const auto & s : result->second)
           {
             if (!first && print_space)
               {
                 lookup_len += strlen(space_format);
               }
             first = false;
-            if (is_epsilon(*s))
+            if (is_epsilon(s))
               {
                 lookup_len += strlen(epsilon_format);
               }
-            else if (FdOperation::is_diacritic(*s))
+            else if (FdOperation::is_diacritic(s))
               {
                 if (show_flags)
                   {
-                    lookup_len += s->size();
+                    lookup_len += s.size();
                   }
               }
             else
               {
-                lookup_len += s->size();
+                lookup_len += s.size();
               }
           }
       }
     if (input != NULL)
       {
         bool first = true;
-        for (vector<string>::const_iterator s = input->second.begin();
-             s != input->second.end();
-             ++s)
+        for (const auto & s : input->second)
           {
             if (!first && print_space)
               {
                 input_len += strlen(space_format);
               }
             first = false;
-            if (is_epsilon(*s))
+            if (is_epsilon(s))
               {
                 input_len += strlen(epsilon_format);
               }
-            else if (FdOperation::is_diacritic(*s))
+            else if (FdOperation::is_diacritic(s))
               {
                 if (show_flags)
                   {
-                    input_len += s->size();
+                    input_len += s.size();
                   }
               }
             else
               {
-                input_len += s->size();
+                input_len += s.size();
               }
             first = false;
           }
@@ -675,32 +669,30 @@ lookup_printf(const char* format, const HfstOneLevelPath* input,
                                               sizeof(char) * strlen(space_format) * (lookup_len - 1) +1));
         char* p = lookupform;
         bool first = true;
-        for (vector<string>::const_iterator s = result->second.begin();
-             s != result->second.end();
-             ++s)
+        for (const auto & s : result->second)
           {
             if (!first && print_space)
               {
                 p = strcpy(p, space_format);
                 p += strlen(space_format);
               }
-            if (is_epsilon(*s))
+            if (is_epsilon(s))
               {
                 p = strcpy(p, epsilon_format);
                 p += strlen(epsilon_format);
               }
-            else if (FdOperation::is_diacritic(*s))
+            else if (FdOperation::is_diacritic(s))
               {
                 if (show_flags)
                   {
-                    p = strcpy(p, s->c_str());
-                    p += s->size();
+                    p = strcpy(p, s.c_str());
+                    p += s.size();
                   }
               }
             else
               {
-                p = strcpy(p, s->c_str());
-                p += s->size();
+                p = strcpy(p, s.c_str());
+                p += s.size();
               }
             first = false;
           }
@@ -718,32 +710,30 @@ lookup_printf(const char* format, const HfstOneLevelPath* input,
                                               sizeof(char) * strlen(space_format) * (input_len - 1) +1));
         char* p = inputform;
         bool first = true;
-        for (vector<string>::const_iterator s = input->second.begin();
-             s != input->second.end();
-             ++s)
+        for (const auto & s : input->second)
           {
             if (!first && print_space)
               {
                 p = strcpy(p, space_format);
                 p += strlen(space_format);
               }
-            if (is_epsilon(*s))
+            if (is_epsilon(s))
               {
                 p = strcpy(p, epsilon_format);
                 p += strlen(epsilon_format);
               }
-            else if (FdOperation::is_diacritic(*s))
+            else if (FdOperation::is_diacritic(s))
               {
                 if (show_flags)
                   {
-                    p = strcpy(p, s->c_str());
-                    p += s->size();
+                    p = strcpy(p, s.c_str());
+                    p += s.size();
                   }
               }
             else
               {
-                p = strcpy(p, s->c_str());
-                p += s->size();
+                p = strcpy(p, s.c_str());
+                p += s.size();
               }
             first = false;
           }
@@ -1029,10 +1019,9 @@ line_to_lookup_path(char** s, hfst::HfstStrings2FstTokenizer& tok,
           StringPairVector spv
             = tok.tokenize_string_pair(S, true);
           
-          for (StringPairVector::const_iterator it = spv.begin();
-               it != spv.end(); it++)
+          for (const auto & it : spv)
             {
-              rv->second.push_back(it->first);
+              rv->second.push_back(it.first);
             }
           break;
         }
@@ -1049,11 +1038,10 @@ line_to_lookup_path(char** s, hfst::HfstStrings2FstTokenizer& tok,
               StringPairVector spv
                 = tok.tokenize_string_pair(S, false);
               
-              for (StringPairVector::const_iterator it = spv.begin();
-                   it != spv.end(); it++)
+              for (const auto & it : spv)
                 {
                   // todo: check if symbol is known to transducer
-                  rv->second.push_back(it->first);
+                  rv->second.push_back(it.first);
                 }
             }
           break;
@@ -1195,9 +1183,8 @@ static std::string get_print_format(const std::string &s)
 }
 
 static void print_lookup_string(const StringVector &s) {
-  for (StringVector::const_iterator it = s.begin();
-       it != s.end(); it++) {
-    fprintf(stderr, "%s", get_print_format(*it).c_str());
+  for (const auto & it : s) {
+    fprintf(stderr, "%s", get_print_format(it).c_str());
   }
 }
 
@@ -1208,9 +1195,9 @@ bool is_possible_to_get_result(const HfstOneLevelPath & s,
   if (unknown_or_identity_seen)
     return true;
   StringVector sv = s.second;
-  for (StringVector::const_iterator it = sv.begin(); it != sv.end(); it++)
+  for (const auto & it : sv)
     {
-      if (symbols_seen.find(*it) == symbols_seen.end())
+      if (symbols_seen.find(it) == symbols_seen.end())
         return false;
     }
   return true;
@@ -1257,15 +1244,14 @@ void lookup_fd_and_print(HfstBasicTransducer &t, HfstOneLevelPaths& results,
             
             /* and the path that yielded the result string */
             bool first_pair=true;
-            for (StringPairVector::const_iterator IT = it->second.begin();
-                 IT != it->second.end(); IT++) {
+            for (const auto & IT : it->second) {
               if (print_space && ! first_pair) {
                 fprintf(outfile, " ");
               }
               first_pair=false;
               fprintf(outfile, "%s:%s",
-                      get_print_format(IT->first).c_str(),
-                      get_print_format(IT->second).c_str());
+                      get_print_format(IT.first).c_str(),
+                      get_print_format(IT.second).c_str());
             }
             /* and the weight of that path. */
             fprintf(outfile, "\t%f\n", it->first);
@@ -1277,37 +1263,31 @@ void lookup_fd_and_print(HfstBasicTransducer &t, HfstOneLevelPaths& results,
   }
 
   // Convert HfstTwoLevelPaths into HfstOneLevelPaths
-  for (HfstTwoLevelPaths::const_iterator it = results_spv.begin();
-       it != results_spv.end(); it++)
+  for (const auto & it : results_spv)
     {
       StringVector sv;
-      for (StringPairVector::const_iterator spv_it = it->second.begin();
-           spv_it != it->second.end(); spv_it++)
+      for (const auto & spv_it : it.second)
         {
-          sv.push_back(spv_it->second);
+          sv.push_back(spv_it.second);
         }
-      HfstOneLevelPath path(it->first, sv);
+      HfstOneLevelPath path(it.first, sv);
       results.insert(path);
     }
  
   HfstOneLevelPaths filtered;
-  for (HfstOneLevelPaths::iterator res = results.begin();
-       res != results.end();
-       ++res)
+  for (const auto & result : results)
     {
-      if (is_valid_flag_diacritic_path(res->second) || !obey_flags)
+      if (is_valid_flag_diacritic_path(result.second) || !obey_flags)
         {
           StringVector unflagged;
-          for (StringVector::const_iterator arc = res->second.begin();
-               arc != res->second.end();
-               arc++)
+          for (const auto & arc : result.second)
             {
-              if (show_flags || ! FdOperation::is_diacritic(*arc))
+              if (show_flags || ! FdOperation::is_diacritic(arc))
                 {
-                  unflagged.push_back(*arc);
+                  unflagged.push_back(arc);
                 }
             }
-          filtered.insert(HfstOneLevelPath(res->first, unflagged));
+          filtered.insert(HfstOneLevelPath(result.first, unflagged));
         }
     }
   results = filtered;
@@ -1366,10 +1346,9 @@ lookup_cascading(const HfstOneLevelPath& s, vector<HfstTransducer> cascade,
         {
           verbose_printf("" SIZE_T_SPECIFIER " results @ level %u\n", result->size(), i);
         }
-      for (HfstOneLevelPaths::const_iterator it = result->begin();
-           it != result->end(); it++)
+      for (const auto & it : *result)
         {
-          results->insert(*it);
+          results->insert(it);
         }
     }
   // all transducers gone through
@@ -1397,10 +1376,9 @@ lookup_cascading(const HfstOneLevelPath& s, vector<HfstBasicTransducer> cascade,
         {
           verbose_printf("" SIZE_T_SPECIFIER " results @ level %u\n", result->size(), i);
         }
-      for (HfstOneLevelPaths::const_iterator it = result->begin();
-           it != result->end(); it++)
+      for (const auto & it : *result)
         {
-          results->insert(*it);
+          results->insert(it);
         }
       delete result;
     }
@@ -1590,13 +1568,11 @@ process_stream(HfstInputStream& inputstream, FILE* outstream)
             type == hfst::FOMA_TYPE)
         {
             HfstBasicTransducer basic(trans);
-            for (HfstBasicTransducer::const_iterator it = basic.begin();
-                 it != basic.end(); it++)
+            for (const auto & it : basic)
               {
-                for (hfst::implementations::HfstBasicTransitions::const_iterator
-                       tr_it = it->begin(); tr_it != it->end(); tr_it++)
+                for (const auto & tr_it : it)
                   {
-                    std::string mcs = tr_it->get_input_symbol();
+                    std::string mcs = tr_it.get_input_symbol();
                     symbols_seen.insert(mcs);
                     if (mcs == hfst::internal_unknown || mcs == hfst::internal_identity)
                       id_or_unk_seen = true;
@@ -1719,11 +1695,9 @@ process_stream(HfstInputStream& inputstream, FILE* outstream)
         if (verbose)
           {
             verbose_printf("Tokenized to: ");
-            for (StringVector::const_iterator s = kv->second.begin();
-                 s != kv->second.end();
-                 ++s)
+            for (const auto & s : kv->second)
               {
-                verbose_printf("%s ", s->c_str());
+                verbose_printf("%s ", s.c_str());
               }
             verbose_printf("\n");
           }

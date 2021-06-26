@@ -166,26 +166,22 @@ namespace hfst
     void ComposeIntersectLexicon::lexicon_skip_symbol_compose
     (const TransitionSet &transitions,HfstState rule_state,HfstState origin)
     {
-      for (TransitionSet::const_iterator it = transitions.begin();
-           it != transitions.end();
-           ++it)
+      for (const auto & transition : transitions)
         {
           add_transition
-            (origin,it->ilabel,it->olabel,it->weight,
-             get_state(StatePair(it->target,rule_state)));
+            (origin,transition.ilabel,transition.olabel,transition.weight,
+             get_state(StatePair(transition.target,rule_state)));
         }
     }
 
     void ComposeIntersectLexicon::rule_skip_symbol_compose
     (const TransitionSet &transitions,HfstState lex_state,HfstState origin)
     {
-      for (TransitionSet::const_iterator it = transitions.begin();
-       it != transitions.end();
-       ++it)
+      for (const auto & transition : transitions)
     {
       add_transition
-        (origin,it->ilabel,it->olabel,it->weight,
-         get_state(StatePair(lex_state,it->target), false));
+        (origin,transition.ilabel,transition.olabel,transition.weight,
+         get_state(StatePair(lex_state,transition.target), false));
     }
 
     }
@@ -196,16 +192,12 @@ namespace hfst
     {
       StatePair p = get_pair(origin);
       (void)p;
-      for (TransitionSet::const_iterator it = lex_transitions.begin();
-       it != lex_transitions.end();
-       ++it)
+      for (const auto & lex_transition : lex_transitions)
     {
-      for (TransitionSet::const_iterator jt = rule_transitions.begin();
-           jt != rule_transitions.end();
-           ++jt)
+      for (const auto & rule_transition : rule_transitions)
         { add_transition
-        (origin,it->ilabel,jt->olabel,it->weight + jt->weight,
-         get_state(StatePair(it->target,jt->target))); }
+        (origin,lex_transition.ilabel,rule_transition.olabel,lex_transition.weight + rule_transition.weight,
+         get_state(StatePair(lex_transition.target,rule_transition.target))); }
     }
     }
 

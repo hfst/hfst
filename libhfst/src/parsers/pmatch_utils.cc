@@ -349,14 +349,13 @@ std::vector<std::pair<WordVector, WordVecFloat> > get_top_n(size_t n,
                                                             WordVector & comparison_point)
 {
     std::vector<std::pair<WordVector, WordVecFloat> > retval;
-    for (std::vector<WordVector>::const_iterator it = vecs.begin();
-         it != vecs.end(); ++it) {
-        WordVecFloat cosdist = cosine_distance(*it, comparison_point);
+    for (const auto & vec : vecs) {
+        WordVecFloat cosdist = cosine_distance(vec, comparison_point);
         for (size_t i = 0; i <= retval.size(); ++i) {
             if (i == retval.size()) {
                 // We made it to the top
                 retval.push_back(std::pair<WordVector, WordVecFloat>(
-                                     WordVector(*it), cosdist));
+                                     WordVector(vec), cosdist));
                 break;
             } else {
                 // Walking the list
@@ -365,7 +364,7 @@ std::vector<std::pair<WordVector, WordVecFloat> > get_top_n(size_t n,
                         break;
                     }
                     retval.insert(retval.begin() + i, std::pair<WordVector, WordVecFloat>(
-                                      WordVector(*it), cosdist));
+                                      WordVector(vec), cosdist));
                     break;
                 } else {
                     continue;
@@ -391,10 +390,7 @@ std::vector<std::pair<WordVector, WordVecFloat> > get_top_n_transformed(
     std::vector<std::pair<WordVector, WordVecFloat> > retval;
     WordVecFloat plane_vec_square_sum = square_sum(plane_vec);
     WordVecFloat comparison_point_norm = norm(comparison_point);
-    for (std::vector<WordVector>::const_iterator it = vecs.begin();
-         it != vecs.end(); ++it) {
-        WordVector transformed_vec(*it);
-
+    for (auto transformed_vec : vecs) {
         /*
          * First, given a plane "plane_vec = translation term" and a point,
          * find the multiple of plane_vec which produces a vector going
@@ -518,10 +514,9 @@ PmatchObject * compile_like_arc(std::string word,
                                 unsigned int nwords)
 {
     WordVector this_word;
-    for (std::vector<WordVector>::iterator it = word_vectors.begin();
-         it != word_vectors.end(); ++it) {
-        if (word == it->word) {
-            this_word = *it;
+    for (auto & word_vector : word_vectors) {
+        if (word == word_vector.word) {
+            this_word = word_vector;
             break;
         }
     }
@@ -540,13 +535,13 @@ PmatchObject * compile_like_arc(std::string word,
     if (verbose) {
         std::cerr << "Inserting into Like(" << word << "):" << std::endl;
     }
-    for (size_t i = 0; i < top_n.size(); ++i) {
+    for (auto & it : top_n) {
         if (verbose) {
-            std::cerr << "  " << top_n[i].first.word << std::endl;
+            std::cerr << "  " << it.first.word << std::endl;
         }
-        HfstTransducer tmp(top_n[i].first.word, tok, format);
+        HfstTransducer tmp(it.first.word, tok, format);
         if (include_cosine_distances) {
-            tmp.set_final_weights(top_n[i].second);
+            tmp.set_final_weights(it.second);
         }
         retval->disjunct(tmp);
     }
@@ -589,13 +584,13 @@ PmatchObject * compile_like_arc(std::string word1, std::string word2,
             std::cerr << "Inserting into Like(" << this_word.word << "):" << std::endl;
         }
 
-        for (size_t i = 0; i < top_n.size(); ++i) {
+        for (auto & it : top_n) {
             if (verbose) {
-                std::cerr << "  " << top_n[i].first.word << std::endl;
+                std::cerr << "  " << it.first.word << std::endl;
             }
-            HfstTransducer tmp(top_n[i].first.word, tok, format);
+            HfstTransducer tmp(it.first.word, tok, format);
             if (include_cosine_distances) {
-                tmp.set_final_weights(top_n[i].second);
+                tmp.set_final_weights(it.second);
             }
             retval->disjunct(tmp);
         }
@@ -680,10 +675,9 @@ hfst::StringSet get_non_special_alphabet(HfstTransducer * t)
 {
     hfst::StringSet retval;
     hfst::StringSet const & alphabet = t->get_alphabet();
-    for (hfst::StringSet::const_iterator it = alphabet.begin();
-         it != alphabet.end(); ++it) {
-        if (hfst_ol::PmatchAlphabet::is_printable(*it)) {
-            retval.insert(*it);
+    for (const auto & it : alphabet) {
+        if (hfst_ol::PmatchAlphabet::is_printable(it)) {
+            retval.insert(it);
         }
     }
     return retval;
@@ -693,9 +687,8 @@ HfstTransducer * make_list(HfstTransducer * t, ImplementationType f)
 {
     std::string arc = "@L.";
     hfst::StringSet alphabet = get_non_special_alphabet(t);
-    for (hfst::StringSet::const_iterator it = alphabet.begin();
-         it != alphabet.end(); ++it) {
-        arc.append(*it);
+    for (const auto & it : alphabet) {
+        arc.append(it);
         arc.append("_");
     }
     arc.append("@");
@@ -706,9 +699,8 @@ HfstTransducer * make_exc_list(HfstTransducer * t, ImplementationType f)
 {
     std::string arc = "@X.";
     hfst::StringSet alphabet = get_non_special_alphabet(t);
-    for (hfst::StringSet::const_iterator it = alphabet.begin();
-         it != alphabet.end(); ++it) {
-        arc.append(*it);
+    for (const auto & it : alphabet) {
+        arc.append(it);
         arc.append("_");
     }
     arc.append("@");
@@ -720,9 +712,8 @@ HfstTransducer * make_sigma(HfstTransducer * t)
     HfstTransducer * retval =
         new HfstTransducer(format);
     hfst::StringSet alphabet = get_non_special_alphabet(t);
-    for (hfst::StringSet::const_iterator it = alphabet.begin();
-         it != alphabet.end(); ++it) {
-            retval->disjunct(HfstTransducer(*it, format));
+    for (const auto & it : alphabet) {
+            retval->disjunct(HfstTransducer(it, format));
     }
     return retval;
 }
@@ -1188,9 +1179,8 @@ compile(const string& pmatch, map<string,HfstTransducer*>& defs,
     include_cosine_distances = do_include_cosine_distances;
     includedir = includedir_;
     vector_similarity_projection_factor = 1.0;
-    for (map<string, HfstTransducer*>::iterator it = defs.begin();
-         it != defs.end(); ++it) {
-        definitions[it->first] = new PmatchTransducerContainer(it->second);
+    for (auto & def : defs) {
+        definitions[def.first] = new PmatchTransducerContainer(def.second);
     }
     format = impl;
     if (hfst::pmatch::verbose) {
@@ -1200,22 +1190,18 @@ compile(const string& pmatch, map<string,HfstTransducer*>& defs,
     pmatchparse();
     free(startptr);
     std::map<std::string, hfst::HfstTransducer*> retval;
-     for (std::set<std::string>::const_iterator it =
-              unsatisfied_insertions.begin();
-          it != unsatisfied_insertions.end(); ++it) {
-         if (definitions.count(*it) == 0) {
+     for (const auto & it : unsatisfied_insertions) {
+         if (definitions.count(it) == 0) {
              std::cerr << "Inserted transducer "
-                       << *it << " was never defined!\n";
+                       << it << " was never defined!\n";
              return retval;
          }
      }
      if (hfst::pmatch::verbose) {
-         std::map<std::string, PmatchObject*>::iterator defs_itr;
-         for (defs_itr = definitions.begin(); defs_itr != definitions.end();
-              ++defs_itr) {
-             if (used_definitions.count(defs_itr->first) == 0 &&
-                 defs_itr->first.compare("TOP") != 0) {
-                 std::cerr << "Warning: " << defs_itr->first << " defined but never used\n";
+         for (const auto & defs_itr : definitions) {
+             if (used_definitions.count(defs_itr.first) == 0 &&
+                 defs_itr.first.compare("TOP") != 0) {
+                 std::cerr << "Warning: " << defs_itr.first << " defined but never used\n";
              }
          }
      }
@@ -1295,25 +1281,23 @@ compile(const string& pmatch, map<string,HfstTransducer*>& defs,
     std::string disallowed_initial_symbols_list;
     // Use this to bail out if there's something suspicious in the final lists
     bool initial_symbols_ok = true;
-    for (StringSet::iterator it = allowed_initial_symbols.begin();
-         it != allowed_initial_symbols.end(); ++it) {
-        if (is_special(*it)) {
+    for (const auto & allowed_initial_symbol : allowed_initial_symbols) {
+        if (is_special(allowed_initial_symbol)) {
             if (hfst::pmatch::verbose) {
-                std::cerr << "Not setting initial symbol list due to special symbol " << *it << std::endl;
+                std::cerr << "Not setting initial symbol list due to special symbol " << allowed_initial_symbol << std::endl;
             }
             initial_symbols_ok = false;
         }
-        initial_symbols_list.append(*it);
+        initial_symbols_list.append(allowed_initial_symbol);
     }
-    for (StringSet::iterator it = disallowed_initial_symbols.begin();
-         it != disallowed_initial_symbols.end(); ++it) {
-        if (is_special(*it)) {
+    for (const auto & disallowed_initial_symbol : disallowed_initial_symbols) {
+        if (is_special(disallowed_initial_symbol)) {
             if (hfst::pmatch::verbose) {
-                std::cerr << "Not setting initial symbol list due to special symbol " << *it << std::endl;
+                std::cerr << "Not setting initial symbol list due to special symbol " << disallowed_initial_symbol << std::endl;
             }
             initial_symbols_ok = false;
         }
-        disallowed_initial_symbols_list.append(*it);
+        disallowed_initial_symbols_list.append(disallowed_initial_symbol);
     }
     if (allowed_initial_symbols.size() > 200) {
         if (hfst::pmatch::verbose) {
@@ -1369,9 +1353,8 @@ compile(const string& pmatch, map<string,HfstTransducer*>& defs,
             }
         }
     }
-    for(std::map<std::string, std::string>::iterator it = variables.begin();
-        it != variables.end(); ++it) {
-        retval["TOP"]->set_property(it->first, it->second);
+    for(auto & variable : variables) {
+        retval["TOP"]->set_property(variable.first, variable.second);
     }
     data = 0;
     len = 0;
@@ -1386,11 +1369,9 @@ void print_size_info(HfstTransducer * net)
     HfstBasicTransducer tmp(*net);
     size_t states = 0;
     size_t arcs = 0;
-    for(HfstBasicTransducer::const_iterator state_it = tmp.begin();
-        state_it != tmp.end(); ++state_it) {
+    for(const auto & state_it : tmp) {
         ++states;
-        for(hfst::implementations::HfstBasicTransitions::const_iterator tr_it =
-                state_it->begin(); tr_it != state_it->end(); ++tr_it) {
+        for(const auto & tr_it : state_it) {
             ++arcs;
         }
     }
@@ -1659,9 +1640,8 @@ HfstTransducer * PmatchUtilityTransducers::make_latin1_numeral_acceptor(Implemen
       HfstTransducer * retval = new HfstTransducer(type);
       const std::string num =
           "0123456789";
-      for (std::string::const_iterator it = num.begin(); it != num.end();
-           ++it) {
-          retval->disjunct(HfstTransducer(std::string(1, *it), type));
+      for (char it : num) {
+          retval->disjunct(HfstTransducer(std::string(1, it), type));
       }
       //retval->minimize(); ?
       return retval;
@@ -2080,13 +2060,13 @@ void PmatchObject::expand_Ins_arcs(StringSet & ss)
     }
     while (!did_no_expansions) {
         did_no_expansions = true;
-        for (StringSet::const_iterator it = ss.begin(); it != ss.end(); ++it) {
-            if (it->find("@I.") == 0 && it->rfind("@") == it->size() - 1) {
+        for (const auto & s : ss) {
+            if (s.find("@I.") == 0 && s.rfind("@") == s.size() - 1) {
                 // it's an Ins
-                if (expansions_done.count(*it) == 0) {
-                    std::string ins_name = it->substr(3, it->size() - 3 - 1);
+                if (expansions_done.count(s) == 0) {
+                    std::string ins_name = s.substr(3, s.size() - 3 - 1);
                     did_no_expansions = false;
-                    expansions_done.insert(*it);
+                    expansions_done.insert(s);
                     if (definitions.count(ins_name) != 0) {
                         StringSet allowed, disallowed;
                         if (def_insed_expressions.count(ins_name) != 0) {
@@ -2104,9 +2084,8 @@ void PmatchObject::expand_Ins_arcs(StringSet & ss)
             }
         }
     }
-    for (StringSet::const_iterator it = expansions_done.begin();
-         it != expansions_done.end(); ++it) {
-        ss.erase(*it);
+    for (const auto & it : expansions_done) {
+        ss.erase(it);
     }
     ss.insert(expanded_symbols.begin(), expanded_symbols.end());
 }
@@ -2272,9 +2251,9 @@ void PmatchObject::collect_initial_symbols_into(StringSet & allowed_initial_symb
     if (string_set_has_meta_arc(allowed)) {
         if (required.size() != 0 && !string_set_has_meta_arc(required)) {
             // RC sets a constraint
-            for (StringSet::iterator it = required.begin(); it != required.end(); ++it) {
-                if (disallowed.count(*it) == 0) {
-                    allowed_initial_symbols.insert(*it);
+            for (const auto & it : required) {
+                if (disallowed.count(it) == 0) {
+                    allowed_initial_symbols.insert(it);
                 }
             }
             return;
@@ -2293,9 +2272,9 @@ void PmatchObject::collect_initial_symbols_into(StringSet & allowed_initial_symb
 
     if (required.size() == 0 || string_set_has_meta_arc(required)) {
         // RC poses no constraint
-        for (StringSet::iterator it = allowed.begin(); it != allowed.end(); ++it) {
-            if (disallowed.count(*it) == 0) {
-                allowed_initial_symbols.insert(*it);
+        for (const auto & it : allowed) {
+            if (disallowed.count(it) == 0) {
+                allowed_initial_symbols.insert(it);
             }
         }
         return;
@@ -2303,9 +2282,9 @@ void PmatchObject::collect_initial_symbols_into(StringSet & allowed_initial_symb
 
     // Now we can assume that there is a genuine RC constraint.
 
-    for (StringSet::iterator it = required.begin(); it != required.end(); ++it) {
-        if (allowed.count(*it) == 1 && disallowed.count(*it) == 0) {
-            allowed_initial_symbols.insert(*it);
+    for (const auto & it : required) {
+        if (allowed.count(it) == 1 && disallowed.count(it) == 0) {
+            allowed_initial_symbols.insert(it);
         }
     }
     return;
@@ -2447,16 +2426,13 @@ HfstTransducer * PmatchFunction::evaluate(void)
 HfstTransducer * PmatchFuncall::evaluate(void)
 {
     std::vector<PmatchObject * > evaluated_args;
-    for (std::vector<PmatchObject *>::iterator it = args->begin();
-         it != args->end(); ++it) {
+    for (auto & arg : *args) {
         evaluated_args.push_back(
-            (*it)->evaluate_as_arg());
+            arg->evaluate_as_arg());
     }
     HfstTransducer * retval = fun->evaluate(evaluated_args);
-    for (std::vector<PmatchObject *>::iterator it =
-             evaluated_args.begin(); it != evaluated_args.end();
-         ++it) {
-        delete *it;
+    for (auto & evaluated_arg : evaluated_args) {
+        delete evaluated_arg;
     }
     return retval;
 }
@@ -2529,9 +2505,8 @@ HfstTransducer * PmatchUnaryOperation::evaluate(void)
         std::vector<std::string> strings;
         root->collect_strings_into(strings);
         std::string whole_string;
-        for (std::vector<std::string>::iterator it = strings.begin();
-             it != strings.end(); ++it) {
-            whole_string += *it;
+        for (auto & string : strings) {
+            whole_string += string;
         }
         if (whole_string.size() > 0) {
             retval = new HfstTransducer(whole_string, format);
@@ -2551,9 +2526,8 @@ HfstTransducer * PmatchUnaryOperation::evaluate(void)
         std::vector<std::string> strings;
         root->collect_strings_into(strings);
         std::string whole_string;
-        for (std::vector<std::string>::iterator it = strings.begin();
-             it != strings.end(); ++it) {
-            whole_string += *it;
+        for (auto & string : strings) {
+            whole_string += string;
         }
         HfstTokenizer tok;
         if (whole_string.size() > 0) {
@@ -2623,8 +2597,8 @@ HfstTransducer * PmatchUnaryOperation::evaluate(void)
         HfstTransducer* any = new HfstTransducer(hfst::internal_identity,
                                                  hfst::pmatch::format);
         hfst::StringSet alphabet = get_non_special_alphabet(retval);
-        for (hfst::StringSet::iterator it = alphabet.begin(); it != alphabet.end(); ++it) {
-            HfstTransducer symbol(*it, hfst::pmatch::format);
+        for (const auto & it : alphabet) {
+            HfstTransducer symbol(it, hfst::pmatch::format);
             any->subtract(symbol);
         }
         delete retval;
@@ -2813,8 +2787,8 @@ HfstTransducer * PmatchBinaryOperation::evaluate(void)
             right->collect_strings_into(strings);
             HfstTokenizer tok;
             retval = new HfstTransducer(format);
-            for (StringVector::iterator it = strings.begin(); it != strings.end(); ++it) {
-                StringPairVector spv = tok.tokenize(*it);
+            for (auto & string : strings) {
+                StringPairVector spv = tok.tokenize(string);
                 retval->disjunct(spv);
             }
             retval->set_final_weights(hfst::double_to_float(weight), true);
@@ -3042,9 +3016,8 @@ HfstTransducer * PmatchParallelRulesContainer::evaluate(void)
 std::vector<hfst::xeroxRules::Rule> PmatchParallelRulesContainer::make_mappings(void)
 {
     std::vector<hfst::xeroxRules::Rule> retval;
-    for(std::vector<PmatchReplaceRuleContainer *>::iterator it = rules.begin();
-        it != rules.end(); ++it) {
-        retval.push_back((*it)->make_mapping());
+    for(auto & rule : rules) {
+        retval.push_back(rule->make_mapping());
     }
 
     return retval;
@@ -3100,9 +3073,8 @@ HfstTransducer * PmatchReplaceRuleContainer::evaluate(void)
 hfst::xeroxRules::Rule PmatchReplaceRuleContainer::make_mapping(void)
 {
     HfstTransducerPairVector pair_vector;
-    for(MappingPairVector::iterator it = mapping.begin();
-        it != mapping.end(); ++it) {
-        TransducerPointerPair pp = (*it)->evaluate_pair();
+    for(auto & it : mapping) {
+        TransducerPointerPair pp = it->evaluate_pair();
         HfstTransducerPair p(HfstTransducer(*(pp.first)), HfstTransducer(*(pp.second)));
         delete pp.first;
         delete pp.second;
@@ -3112,9 +3084,8 @@ hfst::xeroxRules::Rule PmatchReplaceRuleContainer::make_mapping(void)
         return hfst::xeroxRules::Rule(pair_vector);
     }
     HfstTransducerPairVector context_vector;
-    for (MappingPairVector::iterator it = context.begin();
-         it != context.end(); ++it) {
-        TransducerPointerPair pp = (*it)->evaluate_pair();
+    for (auto & it : context) {
+        TransducerPointerPair pp = it->evaluate_pair();
         HfstTransducerPair p(HfstTransducer(*(pp.first)), HfstTransducer(*(pp.second)));
         delete pp.first;
         delete pp.second;
@@ -3141,9 +3112,8 @@ HfstTransducer * PmatchRestrictionContainer::evaluate(void)
     start_timing();
     HfstTransducer * retval = NULL;
     HfstTransducerPairVector pair_vector;
-    for (MappingPairVector::iterator it = contexts->begin();
-         it != contexts->end(); ++it) {
-        TransducerPointerPair pp = (*it)->evaluate_pair();
+    for (auto & context : *contexts) {
+        TransducerPointerPair pp = context->evaluate_pair();
         HfstTransducerPair p(HfstTransducer(*(pp.first)), HfstTransducer(*(pp.second)));
         delete pp.first;
         delete pp.second;

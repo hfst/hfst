@@ -59,16 +59,16 @@ bool is_default(const char * str)
     void collect_unknown_sets(StringSet &s1, StringSet &unknown1,
                   StringSet &s2, StringSet &unknown2)
     {
-      for (StringSet::const_iterator it1 = s1.begin(); it1 != s1.end(); it1++) {
-    String sym1 = *it1;
-    if ( s2.find(sym1) == s2.end() )
-      unknown2.insert(sym1);
-      }
-      for (StringSet::const_iterator it2 = s2.begin(); it2 != s2.end(); it2++) {
-    String sym2 = *it2;
-    if ( s1.find(sym2) == s1.end() )
-      unknown1.insert(sym2);
-      }
+      for (auto sym1 : s1)
+        {
+          if (s2.find(sym1) == s2.end())
+            unknown2.insert(sym1);
+        }
+      for (auto sym2 : s2)
+        {
+          if (s1.find(sym2) == s1.end())
+            unknown1.insert(sym2);
+        }
     }
 
     std::string to_string(const StringVector & sv, bool spaces)
@@ -107,10 +107,9 @@ bool is_default(const char * str)
     StringPairSet to_string_pair_set(const StringSet & ss)
     {
       StringPairSet result;
-      for (StringSet::const_iterator it = ss.begin();
-           it != ss.end(); it++)
+      for (const auto & s : ss)
         {
-          result.insert(StringPair(*it,*it));
+          result.insert(StringPair(s,s));
         }
       return result;
     }
@@ -118,12 +117,12 @@ bool is_default(const char * str)
     StringVector to_string_vector(const StringPairVector & spv, bool input_side)
     {
       StringVector result;
-      for (StringPairVector::const_iterator it = spv.begin(); it != spv.end(); it++)
+      for (const auto & it : spv)
         {
           if (input_side)
-            result.push_back(it->first);
+            result.push_back(it.first);
           else
-            result.push_back(it->second);
+            result.push_back(it.second);
         }
       return result;
     }
@@ -132,9 +131,9 @@ bool is_default(const char * str)
     {
       StringVector result;
       StringPairVector spv = path.second;
-      for (StringPairVector::const_iterator it = spv.begin(); it != spv.end(); it++)
+      for (const auto & it : spv)
         {
-          result.push_back(it->first);
+          result.push_back(it.first);
         }
       return result;
     }
@@ -152,10 +151,9 @@ bool is_default(const char * str)
 
       unsigned int max_path_length = 0;
 
-      for (HfstTwoLevelPaths::const_iterator it = paths.begin();
-           it != paths.end(); it++)
+      for (const auto & path : paths)
         {
-          unsigned int length = (unsigned int)it->second.size();
+          unsigned int length = (unsigned int)path.second.size();
           max_path_length = (length > max_path_length)? length : max_path_length;
         }
       return (int)max_path_length;
@@ -166,20 +164,18 @@ bool is_default(const char * str)
       HfstTwoLevelPaths result;
       unsigned int max_path_length = 0;
 
-      for (HfstTwoLevelPaths::const_iterator it = paths.begin();
-           it != paths.end(); it++)
+      for (const auto & path : paths)
         {
-          unsigned int length = (unsigned int)it->second.size();
+          unsigned int length = (unsigned int)path.second.size();
           max_path_length = (length > max_path_length)? length : max_path_length;
         }
 
-      for (HfstTwoLevelPaths::const_iterator it = paths.begin();
-           it != paths.end(); it++)
+      for (const auto & path : paths)
         {
-          unsigned int length = (unsigned int)it->second.size();
+          unsigned int length = (unsigned int)path.second.size();
           if (length == max_path_length)
             {
-              result.insert(*it);
+              result.insert(path);
             }
         }
 
@@ -190,11 +186,10 @@ bool is_default(const char * str)
     {
       HfstTwoLevelPaths result;
 
-      for (HfstTwoLevelPaths::const_iterator it = paths.begin();
-           it != paths.end(); it++)
+      for (const auto & path : paths)
         {
-          result.insert(HfstTwoLevelPath(it->first,
-                                         remove_flags(it->second)));
+          result.insert(HfstTwoLevelPath(path.first,
+                                         remove_flags(path.second)));
         }
       return result;
     }
@@ -211,12 +206,10 @@ bool is_default(const char * str)
     StringVector remove_flags(const StringVector &v)
     {
       StringVector v_wo_flags;
-      for (StringVector::const_iterator it = v.begin();
-           it != v.end();
-           ++it)
+      for (const auto & it : v)
         {
-          if (! FdOperation::is_diacritic(*it))
-            { v_wo_flags.push_back(*it); }
+          if (! FdOperation::is_diacritic(it))
+            { v_wo_flags.push_back(it); }
         }
       return v_wo_flags;
     }
@@ -224,13 +217,11 @@ bool is_default(const char * str)
     StringPairVector remove_flags(const StringPairVector &v)
     {
       StringPairVector v_wo_flags;
-      for (StringPairVector::const_iterator it = v.begin();
-           it != v.end();
-           ++it)
+      for (const auto & it : v)
         {
-          if (! FdOperation::is_diacritic(it->first) &&
-              ! FdOperation::is_diacritic(it->second))
-            { v_wo_flags.push_back(*it); }
+          if (! FdOperation::is_diacritic(it.first) &&
+              ! FdOperation::is_diacritic(it.second))
+            { v_wo_flags.push_back(it); }
         }
       return v_wo_flags;
     }

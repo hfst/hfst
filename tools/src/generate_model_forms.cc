@@ -18,11 +18,9 @@ InvalidModelLine::InvalidModelLine(const std::string &line):
 
 std::ostream &operator<<(std::ostream &out,const StringVector &v)
 {
-  for (StringVector::const_iterator it = v.begin();
-       it != v.end();
-       ++it)
+  for (const auto & it : v)
     {
-      out << *it;
+      out << it;
     }
 
   return out;
@@ -39,10 +37,8 @@ HfstTokenizer get_alphabet_string_tokenizer(HfstTransducer &fst)
   
   HfstTokenizer tokenizer;
 
-  for (StringSet::const_iterator it = alphabet.begin();
-       it != alphabet.end();
-       ++it)
-    { tokenizer.add_multichar_symbol(*it); }
+  for (const auto & it : alphabet)
+    { tokenizer.add_multichar_symbol(it); }
 
   return tokenizer;
 }
@@ -79,11 +75,8 @@ StringVector join(StringVector sv1, const StringVector &sv2)
 
 bool contains_analysis_symbols(const StringVector &word_form)
 {
-  for (StringVector::const_iterator it = word_form.begin();
-       it != word_form.end();
-       ++it)
+  for (const auto & symbol : word_form)
     {
-      const std::string &symbol = *it;
       if (symbol.size() > 1 and
       symbol[0] == '[' and
       symbol[symbol.size() - 1] == ']')
@@ -106,20 +99,18 @@ StringVector generate_word_forms(const StringVector &analysis,
   
   float best_weight = -1;
 
-  for (HfstOneLevelPaths::const_iterator it = word_forms->begin();
-       it != word_forms->end();
-       ++it)
+  for (const auto & it : *word_forms)
     {
       if (num > max_generated_forms)
         { break; }
 
       if (best_weight == -1)
-        { best_weight = it->first; }
+        { best_weight = it.first; }
 
-      if (it->first - best_weight >= generate_threshold)
+      if (it.first - best_weight >= generate_threshold)
         { break; }
 
-      const StringVector &word_form = it->second;
+      const StringVector &word_form = it.second;
       
       if (contains_analysis_symbols(word_form))
         { continue; }
@@ -138,14 +129,12 @@ StringVector generate_word_forms(const StringVector &analysis,
 
   bool first_form = true;
 
-  for (StringVectorSet::const_iterator it = result_set.begin();
-       it != result_set.end();
-       ++it)
+  for (const auto & it : result_set)
     {
       if (not first_form)
         { results.push_back(", "); }
 
-      results.insert(results.end(), it->begin(), it->end());
+      results.insert(results.end(), it.begin(), it.end());
 
       first_form = false;
     }
@@ -167,11 +156,9 @@ StringVectorVector get_model_forms(const StringVector &reversed_analysis,
 
   StringVectorVector results;
 
-  for (StringVectorVector::const_iterator it  = model_forms.begin();
-       it != model_forms.end();
-       ++it)
+  for (const auto & model_form : model_forms)
     {
-      StringVector model_analysis = join(*it, reversed_analysis_prefix);
+      StringVector model_analysis = join(model_form, reversed_analysis_prefix);
 
       results.push_back(generate_word_forms(model_analysis,
                                             form_generator,
@@ -239,13 +226,11 @@ StringVectorVector get_guesses(const std::string &word_form,
 
   StringVectorVector results;
 
-  for (HfstOneLevelPaths::const_iterator it = paths->begin();
-       it != paths->end();
-       ++it)
+  for (const auto & path : *paths)
     {
       if (num > number_of_guesses)
     { break; }
-      results.push_back(it->second);
+      results.push_back(path.second);
       ++num;
     }
 
@@ -263,12 +248,8 @@ StringVectorVector get_paradigms(const std::string &word_form,
 {
   StringVectorVector paradigm_guesses;
 
-  for (StringVectorVector::const_iterator it = guesses.begin();
-       it != guesses.end();
-       ++it)
+  for (auto analysis_guess : guesses)
     {
-      StringVector analysis_guess = *it;
-
       StringVectorVector results = get_model_forms(analysis_guess,
                                                    model_forms,
                                                    generator,
@@ -285,12 +266,8 @@ StringVectorVector get_paradigms(const std::string &word_form,
               rev_analysis_guess.begin(),
               rev_analysis_guess.end());
 
-      for (StringVectorVector::const_iterator jt = results.begin();
-       jt != results.end();
-       ++jt)
+      for (const auto & model_form : results)
         {
-          const StringVector &model_form = *jt;
-
           paradigm.push_back("\t");
           paradigm.insert(paradigm.end(),
                   model_form.begin(),

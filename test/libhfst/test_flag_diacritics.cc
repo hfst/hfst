@@ -85,13 +85,12 @@ int main(int argc, char **argv)
       assert(results.size() == 2);
 
       std::set<StringPair> result_strings;
-      for (HfstTwoLevelPaths::const_iterator it = results.begin();
-       it != results.end(); it++)
+      for (const auto & result : results)
     {
       std::string istring;
       std::string ostring;
-      for (StringPairVector::const_iterator IT = it->second.begin();
-           IT != it->second.end(); IT++)
+      for (StringPairVector::const_iterator IT = result.second.begin();
+           IT != result.second.end(); IT++)
         {
           istring.append(IT->first);
           ostring.append(IT->second);

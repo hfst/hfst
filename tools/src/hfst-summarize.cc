@@ -327,25 +327,21 @@ process_stream(HfstInputStream& instream)
             {
               sparsest_arcs = arcs_here;
             }
-          for (map<string, unsigned int>::iterator ambit = input_ambiguity.begin();
-               ambit != input_ambiguity.end();
-               ++ambit)
+          for (auto & ambit : input_ambiguity)
             {
-              if (ambit->second > most_ambiguous_input.second)
+              if (ambit.second > most_ambiguous_input.second)
                 {
-                  most_ambiguous_input.first = ambit->first;
-                  most_ambiguous_input.second = ambit->second;
+                  most_ambiguous_input.first = ambit.first;
+                  most_ambiguous_input.second = ambit.second;
                 }
               uniq_input_arcs++;
             }
-          for (map<string, unsigned int>::iterator ambit = output_ambiguity.begin();
-               ambit != output_ambiguity.end();
-               ++ambit)
+          for (auto & ambit : output_ambiguity)
             {
-              if (ambit->second > most_ambiguous_output.second)
+              if (ambit.second > most_ambiguous_output.second)
                 {
-                  most_ambiguous_output.first = ambit->first;
-                  most_ambiguous_output.second = ambit->second;
+                  most_ambiguous_output.first = ambit.first;
+                  most_ambiguous_output.second = ambit.second;
                 }
               uniq_output_arcs++;
             }
@@ -474,15 +470,13 @@ process_stream(HfstInputStream& instream)
           if (transducerKnowsAlphabet)
             {
               bool first = true;
-              for (StringSet::const_iterator s = transducerAlphabet.begin();
-                   s != transducerAlphabet.end();
-                   ++s)
+              for (const auto & s : transducerAlphabet)
                 {
                   if (!first)
                     {
                       fprintf(outfile, ", ");
                     }
-                  fprintf(outfile, "%s", s->c_str());
+                  fprintf(outfile, "%s", s.c_str());
                   first = false;
                 }
               fprintf(outfile, "\n");
@@ -493,15 +487,13 @@ process_stream(HfstInputStream& instream)
             }
           fprintf(outfile, "arc symbols actually seen in transducer:\n");
           bool first = true;
-          for (StringSet::const_iterator s = foundAlphabet.begin();
-               s != foundAlphabet.end();
-               ++s)
+          for (const auto & s : foundAlphabet)
             {
               if (!first)
                 {
                   fprintf(outfile, ", ");
                 }
-              fprintf(outfile, "%s", s->c_str());
+              fprintf(outfile, "%s", s.c_str());
               first = false;
             }
           fprintf(outfile, "\n");
@@ -517,15 +509,13 @@ process_stream(HfstInputStream& instream)
                                                 transducerMinusSet.end()));
 
               first = true;
-              for (StringSet::const_iterator s = transducerMinusSet.begin();
-                   s != transducerMinusSet.end();
-                   ++s)
+              for (const auto & s : transducerMinusSet)
                 {
                   if (!first)
                     {
                       fprintf(outfile, ", ");
                     }
-                  fprintf(outfile, "%s", s->c_str());
+                  fprintf(outfile, "%s", s.c_str());
                   first = false;
                 }
               fprintf(outfile, "\n");
@@ -540,15 +530,13 @@ process_stream(HfstInputStream& instream)
               StringSet ss = trans.get_first_input_symbols();
               fprintf(outfile, "first input symbols:\n");
               first = true;
-              for (StringSet::const_iterator s = ss.begin();
-                   s != ss.end();
-                   ++s)
+              for (const auto & s : ss)
                 {
                   if (!first)
                     {
                       fprintf(outfile, ", ");
                     }
-                  fprintf(outfile, "%s", s->c_str());
+                  fprintf(outfile, "%s", s.c_str());
                   first = false;
                 }
               fprintf(outfile, "\n");

@@ -226,12 +226,10 @@ process_stream(HfstInputStream& instream, HfstOutputStream& outstream)
             const map<string, string>& props = trans.get_properties();
             if (print_all_properties)
               {
-                for (map<string, string>::const_iterator prop = props.begin();
-                     prop != props.end();
-                     ++prop)
+                for (const auto & prop : props)
                   {
-                    fprintf(outfile, "%s: %s\n", prop->first.c_str(),
-                            prop->second.c_str());
+                    fprintf(outfile, "%s: %s\n", prop.first.c_str(),
+                            prop.second.c_str());
                   }
               }
             else

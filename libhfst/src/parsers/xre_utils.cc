@@ -481,10 +481,9 @@ unescape_enclosing_angle_brackets(HfstTransducer *t)
 {
   hfst::HfstSymbolSubstitutions substitutions;
   StringSet alpha = t->get_alphabet();
-  for (StringSet::const_iterator it = alpha.begin();
-       it != alpha.end(); it++)
+  for (const auto & it : alpha)
     {
-      insert_angle_bracket_substitutions(*it, substitutions);
+      insert_angle_bracket_substitutions(it, substitutions);
     }
   if (substitutions.size() == 0)
     return t;
@@ -661,13 +660,12 @@ bool define_function_args(const char * name, const std::vector<HfstTransducer> *
       return false;
     }
   unsigned int arg_number = 1;
-  for (std::vector<HfstTransducer>::const_iterator it = args->begin();
-       it != args->end(); it++)
+  for (const auto & arg : *args)
     {
       ostringstream os;
       os << arg_number;
       std::string function_arg = "@" + std::string(name) + os.str() + "@";
-      definitions[function_arg] = new HfstTransducer(*it);
+      definitions[function_arg] = new HfstTransducer(arg);
       //fprintf(stderr, "defined function arg: '%s', %i:\n", name, arg_number); // DEBUG
       //std::cerr << *it << std::endl;
       arg_number++;
@@ -766,10 +764,9 @@ xfst_curly_label_to_transducer(const char* input, const char* output)
       retval = new HfstTransducer
         (hfst::internal_unknown, first_token, hfst::xre::format);
 
-      for (StringVector::const_iterator it = sv.begin();
-           it != sv.end(); it++)
+      for (const auto & it : sv)
         {
-          HfstTransducer tmp(*it, first_token, hfst::xre::format);
+          HfstTransducer tmp(it, first_token, hfst::xre::format);
           retval->disjunct(tmp, false);
         }
       for (StringVector::const_iterator it = ++(sv.begin());
@@ -787,10 +784,9 @@ xfst_curly_label_to_transducer(const char* input, const char* output)
       retval = new HfstTransducer
         (first_token, hfst::internal_unknown, hfst::xre::format);
 
-      for (StringVector::const_iterator it = sv.begin();
-           it != sv.end(); it++)
+      for (const auto & it : sv)
         {
-          HfstTransducer tmp(first_token, *it, hfst::xre::format);
+          HfstTransducer tmp(first_token, it, hfst::xre::format);
           retval->disjunct(tmp, false);
         }
       for (StringVector::const_iterator it = ++(sv.begin());
@@ -899,12 +895,11 @@ xfst_label_to_transducer(const char* input, const char* output)
     // and identity pairs of symbols that occur in t
     HfstBasicTransducer basic(*t);
     StringPairSet symbol_pairs = basic.get_transition_pairs();
-    for (StringPairSet::const_iterator it = symbol_pairs.begin();
-         it != symbol_pairs.end(); it++)
+    for (const auto & symbol_pair : symbol_pairs)
       {
-        alphabet.insert(*it);
-        alphabet.insert(StringPair(it->first, it->first));
-        alphabet.insert(StringPair(it->second, it->second));
+        alphabet.insert(symbol_pair);
+        alphabet.insert(StringPair(symbol_pair.first, symbol_pair.first));
+        alphabet.insert(StringPair(symbol_pair.second, symbol_pair.second));
       }
 
     HfstTransducer rule = hfst::rules::two_level_if_and_only_if
@@ -1116,15 +1111,14 @@ void warn_about_special_symbols_in_replace(HfstTransducer * t)
   std::ostream * err = xreerrstr();
 
   StringSet alphabet = t->get_alphabet();
-  for (StringSet::const_iterator it = alphabet.begin();
-       it != alphabet.end(); it++)
+  for (const auto & symbol : alphabet)
     {
-      if (HfstTransducer::is_special_symbol(*it) &&
-          *it != hfst::internal_epsilon &&
-          *it != hfst::internal_unknown &&
-          *it != hfst::internal_identity)
+      if (HfstTransducer::is_special_symbol(symbol) &&
+          symbol != hfst::internal_epsilon &&
+          symbol != hfst::internal_unknown &&
+          symbol != hfst::internal_identity)
         {
-          *err << "warning: using special symbol '" << *it << "' in replace rule, use substitute instead" << std::endl;
+          *err << "warning: using special symbol '" << symbol << "' in replace rule, use substitute instead" << std::endl;
         }
     }
   xreflush(err);
@@ -1148,9 +1142,9 @@ bool has_non_identity_pairs(const HfstTransducer * t)
 {
   hfst::implementations::HfstBasicTransducer basic(*t);
   StringPairSet sps = basic.get_transition_pairs();
-  for (StringPairSet::const_iterator it = sps.begin(); it != sps.end(); it++)
+  for (const auto & sp : sps)
     {
-      if (it->first != it->second)
+      if (sp.first != sp.second)
         {
           return true;
         }

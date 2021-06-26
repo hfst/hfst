@@ -34,19 +34,17 @@ void NewLexicalModel::initialize_tag_probabilities(void)
   if (lower_case_tag_paths->empty())
     { lexical_model_is_broken = true; }
 
-  for (HfstOneLevelPaths::const_iterator it = upper_case_tag_paths->begin();
-       it != upper_case_tag_paths->end();
-       ++it)
+  for (const auto & upper_case_tag_path : *upper_case_tag_paths)
     {
-      float penalty = it->first;
+      float penalty = upper_case_tag_path.first;
 
-      if (it->second.empty())
+      if (upper_case_tag_path.second.empty())
 	{
 	  lexical_model_is_broken = true;
 	  break;
 	}
 
-      const std::string &tag = *(it->second.rbegin());
+      const std::string &tag = *(upper_case_tag_path.second.rbegin());
 
       upper_case_tag_penalties[tag] = penalty;
       upper_case_empty_suffix_guesses.push_back
@@ -54,19 +52,17 @@ void NewLexicalModel::initialize_tag_probabilities(void)
       upper_case_empty_suffix_null.push_back(WeightedString(0,tag));
     }
 
-  for (HfstOneLevelPaths::const_iterator it = lower_case_tag_paths->begin();
-       it != lower_case_tag_paths->end();
-       ++it)
+  for (const auto & lower_case_tag_path : *lower_case_tag_paths)
     {
-      float penalty = it->first;
+      float penalty = lower_case_tag_path.first;
 
-      if (it->second.empty())
+      if (lower_case_tag_path.second.empty())
 	{
 	  lexical_model_is_broken = true;
 	  break;
 	}
 
-      const std::string &tag = *(it->second.rbegin());
+      const std::string &tag = *(lower_case_tag_path.second.rbegin());
 
       lower_case_tag_penalties[tag] = penalty;
       lower_case_empty_suffix_guesses.push_back
@@ -380,15 +376,13 @@ const WeightedStringVector &NewLexicalModel::cache_analyses
 		       WeightedString());
 
   size_t i = 0;
-  for (HfstOneLevelPaths::const_iterator it = paths->begin();
-       it != paths->end();
-       ++it)
+  for (const auto & path : *paths)
     {
       // Each entry in paths, is a weight analysis pair. The last entry in
       // the analysis is the tag.
       word_analyses[i].first  =
-	convert_to_probabilities ? get_prob(it->first) : it->first;
-      word_analyses[i].second = *(it->second.rbegin());
+	convert_to_probabilities ? get_prob(path.first) : path.first;
+      word_analyses[i].second = *(path.second.rbegin());
       ++i;
     }
 
@@ -403,10 +397,8 @@ void NewLexicalModel::merge_analyses
 {
   ++id;
 
-  for (WeightedStringVector::const_iterator it = suffix_analyses.begin();
-       it != suffix_analyses.end();
-       ++it)
-    { suffix_tag_probability_hash[it->second] = IdWeightPair(id,it->first); }
+  for (const auto & suffix_analyse : suffix_analyses)
+    { suffix_tag_probability_hash[suffix_analyse.second] = IdWeightPair(id,suffix_analyse.first); }
 
   for (WeightedStringVector::reverse_iterator it = word_analyses.rbegin();
        it != word_analyses.rend();
@@ -501,13 +493,11 @@ void NewLexicalModel::bayesian_invert(WeightedStringVector &word_analyses,
   preserve_n_best_analyses(word_analyses,GUESSES_PRESERVED);
 
   float suffix_penalty = get_suffix_penalty(suffix, upper_case);
-  for (WeightedStringVector::iterator it = word_analyses.begin();
-       it != word_analyses.end();
-       ++it)
+  for (auto & word_analyse : word_analyses)
     {
-      it->first =
-	suffix_penalty + get_penalty(it->first) - get_tag_penalty(it->second,upper_case);
-      it->first *= 0.2;
+      word_analyse.first =
+	suffix_penalty + get_penalty(word_analyse.first) - get_tag_penalty(word_analyse.second,upper_case);
+      word_analyse.first *= 0.2;
     }
 }
 

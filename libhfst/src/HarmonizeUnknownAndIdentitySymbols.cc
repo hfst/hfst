@@ -30,12 +30,12 @@ size_t max_(size_t t1,size_t t2)
 
 static bool is_subset(const StringSet &subset,const StringSet &superset)
 {
-  for (StringSet::const_iterator it = subset.begin();
-       it != subset.end();
-       ++it)
+  for (const auto& it : subset)
     {
-      if (superset.find(*it) == superset.end())
-    { return false; }
+      if (superset.find(it) == superset.end())
+        {
+          return false;
+        }
     }
   return true;
 }
@@ -43,12 +43,11 @@ static bool is_subset(const StringSet &subset,const StringSet &superset)
 static StringSet remove_flags(const StringSet & alpha)
 {
   StringSet retval;
-  for (StringSet::const_iterator it = alpha.begin();
-      it != alpha.end(); it++)
+  for (const auto& symbol : alpha)
     {
-        if (!FdOperation::is_diacritic(*it) && !hfst_ol::PmatchAlphabet::is_special(*it))
+      if (!FdOperation::is_diacritic(symbol) && !hfst_ol::PmatchAlphabet::is_special(symbol))
         {
-          retval.insert(*it);
+          retval.insert(symbol);
         }
     }
   return retval;
@@ -158,15 +157,12 @@ HarmonizeUnknownAndIdentitySymbols::HarmonizeUnknownAndIdentitySymbols
 void HarmonizeUnknownAndIdentitySymbols::populate_symbol_set
 (const HfstBasicTransducer &t,StringSet &s)
 {
-  for (HfstBasicTransducer::const_iterator it = t.begin(); it != t.end(); ++it)
+  for (const auto & state : t)
     {
-      for (hfst::implementations::HfstBasicTransitions::const_iterator jt =
-         it->begin();
-       jt != it->end();
-       ++jt)
+      for (const auto & arc : state)
     {
-      s.insert(jt->get_input_symbol());
-      s.insert(jt->get_output_symbol());
+      s.insert(arc.get_input_symbol());
+      s.insert(arc.get_output_symbol());
     }
     }
   if (debug_harmonize)
@@ -179,9 +175,9 @@ void HarmonizeUnknownAndIdentitySymbols::populate_symbol_set
 void HarmonizeUnknownAndIdentitySymbols::add_symbols_to_alphabet
 (HfstBasicTransducer &t, const StringSet &s)
 {
-  for (StringSet::const_iterator it = s.begin(); it != s.end(); it++)
+  for (const auto & it : s)
     {
-      t.add_symbol_to_alphabet(*it);
+      t.add_symbol_to_alphabet(it);
     }
 }
 
@@ -192,14 +188,14 @@ void HarmonizeUnknownAndIdentitySymbols::harmonize_identity_symbols
   if (missing_symbols.empty())
     { return; }
 
-  for (HfstBasicTransducer::iterator it = t.begin(); it != t.end(); ++it)
+  for (auto & it : t)
     {
 
       hfst::implementations::HfstBasicTransitions added_transitions;
 
       for (hfst::implementations::HfstBasicTransitions::const_iterator jt =
-         it->begin();
-       jt != it->end();
+         it.begin();
+       jt != it.end();
        ++jt)
     {
       if (jt->get_input_symbol() == identity)
@@ -207,16 +203,14 @@ void HarmonizeUnknownAndIdentitySymbols::harmonize_identity_symbols
           // --- an exception instead, this could also be checked
           //     at an earlier stage
           assert(jt->get_output_symbol() == identity);
-          for (StringSet::const_iterator kt = missing_symbols.begin();
-           kt != missing_symbols.end();
-           ++kt)
+          for (const auto & missing_symbol : missing_symbols)
         { added_transitions.push_back
             (HfstBasicTransition(jt->get_target_state(),
-                     *kt,*kt,
+                     missing_symbol,missing_symbol,
                      jt->get_weight())); }
         }
     }
-      it->insert(it->end(),
+      it.insert(it.end(),
          added_transitions.begin(),added_transitions.end());
     }
 }
@@ -228,13 +222,13 @@ void HarmonizeUnknownAndIdentitySymbols::harmonize_unknown_symbols
   if (missing_symbols.empty())
     { return; }
 
-  for (HfstBasicTransducer::iterator it = t.begin(); it != t.end(); ++it)
+  for (auto & it : t)
     {
       hfst::implementations::HfstBasicTransitions added_transitions;
 
       for (hfst::implementations::HfstBasicTransitions::const_iterator jt =
-         it->begin();
-       jt != it->end();
+         it.begin();
+       jt != it.end();
        ++jt)
     {
       if (jt->get_input_symbol() == unknown)
@@ -243,13 +237,11 @@ void HarmonizeUnknownAndIdentitySymbols::harmonize_unknown_symbols
           //     at an earlier stage
           assert(jt->get_output_symbol() != identity);
         
-          for (StringSet::const_iterator kt = missing_symbols.begin();
-           kt != missing_symbols.end();
-           ++kt)
+          for (const auto & missing_symbol : missing_symbols)
         {
           added_transitions.push_back
             (HfstBasicTransition(jt->get_target_state(),
-                     *kt,jt->get_output_symbol(),
+                     missing_symbol,jt->get_output_symbol(),
                      jt->get_weight()));
         }
         }
@@ -259,12 +251,10 @@ void HarmonizeUnknownAndIdentitySymbols::harmonize_unknown_symbols
           //     at an earlier stage
           assert(jt->get_input_symbol() != identity);
 
-          for (StringSet::const_iterator kt = missing_symbols.begin();
-           kt != missing_symbols.end();
-           ++kt)
+          for (const auto & missing_symbol : missing_symbols)
         { added_transitions.push_back
             (HfstBasicTransition(jt->get_target_state(),
-                     jt->get_input_symbol(),*kt,
+                     jt->get_input_symbol(),missing_symbol,
                      jt->get_weight())); }
 
         }
@@ -290,7 +280,7 @@ void HarmonizeUnknownAndIdentitySymbols::harmonize_unknown_symbols
         }
         }
     }
-      it->insert(it->end(),
+      it.insert(it.end(),
          added_transitions.begin(),added_transitions.end());
     }
 }
@@ -298,10 +288,8 @@ void HarmonizeUnknownAndIdentitySymbols::harmonize_unknown_symbols
 // --- this could be useful elsewhere, too (print_string_set?)
 void debug_harmonize_print(const StringSet &s)
 {
-  for (StringSet::const_iterator it = s.begin();
-       it != s.end();
-       ++it)
-    { std::cerr << *it << std::endl; }
+  for (const auto & it : s)
+    { std::cerr << it << std::endl; }
 }
 
 void debug_harmonize_print(const std::string &s)

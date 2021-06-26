@@ -50,8 +50,8 @@ PmatchAlphabet::PmatchAlphabet(std::istream & inputstream,
                     // finally go over all other known flag diacritics with the non-globalized feature and
                     // mark them global too
                     SymbolNumberVector globals = fd_table.get_symbols_with_feature(feature);
-                    for (SymbolNumberVector::iterator it = globals.begin(); it != globals.end(); ++it) {
-                        global_flags[*it] = true;
+                    for (unsigned short & global : globals) {
+                        global_flags[global] = true;
                     }
                 }
             }
@@ -201,16 +201,15 @@ void PmatchAlphabet::process_underscored_symbol_list(const std::string & str, Sy
         collected_symbols.push_back(symbol);
     }
     // Process the symbols we found
-    for (std::vector<std::string>::const_iterator it = collected_symbols.begin();
-         it != collected_symbols.end(); ++it) {
+    for (const auto & collected_symbol : collected_symbols) {
         SymbolNumber str_sym;
-        if (ss.count(*it) == 0) {
+        if (ss.count(collected_symbol) == 0) {
 // This symbol isn't mentioned elsewhere in the alphabet
-            add_symbol(*it);
+            add_symbol(collected_symbol);
             str_sym = orig_symbol_count;
             ++orig_symbol_count;
         } else {
-            str_sym = ss[*it];
+            str_sym = ss[collected_symbol];
         }
         list_symbols.push_back(str_sym);
         if (polarity == true) {
@@ -253,14 +252,13 @@ void PmatchAlphabet::process_symbol_list(const std::string & str, SymbolNumber s
     SymbolNumberVector list_symbols = container->symbol_vector_from_symbols(str.substr(begin, stop));
 
     // Process the symbols we found
-    for (SymbolNumberVector::const_iterator it = list_symbols.begin();
-         it != list_symbols.end(); ++it) {
+    for (unsigned short list_symbol : list_symbols) {
         if (polarity == true) {
-            if (symbol2lists[*it] == NO_SYMBOL_NUMBER) {
-              symbol2lists[*it] = hfst::size_t_to_ushort(symbol_lists.size());
+            if (symbol2lists[list_symbol] == NO_SYMBOL_NUMBER) {
+              symbol2lists[list_symbol] = hfst::size_t_to_ushort(symbol_lists.size());
                 symbol_lists.push_back(SymbolNumberVector(1, sym));
             } else {
-                symbol_lists[symbol2lists[*it]].push_back(sym);
+                symbol_lists[symbol2lists[list_symbol]].push_back(sym);
             }
         }
     }
@@ -289,10 +287,9 @@ void PmatchAlphabet::process_symbol_list(const std::string & str, SymbolNumber s
 SymbolNumberVector PmatchAlphabet::get_specials(void) const
 {
     SymbolNumberVector v;
-    for (SymbolNumberVector::const_iterator it =
-             special_symbols.begin(); it != special_symbols.end(); ++it) {
-        if (*it != NO_SYMBOL_NUMBER) {
-            v.push_back(*it);
+    for (unsigned short special_symbol : special_symbols) {
+        if (special_symbol != NO_SYMBOL_NUMBER) {
+            v.push_back(special_symbol);
         }
     }
     return v;
@@ -473,11 +470,10 @@ PmatchContainer::PmatchContainer(std::vector<HfstTransducer> transducers):
         // We collect all the symbols and also copy and convert any non-olw bits
         for (size_t i = 0; i < transducers.size(); ++i) {
             hfst::StringSet string_set = transducers[i].get_alphabet();
-            for (hfst::StringSet::const_iterator sym = string_set.begin();
-                 sym != string_set.end(); ++sym) {
-                if (symbols_seen.count(*sym) == 0) {
-                    harmonizer.disjunct(HfstTransducer(*sym, harmonizer.get_type()));
-                    symbols_seen.insert(*sym);
+            for (const auto & sym : string_set) {
+                if (symbols_seen.count(sym) == 0) {
+                    harmonizer.disjunct(HfstTransducer(sym, harmonizer.get_type()));
+                    symbols_seen.insert(sym);
                 }
             }
             if (transducers[i].get_name() == "TOP") {
@@ -531,11 +527,11 @@ PmatchContainer::PmatchContainer(std::vector<HfstTransducer> transducers):
             this);
         // Then we do the same for the other transducers except without
         // alphabets or encoders because those should be identical
-        for (size_t i = 0; i < temporaries.size(); ++i) {
-            if (temporaries[i] != NULL) {
+        for (auto & temporary : temporaries) {
+            if (temporary != NULL) {
                 // there's a NULL where TOP should be
                 intermediate_tmp = hfst::implementations::ConversionFunctions::
-                    hfst_transducer_to_hfst_basic_transducer(*(temporaries[i]));
+                    hfst_transducer_to_hfst_basic_transducer(*temporary);
                 harmonized_tmp = hfst::implementations::ConversionFunctions::
                     hfst_basic_transducer_to_hfst_ol(intermediate_tmp,
                                                      true, // weighted
@@ -547,9 +543,9 @@ PmatchContainer::PmatchContainer(std::vector<HfstTransducer> transducers):
                     transitions.get_vector(),
                     indices.get_vector(),
                     alphabet,
-                    temporaries[i]->get_name(),
+                    temporary->get_name(),
                     this);
-                alphabet.add_rtn(rtn, temporaries[i]->get_name());
+                alphabet.add_rtn(rtn, temporary->get_name());
             }
         }
         // clean up the temporaries
@@ -685,9 +681,8 @@ bool PmatchAlphabet::is_printable(const std::string & symbol)
 
 bool PmatchAlphabet::is_guard(const SymbolNumber symbol) const
 {
-    for(SymbolNumberVector::const_iterator it = guards.begin();
-        it != guards.end(); ++it) {
-        if(symbol == *it) {
+    for(unsigned short guard : guards) {
+        if(symbol == guard) {
             return true;
         }
     }
@@ -736,10 +731,9 @@ PmatchContainer::~PmatchContainer(void)
 
 PmatchAlphabet::~PmatchAlphabet(void)
 {
-    for (RtnVector::iterator it = rtns.begin();
-         it != rtns.end(); ++it) {
-        delete *it;
-        *it = NULL;
+    for (auto & rtn : rtns) {
+        delete rtn;
+        rtn = NULL;
     }
 
 }
@@ -916,10 +910,9 @@ void PmatchContainer::process(const std::string & input_str)
                     nonmatching_locations.clear();
                 }
                 LocationVector ls;
-                for (WeightedDoubleTapeVector::iterator it = tape_locations.begin();
-                     it != tape_locations.end(); ++it) {
+                for (auto & tape_location : tape_locations) {
                     ls.push_back(alphabet.locatefy(printable_input_pos,
-                                                   *it));
+                                                   tape_location));
                 }
                 sort(ls.begin(), ls.end());
                 locations.push_back(ls);
@@ -1010,15 +1003,14 @@ std::string PmatchContainer::get_profiling_info(void)
     }
     std::sort(counter_name_val_pairs.begin(), counter_name_val_pairs.end(),
               counter_comp);
-    for(std::vector<std::pair<std::string, unsigned long> >::const_iterator it =
-            counter_name_val_pairs.begin(); it != counter_name_val_pairs.end(); ++it) {
-        retval << "    " << it->first;
-        size_t spacing_counter = max_name_len + 8 - it->first.size();
+    for(const auto & counter_name_val_pair : counter_name_val_pairs) {
+        retval << "    " << counter_name_val_pair.first;
+        size_t spacing_counter = max_name_len + 8 - counter_name_val_pair.first.size();
         while (spacing_counter) {
             retval << " ";
             --spacing_counter;
         }
-        retval << it->second << "\n";
+        retval << counter_name_val_pair.second << "\n";
     }
     return retval.str();
 }
@@ -1027,15 +1019,14 @@ std::string PmatchContainer::get_pattern_count_info(void)
 {
     size_t total = 0;
     std::string retval = "Pattern\t\t# of matches\n------------------------\n";
-    for (std::map<std::string, size_t>::iterator it = pattern_counts.begin();
-         it != pattern_counts.end(); ++it) {
-        retval.append(it->first);
+    for (auto & pattern_count : pattern_counts) {
+        retval.append(pattern_count.first);
         retval.append("\t\t");
         std::ostringstream converter;
-        converter << it->second;
+        converter << pattern_count.second;
         retval.append(converter.str());
         retval.append("\n");
-        total += it->second;
+        total += pattern_count.second;
     }
     retval.append("------------------------\n");
     std::ostringstream converter;
@@ -1048,9 +1039,8 @@ std::string PmatchContainer::get_pattern_count_info(void)
 
 void PmatchContainer::copy_to_result(const DoubleTape & best_result)
 {
-    for (DoubleTape::const_iterator it = best_result.begin();
-         it != best_result.end(); ++it) {
-        result.push_back(*it);
+    for (auto it : best_result) {
+        result.push_back(it);
     }
 }
 
@@ -1064,12 +1054,11 @@ std::string PmatchAlphabet::stringify(const DoubleTape & str)
     std::string retval;
     std::stack<unsigned int> start_tag_pos;
     bool input_contained_printable_symbol = false;
-    for (DoubleTape::const_iterator it = str.begin();
-         it != str.end(); ++it) {
-        if (!input_contained_printable_symbol && is_printable(it->input)) {
+    for (auto it : str) {
+        if (!input_contained_printable_symbol && is_printable(it.input)) {
             input_contained_printable_symbol = true;
         }
-        SymbolNumber output = it->output;
+        SymbolNumber output = it.output;
         if (output == special_symbols[entry]) {
             start_tag_pos.push(hfst::size_t_to_uint(retval.size()));
         } else if (output == special_symbols[exit]) {
@@ -1119,10 +1108,9 @@ Location PmatchAlphabet::locatefy(unsigned int input_offset,
 
     // We rebuild the original input without special
     // symbols but with IDENTITIES etc. replaced
-    for (DoubleTape::const_iterator it = str.begin();
-         it != str.end(); ++it) {
-        SymbolNumber input = it->input;
-        SymbolNumber output = it->output;
+    for (auto it : str) {
+        SymbolNumber input = it.input;
+        SymbolNumber output = it.output;
         if (is_end_tag(output)) {
             if (container->count_patterns) {
                 if ((container->pattern_counts).count(start_tag(output)) == 0) {
@@ -1279,64 +1267,63 @@ void PmatchContainer::set_properties(void)
 
 void PmatchContainer::set_properties(std::map<std::string, std::string> & properties)
 {
-    for (std::map<std::string, std::string>::iterator it = properties.begin();
-         it != properties.end(); ++it) {
-        if (it->first == "count-patterns") {
-            if (it->second == "on") {
+    for (auto & propertie : properties) {
+        if (propertie.first == "count-patterns") {
+            if (propertie.second == "on") {
                 count_patterns = true;
-            } else if (it->second == "off") {
+            } else if (propertie.second == "off") {
                 count_patterns = false;
             }
-        } else if (it->first == "delete-patterns") {
-            if (it->second == "on") {
+        } else if (propertie.first == "delete-patterns") {
+            if (propertie.second == "on") {
                 delete_patterns = true;
-            } else if (it->second == "off") {
+            } else if (propertie.second == "off") {
                 delete_patterns = false;
             }
-        } else if (it->first == "extract-patterns") {
-            if (it->second == "on") {
+        } else if (propertie.first == "extract-patterns") {
+            if (propertie.second == "on") {
                 extract_patterns = true;
-            } else if (it->second == "off") {
+            } else if (propertie.second == "off") {
                 extract_patterns = false;
             }
-        } else if (it->first == "locate-patterns") {
-            if (it->second == "on") {
+        } else if (propertie.first == "locate-patterns") {
+            if (propertie.second == "on") {
                 locate_mode = true;
-            } else if (it->second == "off") {
+            } else if (propertie.second == "off") {
                 locate_mode = false;
             }
-        } else if (it->first == "mark-patterns") {
-            if (it->second == "on") {
+        } else if (propertie.first == "mark-patterns") {
+            if (propertie.second == "on") {
                 mark_patterns = true;
-            } else if (it->second == "off") {
+            } else if (propertie.second == "off") {
                 mark_patterns = false;
             }
-        } else if (it->first == "max-context-length") {
-            std::stringstream converter(it->second);
+        } else if (propertie.first == "max-context-length") {
+            std::stringstream converter(propertie.second);
             converter >> max_context_length;
             if (max_context_length == 0) {
-                if (it->second != "0") {
+                if (propertie.second != "0") {
                     max_context_length = 254;
                 }
             }
-        } else if (it->first == "max-recursion") {
-            std::stringstream converter(it->second);
+        } else if (propertie.first == "max-recursion") {
+            std::stringstream converter(propertie.second);
             converter >> max_recursion;
             if (max_recursion == 0) {
-                if (it->second != "0") {
+                if (propertie.second != "0") {
                     max_recursion = 5000;
                 }
             }
-        } else if (it->first == "need-separators") {
-            if (it->second == "on") {
+        } else if (propertie.first == "need-separators") {
+            if (propertie.second == "on") {
                 need_separators = true;
-            } else if (it->second == "off") {
+            } else if (propertie.second == "off") {
                 need_separators = false;
             }
-        } else if (it->first == "xerox-composition") {
-            if (it->second == "off") {
+        } else if (propertie.first == "xerox-composition") {
+            if (propertie.second == "off") {
                 xerox_composition = false;
-            } else if (it->second == "on") {
+            } else if (propertie.second == "on") {
                 xerox_composition = true;
             }
         }
@@ -1346,12 +1333,11 @@ void PmatchContainer::set_properties(std::map<std::string, std::string> & proper
 void PmatchContainer::collect_first_symbols(const std::string & symbols_list)
 {
     SymbolNumberVector first_symbols = symbol_vector_from_symbols(symbols_list);
-    for (SymbolNumberVector::const_iterator it = first_symbols.begin();
-         it != first_symbols.end(); ++it) {
-        while (*it >= possible_first_symbols.size()) {
+    for (unsigned short first_symbol : first_symbols) {
+        while (first_symbol >= possible_first_symbols.size()) {
             possible_first_symbols.push_back(false);
         }
-        possible_first_symbols[*it] = true;
+        possible_first_symbols[first_symbol] = true;
     }
 }
 
@@ -1532,25 +1518,23 @@ std::pair<SymbolNumberVector::iterator,
     SymbolNumber key, unsigned int input_pos)
 {
     std::pair<SymbolNumberVector::iterator, SymbolNumberVector::iterator> longest_so_far(input.begin(), input.begin());
-    for (std::vector<Capture>::iterator it =
-             captures.begin(); it != captures.end(); ++it) {
-        if (key == it->name && input_matches_at(input_pos, input.begin() + it->begin, input.begin() + it->end)) {
-            if ((it->end - it->begin) <= longest_so_far.second - longest_so_far.first) {
+    for (auto & capture : captures) {
+        if (key == capture.name && input_matches_at(input_pos, input.begin() + capture.begin, input.begin() + capture.end)) {
+            if ((capture.end - capture.begin) <= longest_so_far.second - longest_so_far.first) {
                 continue;
             } else {
-                longest_so_far.first = input.begin() + it->begin;
-                longest_so_far.second = input.begin() + it->end;
+                longest_so_far.first = input.begin() + capture.begin;
+                longest_so_far.second = input.begin() + capture.end;
             }
         }
     }
-    for (std::vector<Capture>::iterator it =
-             old_captures.begin(); it != old_captures.end(); ++it) {
-        if (key == it->name && input_matches_at(input_pos, input.begin() + it->begin, input.begin() + it->end)) {
-            if ((it->end - it->begin) <= longest_so_far.second - longest_so_far.first) {
+    for (auto & old_capture : old_captures) {
+        if (key == old_capture.name && input_matches_at(input_pos, input.begin() + old_capture.begin, input.begin() + old_capture.end)) {
+            if ((old_capture.end - old_capture.begin) <= longest_so_far.second - longest_so_far.first) {
                 continue;
             } else {
-                longest_so_far.first = input.begin() + it->begin;
-                longest_so_far.second = input.begin() + it->end;
+                longest_so_far.first = input.begin() + old_capture.begin;
+                longest_so_far.second = input.begin() + old_capture.end;
             }
         }
     }
@@ -1805,10 +1789,8 @@ void PmatchTransducer::get_analyses(unsigned int input_pos,
 
     if (alphabet.symbol2lists[input] != NO_SYMBOL_NUMBER) {
 // At least one symbol list could allow this symbol
-        for(SymbolNumberVector::const_iterator it =
-                alphabet.symbol_lists[alphabet.symbol2lists[input]].begin();
-            it != alphabet.symbol_lists[alphabet.symbol2lists[input]].end(); ++it) {
-            take_transitions(*it, input_pos, tape_pos, i+1);
+        for(unsigned short it : alphabet.symbol_lists[alphabet.symbol2lists[input]]) {
+            take_transitions(it, input_pos, tape_pos, i+1);
         }
     }
     // The "normal" case where we have a regular input symbol

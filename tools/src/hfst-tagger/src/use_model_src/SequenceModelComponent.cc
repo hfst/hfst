@@ -42,10 +42,8 @@ void SequenceModelComponent::add_symbols_from(const HfstBasicTransducer &fst)
 
   const HfstTransitionGraphAlphabet &alphabet = fst.get_alphabet();
 
-  for (HfstTransitionGraphAlphabet::const_iterator it = alphabet.begin();
-       it != alphabet.end();
-       ++it)
-    { add_symbol(*it); }
+  for (const auto & it : alphabet)
+    { add_symbol(it); }
 }
 
 void SequenceModelComponent::add_symbol(const std::string &string_symbol)
@@ -94,17 +92,14 @@ void SequenceModelComponent::add_transitions_from
 
       Symbol2TransitionDataMap &symbol_to_transition = transition_map[s];
 
-      for (hfst::implementations::HfstBasicTransitions::const_iterator it =
-	     transitions.begin();
-	   it != transitions.end();
-	   ++it)
+      for (const auto & transition : transitions)
 	{
-	  Symbol symbol = symbol_to_number_map[it->get_input_symbol()];
+	  Symbol symbol = symbol_to_number_map[transition.get_input_symbol()];
 	  
 	  add_transition_to_map(symbol_to_transition,
 				symbol,
-				it->get_weight(),
-				it->get_target_state());
+				transition.get_weight(),
+				transition.get_target_state());
 	}
     }
 }

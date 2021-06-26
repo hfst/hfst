@@ -626,11 +626,9 @@ print_match_line(const HfstOneLevelPath& path)
     {
       fprintf(outfile, "%lu: ", linen);
     }
-  for (vector<string>::const_iterator s = path.second.begin();
-       s != path.second.end();
-       ++s)
+  for (const auto & s : path.second)
     {
-      fprintf(outfile, "%s", s->c_str());
+      fprintf(outfile, "%s", s.c_str());
     }
   fprintf(outfile, "\n");
 }
@@ -661,13 +659,11 @@ print_match_transducer(const HfstTransducer& path)
     {
       fprintf(outfile, "%lu: ", linen);
     }
-  for (vector<pair<string,string> >::const_iterator s = p.begin()->second.begin();
-       s != p.begin()->second.end();
-       ++s)
+  for (const auto & s : p.begin()->second)
     {
-      if (!is_epsilon(s->first))
+      if (!is_epsilon(s.first))
         {
-          fprintf(outfile, "%s", s->first.c_str());
+          fprintf(outfile, "%s", s.first.c_str());
         }
     }
   fprintf(outfile, "\n");

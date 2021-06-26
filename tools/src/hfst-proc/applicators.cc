@@ -70,8 +70,8 @@ TokenizationApplicator::apply()
   if(verboseFlag)
   {
     std::cout << "Set of tokens:" << std::endl;
-    for(std::set<Token>::const_iterator it=alltokens.begin(); it!=alltokens.end(); it++)
-      std::cout << process_token(*it) << std::endl;
+    for(auto token : alltokens)
+      std::cout << process_token(token) << std::endl;
   }
 }
 
@@ -270,10 +270,9 @@ GenerationApplicator::apply()
           if(!lookup(form, false))
             {
               std::vector<TokenVector> parts = split(form);
-              for (std::vector<TokenVector>::const_iterator it=parts.begin();
-                   it!=parts.end(); it++)
+              for (const auto & part : parts)
                 {
-                  lookup(*it, true);
+                  lookup(part, true);
                 }
             }
 
@@ -321,18 +320,18 @@ GenerationApplicator::preprocess_finals(const LookupPathSet& finals) const
 {
   LookupPathSet goodcmp_finals(LookupPathW::compare_weights);
   // insertion sort :)
-  for (LookupPathSet::const_iterator it = finals.begin(); it != finals.end(); ++it)
+  for (auto final : finals)
   {
-      goodcmp_finals.insert(*it);
+      goodcmp_finals.insert(final);
   }
   
   // Keep only the N best weight classes
   int classes_found = -1;
   Weight last_weight_class = 0.0;
   LookupPathSet goodweight_finals(LookupPathW::compare_weights); 
-  for(LookupPathSet::const_iterator it = goodcmp_finals.begin(); it != goodcmp_finals.end(); it++)
+  for(auto goodcmp_final : goodcmp_finals)
   {
-          LookupPathW* pw = dynamic_cast<LookupPathW*>(*it);
+          LookupPathW* pw = dynamic_cast<LookupPathW*>(goodcmp_final);
     if(pw != NULL) {
       Weight current_weight = pw->get_weight();
       if (classes_found == -1) // we're just starting
@@ -350,7 +349,7 @@ GenerationApplicator::preprocess_finals(const LookupPathSet& finals) const
         break;
       }
     }
-    goodweight_finals.insert(*it);
+    goodweight_finals.insert(goodcmp_final);
   }
   // Keep no more than maxAnalyses
   LookupPathSet clipped_finals(LookupPathW::compare_weights);

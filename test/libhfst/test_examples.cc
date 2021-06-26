@@ -86,16 +86,16 @@ int main(int argc, char **argv)
 
 
   // For all transducer implementation types, perform the following tests: */
-  for (unsigned int i=0; i<TYPES_SIZE; i++)
+  for (auto type : types)
     {
-      if (not HfstTransducer::is_implementation_type_available(types[i]))
+      if (not HfstTransducer::is_implementation_type_available(type))
 	continue;
 
-      verbose_print("expanding unknowns", types[i]);
+      verbose_print("expanding unknowns", type);
       
-      HfstTransducer Tr1(tr1, types[i]);
-      HfstTransducer Tr2(tr2, types[i]);
-      HfstTransducer Disj(disj, types[i]);
+      HfstTransducer Tr1(tr1, type);
+      HfstTransducer Tr2(tr2, type);
+      HfstTransducer Disj(disj, type);
 
       Tr1.disjunct(Tr2).minimize();
       // Tr1 is expanded to [ @_UNKNOWN_SYMBOL_@:foo | bar:foo ]
@@ -105,12 +105,12 @@ int main(int argc, char **argv)
       assert(Tr1.compare(Disj));
 
 
-      verbose_print("testing NotValidAttFormatException", types[i]);
+      verbose_print("testing NotValidAttFormatException", type);
 
       FILE * ifile = fopen("testfile.att", "rb");
       try {
 	unsigned int linecount = 0;
-	HfstTransducer t(ifile, types[i], "@_EPSILON_SYMBOL_@", linecount);
+	HfstTransducer t(ifile, type, "@_EPSILON_SYMBOL_@", linecount);
     assert(false);
       }
       catch (NotValidAttFormatException e)
@@ -179,19 +179,17 @@ int main(int argc, char **argv)
       }
     
     /* Go through all paths. */
-    for (HfstTwoLevelPaths::const_iterator it = results.begin();
-         it != results.end(); it++)
+    for (const auto & result : results)
       {
     /* Go through each path. */
-    StringPairVector spv = it->second;
+    StringPairVector spv = result.second;
     std::string istring("");
     std::string ostring("");
     
-    for (StringPairVector::const_iterator IT = spv.begin();
-         IT != spv.end(); IT++)
+    for (const auto & IT : spv)
       {
-        istring.append(IT->first);
-        ostring.append(IT->second);
+        istring.append(IT.first);
+        ostring.append(IT.second);
       }
     /*fprintf(stdout, "%s : %s\n",
         istring.c_str(),

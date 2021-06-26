@@ -34,16 +34,16 @@
 bool
 LetterTrie::has_symbol_0() const
 {
-  for(size_t i=0;i<symbols.size();i++)
-  {
-    if(symbols[i] == 0)
-      return true;
-  }
-  for(size_t i=0;i<letters.size();i++)
-  {
-    if(letters[i] != NULL && letters[i]->has_symbol_0())
-      return true;
-  }
+  for (unsigned short symbol : symbols)
+    {
+      if (symbol == 0)
+        return true;
+    }
+  for (auto letter : letters)
+    {
+      if (letter != NULL && letter->has_symbol_0())
+        return true;
+    }
   return false;
 }
 
@@ -123,8 +123,8 @@ Symbolizer::add_symbol(const std::string& symbol_str)
 void
 Symbolizer::add_symbols(const SymbolTable& st)
 {
-  for (SymbolNumber k = 0; k < st.size(); ++k)
-    add_symbol(st[k]);
+  for (const auto & symbol_str : st)
+    add_symbol(symbol_str);
 }
 
 SymbolNumber
@@ -219,9 +219,8 @@ ProcTransducerAlphabet::check_for_overlapping() const
 {
   std::vector<std::string> overlapping;
   
-  for(size_t i=0;i<symbol_table.size();i++)
+  for(auto str : symbol_table)
   {
-    std::string str = symbol_table[i];
     if(str.length() > 1 && !is_punctuation(std::string(1, str[0]).c_str()))
     {
       std::istringstream s(str);
@@ -240,9 +239,8 @@ ProcTransducerAlphabet::check_for_overlapping() const
         continue;
       
       bool overlaps = true;
-      for(size_t j=0;j<chars.size();j++)
+      for(auto ch : chars)
       {
-        std::string ch = chars[j];
         if(!is_alphabetic(ch.c_str()) || symbolizer.find_symbol(ch.c_str()) == NO_SYMBOL_NUMBER)
         {
           overlaps = false;
@@ -500,40 +498,40 @@ ProcTransducerAlphabet::caps_helper_single(const char* c, int& case_res)
                                              {"Ԁ","ԥ"}, // Cyrillic Supplement
                                              {"Ḁ","ỿ"}}; //Latin Extended Additional
 
-  for(int i = 0; i < 21; i++)
+  for(auto & i : override_upper)
   {
-    if(strcmp(c,override_upper[i][0]) == 0)
+    if(strcmp(c,i[0]) == 0)
     {
       case_res = 1;
-      return override_upper[i][1];
+      return i[1];
     }
   }
 
-  for(int i = 0; i < 21; i++)
+  for(auto & i : override_lower)
   {
-    if(strcmp(c,override_lower[i][0]) == 0)
+    if(strcmp(c,i[0]) == 0)
     {
       case_res = -1;
-      return override_lower[i][1];
+      return i[1];
     }
   }
 
-  for(int i=0;i<5;i++) // check parallel ranges
+  for(auto & parallel_range : parallel_ranges) // check parallel ranges
   {
-    if(strcmp(c,parallel_ranges[i][0][0]) >= 0 &&
-       strcmp(c,parallel_ranges[i][0][1]) <= 0) // in the uppercase section
+    if(strcmp(c,parallel_range[0][0]) >= 0 &&
+       strcmp(c,parallel_range[0][1]) <= 0) // in the uppercase section
     {
       case_res = 1;
-      int diff = utf8_str_to_int(parallel_ranges[i][1][0]) -
-                 utf8_str_to_int(parallel_ranges[i][0][0]);
+      int diff = utf8_str_to_int(parallel_range[1][0]) -
+                 utf8_str_to_int(parallel_range[0][0]);
       return utf8_int_to_str(utf8_str_to_int(c)+diff);
     }
-    else if(strcmp(c,parallel_ranges[i][1][0]) >= 0 &&
-            strcmp(c,parallel_ranges[i][1][1]) <= 0) // in the lowercase section
+    else if(strcmp(c,parallel_range[1][0]) >= 0 &&
+            strcmp(c,parallel_range[1][1]) <= 0) // in the lowercase section
     {
       case_res = -1;
-      int diff = utf8_str_to_int(parallel_ranges[i][1][0]) -
-                 utf8_str_to_int(parallel_ranges[i][0][0]);
+      int diff = utf8_str_to_int(parallel_range[1][0]) -
+                 utf8_str_to_int(parallel_range[0][0]);
       return utf8_int_to_str(utf8_str_to_int(c)-diff);
     }
   }
@@ -650,10 +648,10 @@ ProcTransducerAlphabet::is_punctuation(const char* c) const
                                            {"₠","₸"},
                                            {"∀","⋿"}};
   const char* individual_chars = "×÷";
-  for(int i=0;i<8;i++)
+  for(auto & punct_range : punct_ranges)
   {
-    if(strcmp(c,punct_ranges[i][0]) >= 0 &&
-       strcmp(c,punct_ranges[i][1]) <= 0)
+    if(strcmp(c,punct_range[0]) >= 0 &&
+       strcmp(c,punct_range[1]) <= 0)
     {
       // a hack to filter out symbols (e.g. tags) that may start with punctuation
       // and then contain ASCII text. Tags should be treated as alphabetic.
@@ -710,9 +708,9 @@ int
 ProcTransducerAlphabet::num_compound_boundaries(const SymbolNumberVector& symbol) const
 {
   int count=0;
-  for(SymbolNumberVector::const_iterator i=symbol.begin(); i!=symbol.end(); i++)
+  for(unsigned short i : symbol)
   {
-    if(is_compound_boundary(*i))
+    if(is_compound_boundary(i))
       count++;
   }
   return count;

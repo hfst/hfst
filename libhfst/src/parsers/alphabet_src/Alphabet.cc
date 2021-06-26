@@ -92,15 +92,13 @@ const OtherSymbolTransducer &Alphabet::compute(const SymbolPair &pair)
     }
   else if (input == TWOLC_UNKNOWN && output == TWOLC_UNKNOWN)
     {
-      for (HandySet<SymbolPair>::const_iterator it = alphabet_set.begin();
-       it != alphabet_set.end();
-       ++it)
+      for (const auto & it : alphabet_set)
         {
-          if (is_set_pair(*it))
+          if (is_set_pair(it))
             { continue; }
 
           pair_transducer.apply(&HfstTransducer::disjunct,
-                                OtherSymbolTransducer(it->first,it->second));
+                                OtherSymbolTransducer(it.first,it.second));
         }
       pair_transducer.apply(&HfstTransducer::disjunct,
                             OtherSymbolTransducer(TWOLC_UNKNOWN));
@@ -109,68 +107,59 @@ const OtherSymbolTransducer &Alphabet::compute(const SymbolPair &pair)
     {
       output_symbols.insert(pair.second);
       const SymbolRange &output_set = sets[output];
-      for (SymbolRange::const_iterator it = output_set.begin();
-       it != output_set.end();
-       ++it)
-    {
-      for (HandySet<SymbolPair>::const_iterator jt = alphabet_set.begin();
-           jt != alphabet_set.end();
-           ++jt)
+      for (const auto & it : output_set)
         {
-          if (is_set_pair(*jt))
-            { continue; }
-
-          if (*it == jt->second)
+          for (const auto& jt : alphabet_set)
             {
-              pair_transducer.apply(&HfstTransducer::disjunct,
-                                    OtherSymbolTransducer
-                                    (jt->first,jt->second)); }
+              if (is_set_pair(jt))
+                {
+                  continue;
+                }
+
+              if (it == jt.second)
+                {
+                  pair_transducer.apply(&HfstTransducer::disjunct,
+                                        OtherSymbolTransducer(jt.first, jt.second));
+                }
+            }
         }
-    }
     }
   else if (output == TWOLC_UNKNOWN)
     {
       input_symbols.insert(pair.first);
       const SymbolRange &input_set = sets[input];
-      for (SymbolRange::const_iterator it = input_set.begin();
-       it != input_set.end();
-       ++it)
-    {
-      for (HandySet<SymbolPair>::const_iterator jt = alphabet_set.begin();
-           jt != alphabet_set.end();
-           ++jt)
+      for (const auto& it : input_set)
         {
-          if (is_set_pair(*jt))
-            { continue; }
-          
-          if (*it == jt->first)
+          for (const auto& jt : alphabet_set)
             {
-              pair_transducer.apply(&HfstTransducer::disjunct,
-                                    OtherSymbolTransducer
-                                    (jt->first,jt->second)); }
+              if (is_set_pair(jt))
+                {
+                  continue;
+                }
+
+              if (it == jt.first)
+                {
+                  pair_transducer.apply(&HfstTransducer::disjunct,
+                                        OtherSymbolTransducer(jt.first, jt.second));
+                }
+            }
         }
-    }
     }
   else
     {
       const SymbolRange &input_set = sets[input];
       const SymbolRange &output_set = sets[output];
 
-      for (SymbolRange::const_iterator it = input_set.begin();
-       it != input_set.end();
-       ++it)
-    {
-      for (SymbolRange::const_iterator jt = output_set.begin();
-           jt != output_set.end();
-           ++jt)
+      for (const auto& it : input_set)
         {
-          if (is_pair(*it,*jt))
+          for (const auto& jt : output_set)
             {
-              pair_transducer.apply(&HfstTransducer::disjunct,
-                                    OtherSymbolTransducer(*it,*jt));
+              if (is_pair(it, jt))
+                {
+                  pair_transducer.apply(&HfstTransducer::disjunct, OtherSymbolTransducer(it, jt));
+                }
             }
         }
-    }
     }
   alphabet[pair] = pair_transducer;
   alphabet_set.insert(pair);
@@ -187,14 +176,12 @@ void Alphabet::define_alphabet_pair(const SymbolPair &pair)
 void Alphabet::define_diacritics(const SymbolRange &diacs)
 {
   diacritics.insert(diacs.begin(),diacs.end());
-  for (HandySet<std::string>::iterator it = diacritics.begin();
-       it != diacritics.end();
-       ++it)
+  for (const auto & diacritic : diacritics)
     {
-      alphabet_set.erase(SymbolPair(*it,*it));
-      alphabet_set.erase(SymbolPair(*it,TWOLC_EPSILON));
-      input_symbols.erase(*it);
-      output_symbols.erase(*it);
+      alphabet_set.erase(SymbolPair(diacritic,diacritic));
+      alphabet_set.erase(SymbolPair(diacritic,TWOLC_EPSILON));
+      input_symbols.erase(diacritic);
+      output_symbols.erase(diacritic);
     }
 }
 

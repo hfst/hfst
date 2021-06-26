@@ -23,12 +23,8 @@ RuleSymbolVector::RuleSymbolVector(const VariableValueMap &vvm):
 std::string RuleSymbolVector::replace_variables(void)
 {
   std::string result;
-  for (std::vector<std::string>::const_iterator it =
-     std::vector<std::string>::begin();
-       it != std::vector<std::string>::end();
-       ++it)
+  for (auto symbol : *this)
     {
-      std::string symbol = *it;
       if (symbol.find("__HFST_TWOLC_RULE_NAME") != std::string::npos)
     {
       if (! vvm.empty())
@@ -37,12 +33,10 @@ std::string RuleSymbolVector::replace_variables(void)
         (symbol.size()-1,
          "__HFST_TWOLC_SPACE" "SUBCASE:");
         }
-      for (VariableValueMap::const_iterator it = vvm.begin();
-           it != vvm.end();
-           ++it)
+      for (const auto & it : vvm)
         { symbol.insert
         (symbol.size()-1,
-         "__HFST_TWOLC_SPACE"+ it->first + "=" + it->second); }
+         "__HFST_TWOLC_SPACE"+ it.first + "=" + it.second); }
     }
       result +=
     (vvm.has_key(symbol) ? vvm.get_value(symbol) : symbol) + " ";
@@ -53,12 +47,8 @@ std::string RuleSymbolVector::replace_variables(void)
 std::string RuleSymbolVector::replace_variables(const RuleCenter &center)
 {
   std::string result;
-  for (std::vector<std::string>::const_iterator it =
-         std::vector<std::string>::begin();
-       it != std::vector<std::string>::end();
-       ++it)
+  for (auto symbol : *this)
     {
-      std::string symbol = *it;
       if (symbol.find("__HFST_TWOLC_RULE_NAME") != std::string::npos)
     {
       if (! vvm.empty())
@@ -67,12 +57,10 @@ std::string RuleSymbolVector::replace_variables(const RuleCenter &center)
         (symbol.size()-1,
          "__HFST_TWOLC_SPACE" "SUBCASE:");
         }
-      for (VariableValueMap::const_iterator it = vvm.begin();
-           it != vvm.end();
-           ++it)
+      for (const auto & it : vvm)
         { symbol.insert
         (symbol.size()-1,
-         "__HFST_TWOLC_SPACE"+ it->first + "=" + it->second); }
+         "__HFST_TWOLC_SPACE"+ it.first + "=" + it.second); }
     }
       else if (symbol == "__HFST_TWOLC_RULE_CENTER")
         { symbol = center.first + " __HFST_TWOLC_: " + center.second; }

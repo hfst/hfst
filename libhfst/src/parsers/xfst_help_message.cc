@@ -35,11 +35,11 @@ typedef std::vector<std::string> StringVector;
 std::string to_upper_case(const std::string & str)
 {
   std::string retval;
-  for (unsigned int i=0; i<str.length(); i++) {
-    if (str[i] >= 97 && str[i] <= 122) {
-      retval.append(1, str[i] - 32); }
+  for (char i : str) {
+    if (i >= 97 && i <= 122) {
+      retval.append(1, i - 32); }
     else {
-      retval.append(1, str[i]); } }
+      retval.append(1, i); } }
   return retval;
 }
 
@@ -47,9 +47,9 @@ std::string to_upper_case(const std::string & str)
 bool is_punctuation_char(char c)
 {
   std::string chars = " \n\t.,;:?!-/'\"<>()|";
-  for (size_t i=0; i < chars.size(); i++)
+  for (char i : chars)
     {
-      if (chars[i] == c) {
+      if (i == c) {
         return true; }
     }
   return false;
@@ -163,10 +163,9 @@ void append_help_message(const std::string & namelist, const std::string & argum
 bool text_matches_some_name(const std::string & text, const std::string & namelist)
 {
   StringVector names = namelist_to_name_vector(namelist);
-  for (StringVector::const_iterator it = names.begin();
-       it != names.end(); it++)
+  for (const auto & name : names)
     {
-      if (text == *it)
+      if (text == name)
         {
           return true;
         }

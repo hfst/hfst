@@ -254,13 +254,13 @@ void FlagDiacriticTable::reset(void)
 bool FlagDiacriticTable::is_valid_string(const StringVector &input_string)
 {
   reset();
-  for (StringVector::const_iterator it = input_string.begin();
-       it != input_string.end();
-       ++it)
+  for (const auto& it : input_string)
     {
-      insert_symbol(*it);
+      insert_symbol(it);
       if (fails())
-    { return false; }
+        {
+          return false;
+        }
     }
   return true;
 }
@@ -269,12 +269,10 @@ StringVector FlagDiacriticTable::filter_diacritics
 (const StringVector &input_string)
 {
   StringVector filtered;
-  for (StringVector::const_iterator it = input_string.begin();
-       it != input_string.end();
-       ++it)
+  for (const auto & it : input_string)
     {
-      if (! is_diacritic(*it))
-    { filtered.push_back(*it); }
+      if (! is_diacritic(it))
+    { filtered.push_back(it); }
     }
   return filtered;
 }

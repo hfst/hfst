@@ -31,27 +31,21 @@ void LeftArrowRuleContainer::add_rule_and_display_and_resolve_conflicts
   std::string input = rule->input_symbol;
   if (input_to_rule_map.has_key(input))
     {
-      for (LeftArrowRuleVector::iterator it = input_to_rule_map[input].begin();
-       it != input_to_rule_map[input].end();
-       ++it)
+      for (auto & it : input_to_rule_map[input])
     {
       StringVector conflicting_context;
-      if ((*it)->conflicts_this(*rule,conflicting_context))
+      if (it->conflicts_this(*rule,conflicting_context))
         {
           if (report_left_arrow_conflicts)
         {
           out << "There is a <=-rule conflict between "
-              << Rule::get_print_name((*it)->name) << " and "
+              << Rule::get_print_name(it->name) << " and "
               << Rule::get_print_name(rule->name) << "."
               << std::endl
               << "E.g. in context ";
           bool diamond_seen = false;
-          for (StringVector::const_iterator it =
-             conflicting_context.begin();
-               it != conflicting_context.end();
-               ++it)
+          for (auto symbol_pair : conflicting_context)
             {
-              std::string symbol_pair = *it;
               symbol_pair = replace_substr
             (symbol_pair,TWOLC_EPSILON,"");
               if (symbol_pair ==
@@ -73,18 +67,18 @@ void LeftArrowRuleContainer::add_rule_and_display_and_resolve_conflicts
         }
           if (resolve_left_arrow_conflicts)
         {
-          if ((*it)->resolvable_conflict(*rule))
+          if (it->resolvable_conflict(*rule))
             {
               if (report_left_arrow_conflicts)
             {
               out << "Resolving the conflict by restricting the "
                   << "context of "
-                  << Rule::get_print_name((*it)->name) << "."
+                  << Rule::get_print_name(it->name) << "."
                   << std::endl;
             }
-              (*it)->resolve_conflict(*rule);
+              it->resolve_conflict(*rule);
             }
-          else if (rule->resolvable_conflict(**it))
+          else if (rule->resolvable_conflict(*it))
             {
               if (report_left_arrow_conflicts)
             {
@@ -92,7 +86,7 @@ void LeftArrowRuleContainer::add_rule_and_display_and_resolve_conflicts
                   << "context of " << rule->name << "."
                   << std::endl;
             }
-              rule->resolve_conflict(**it);
+              rule->resolve_conflict(*it);
             }
           else
             {

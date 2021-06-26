@@ -25,12 +25,10 @@ void SentenceTransducer::add_word
   // Add analysis transitions.
   Symbol2TransitionDataMap &tag_symbol_to_transition =
     transition_map[word_target];
-  for (WeightedStringVector::const_iterator it = tags.begin();
-       it != tags.end();
-       ++it)
+  for (const auto & tag : tags)
     {
-      Symbol tag_symbol = SequenceModelComponent::get_symbol(it->second);
-      Weight weight = LEX_K*it->first;
+      Symbol tag_symbol = SequenceModelComponent::get_symbol(tag.second);
+      Weight weight = LEX_K*tag.first;
 
       add_transition_to_map(tag_symbol_to_transition,
 			    tag_symbol,
