@@ -677,24 +677,6 @@ AX_CHECK_COMPILE_FLAG([-msse], [CXXFLAGS="$CXXFLAGS -msse"], [])
 AX_CHECK_COMPILE_FLAG([-msse2], [CXXFLAGS="$CXXFLAGS -msse2"], [])
 AX_CHECK_COMPILE_FLAG([-mfpmath=sse], [CXXFLAGS="$CXXFLAGS -mfpmath=sse"], [])
 
-AC_CHECK_HEADERS([unordered_map], [], [],
-[#ifdef HAVE_UNORDERED_MAP
-#include <unordered_map>
-#endif
-])
-AC_CHECK_HEADERS([unordered_set], [], [],
-[#ifdef HAVE_UNORDERED_SET
-#include <unordered_set>
-#endif
-])
-
-AS_IF([test "x$with_cplusplus_11" != "xno"],[
-AS_IF([test "x$ac_cv_header_unordered_map" = "xno"],
-            [AC_MSG_ERROR(["<unordered_map> not found, it is needed in c++ standard 11 (or higher)"])])
-AS_IF([test "x$ac_cv_header_unordered_set" = "xno"],
-            [AC_MSG_ERROR(["<unordered_set> not found, it is needed in c++ standard 11 (or higher)"])])
-])
-
 AC_CHECK_HEADERS([ext/slist])
 
 AS_IF([test "x$with_sfst" != "xno"],
@@ -864,8 +846,6 @@ AS_IF([test "x$with_unicode_handler" = "xhfst"],
       [AC_MSG_WARN([HFST only supports basic unicode handling with limited case mapping tables etc.; for better support consider using glib or ICU --with-unicode-handler])])
 AS_IF([test "x$with_readline" == "xno"],
       [AC_MSG_WARN([HFST tools will be compiled without readline; editing user input on command line is not supported; for better support consider using --with-readline])])
-AS_IF([test "x$with_cplusplus_11" == "xno"],
-      [AC_MSG_WARN([HFST tools will be compiled without C++11 support; some features will be disabled; for better support consider using --with-c++11])])
 dnl warn about missing "important" tools
 AS_IF([test "x$enable_lexc" == "xno"],
       [AC_MSG_WARN([hfst-lexc is not enabled; enable with --enable-lexc])])
