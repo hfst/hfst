@@ -64,20 +64,18 @@ print_usage()
       "\n", program_name);
 
   print_common_program_options(stdout);
-  fprintf(message_out, "Eqv. class extension options:\n"
-          "  -f, --format        convert single symbol ISYM to allow OSYM\n"
-          "  -t, --to=OSYM       convert to OSYM\n"
-          "  -a, --acx=ACXFILE   read extensions in acx format "
-          "from ACXFILE\n"
-          "  -T, --tsv=TSVFILE   read extensions in tsv format "
-          "from TSVFILE\n"
-          "  -l, --level=LEVEL   perform extensions on LEVEL of fsa\n"
+  fprintf(message_out, "Compiler options:\n"
+          "  -f, --format=FORMAT   compile into FORMAT transducer\n"
+          "  -a, --alt=ALT         set alternative to ALT\n"
+          "  -n, --var=VAR         set variant name to VAR\n"
+          "  -l, --var-left=VAR    set left-side variant to VAR\n"
+          "  -r, --var-right=VAR   set right-side variant to VAR\n"
+          "  -m, --keep-boundaries retain morpheme boundaries\n"
          );
   fprintf(message_out, "\n");
   fprintf(message_out,
          "Examples:\n"
-         "  %s -o rox.hfst -a romanian.acx ro.hfst  extend romanian char"
-         "equivalences\n"
+         "  %s -o ukr.hfst ukranian.dix  compile XML dictionary\n"
          "\n", program_name);
   print_report_bugs();
   print_more_info();
@@ -92,7 +90,7 @@ parse_options(int argc, char** argv) {
         HFST_GETOPT_UNARY_LONG,
         {"format",    required_argument, 0, 'f'},
         {"alt",       required_argument, 0, 'a'},
-        {"var",       required_argument, 0, 'v'},
+        {"var",       required_argument, 0, 'n'},
         {"var-left",  required_argument, 0, 'l'},
         {"var-right", required_argument, 0, 'r'},
         {"keep-boundaries", no_argument, 0, 'm'},
@@ -100,7 +98,7 @@ parse_options(int argc, char** argv) {
     };
     int option_index = 0;
     int c = getopt_long(argc, argv, HFST_GETOPT_COMMON_SHORT
-                        HFST_GETOPT_UNARY_SHORT "f:a:v:l:r:m",
+                        HFST_GETOPT_UNARY_SHORT "f:a:n:l:r:m",
                         long_options, &option_index);
     if (-1 == c) {
       break;
@@ -113,9 +111,9 @@ parse_options(int argc, char** argv) {
       case 'a':
         alt = hfst_strdup(optarg);
         break;
-      //case 'v': // TODO: conflicts with verbose flag
-      //  var = hfst_strdup(optarg);
-      //  break;
+      case 'n':
+        var = hfst_strdup(optarg);
+        break;
       case 'l':
         varleft = hfst_strdup(optarg);
         break;
