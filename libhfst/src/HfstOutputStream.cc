@@ -435,10 +435,12 @@ HfstOutputStream::append_implementation_specific_header_data(std::vector<char>&,
         HFST_THROW_MESSAGE(HfstFatalException, "transducer header is too long");
       }
 
-      char first_byte = *((char*)(&header_length));
-      char second_byte = *((char*)(&header_length)+1);
-      write(first_byte);
-      write(second_byte);
+      // write header length as big endian
+      char be_u16[2];
+      be_u16[0] = static_cast<char>(header_length>>8);
+      be_u16[1] = static_cast<char>(header_length>>0);
+      write(be_u16[0]);
+      write(be_u16[1]);
       write('\0');
 
       // write the rest of the header

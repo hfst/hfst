@@ -794,8 +794,12 @@ std::map<std::string, std::string> PmatchContainer::parse_hfst3_header(std::istr
     }
     if(header_loc == strlen(header1) + 1)
     {
+        // read header length from big endian format
         unsigned short remaining_header_len;
-        f.read((char*) &remaining_header_len, sizeof(remaining_header_len));
+        char remaining_header_len_bytes[sizeof(remaining_header_len)];
+        f.read((char*) &remaining_header_len_bytes, sizeof(remaining_header_len));
+        remaining_header_len = remaining_header_len_bytes[1]<<0 | remaining_header_len_bytes[0]<<8;
+
         if (f.get() != '\0') {
             HFST_THROW(TransducerHeaderException);
         }
