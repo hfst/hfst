@@ -5,10 +5,10 @@
 ==================================================================
 
 This package contains a bridging library for multiple FST libraries and toolkits
-and set of tools for processing of finite-state automate especially for
-linguistic systems. HFST library and tools are licenced under GNU GPL licence
+and set of tools for processing of finite-state automata especially for
+linguistic systems. HFST library and tools are licensed under GNU GPL licence
 version 3, you may read the full licence in the file named COPYING. The
-authors specified in AUTHORS file may be contacted about licencing issues.
+authors specified in AUTHORS file may be contacted about licensing issues.
 
 For additional information, see the project page `<https://hfst.github.io>`_.
 
