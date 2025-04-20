@@ -104,14 +104,25 @@ typedef std::vector<Transition*> TransitionVector;
 // For some profound reason it can't be replaced with (UINT_MAX+1)/2.
 const TransitionTableIndex TRANSITION_TARGET_TABLE_START = 2147483648u;
 
-std::vector<std::string> ders_txt{"+Der/nn", "+Der/nv", "+Der/vn", "+Der/vv", "+Der/xx"};
 std::vector<std::string> dms_txt{"+A", "+AJAAQ", "+ALAAQ", "+ALAAR", "+ALLAK", "+ALLAP", "+ALUK", "+ALUP", "+AQ", "+AQQIK", "+AR", "+ARAQ", "+ARSAAR", "+ARSUK", "+ARSUP", "+ATAAR", "+ATSIAQ", "+GAJUK", "+GAJUP", "+GAJUUQ", "+GALLAR", "+GALUAQ", "+GALUAR", "+GALUTTUAR", "+GAR", "+GASAAQ", "+GASAAR", "+GASAP", "+GASUAR", "+GASUGE", "+GE", "+GI", "+GIAQ", "+GIAQAR", "+GIAR", "+GIARTUAAR", "+GIARTUR", "+GIIAAQ", "+GIIAAR", "+GIIAAT", "+GIIAK", "+GIILIP", "+GIIP", "+GIIT", "+GIK", "+GIP", "+GISSAAR", "+GUMA", "+GUMAAR", "+GUMAATAAR", "+GUMALLIR", "+GUMINAALLI", "+GUMINAR", "+GUNAR", "+GUNNAIR", "+GUNNAR", "+GUP", "+GUSUP", "+GUTE", "+HTR", "+IAR", "+ILATSI", "+ILIQI", "+INNAQ", "+INNAR", "+INNARIAA", "+IP", "+IR", "+IRLUIR", "+IRNIAQ", "+IRNIAR", "+IRSI", "+IRSIR", "+IRUTE", "+ISAP", "+ISUA", "+ISUR", "+IT", "+JA", "+JAALLU", "+JAAR", "+JURAR", "+JURTUR", "+KAA", "+KAALLAP", "+KAJAAQ", "+KAJAAR", "+KANNIQ", "+KANNIR", "+KAR", "+KASAK", "+KASIK", "+KASIP", "+KASSAK", "+KASSAP", "+KATAAR", "+KATAK", "+KATAP", "+KATTAR", "+KILLI", "+KILLIUR", "+KIP", "+KISAAR", "+KISAR", "+KKAAQ", "+KKAAR", "+KKAJAAQ", "+KKATAAQ", "+KKULUK", "+KKUMINAR", "+KKUP", "+KKUQ", "+KKUT", "+KKUUR", "+KKUUTAAQ", "+KKUUTAAR", "+KU", "+KUJUK", "+KUJUP", "+KUJUUQ", "+KUJUUR", "+KULA", "+KULAAR", "+KULAK", "+KULLAK", "+KULLAP", "+KULUK", "+KULUP", "+KULUUQ", "+KULUUR", "+KUQ", "+KUSUUR", "+KUTSUUR", "+LAAQ", "+LAAR", "+LI", "+LIAQ", "+LIAR", "+LIARE", "+LII", "+LIK", "+LIKKAAQ", "+LIKKIRSAAR", "+LIP", "+LIR", "+LIRI", "+LIRNGUSAATE", "+LIRSAAR", "+LIRSUR", "+LIRTUR", "+LISAAR", "+LISAQ", "+LISAR", "+LIUR", "+LIUTE", "+LIVIK", "+LLAARE", "+LLAATAA", "+LLAMMAK", "+LLAP", "+LLAQQIP", "+LLAR", "+LLARIP", "+LLATSIAANNAQ", "+LLATSIAR", "+LLATTAA", "+LLATTAAR", "+LLATUAR", "+LLIQ", "+LLIR", "+LLIUR", "+LLUAR", "+LLUATAAR", "+LLUINNAQ", "+LLUINNAR", "+LUP", "+LUSSINNAR", "+LUUMI", "+LUUR", "+LUUSAAR", "+MAAR", "+MI", "+MIIP", "+MINAATSIAQ", "+MINIQ", "+MINIR", "+MIP", "+MISAAR", "+MIU", "+MIUQ", "+MMIP", "+MMIRSUR", "+NAAR", "+NAQ", "+NAR", "+NASURE", "+NAVIAR", "+NAVIIR", "+NAVIIRSAAR", "+NGA", "+NGAAQ", "+NGAAR", "+NGAATSIAQ", "+NGAJAK", "+NGAJAP", "+NGAJASSAA", "+NGIR", "+NGUSAQ", "+NGUSAR", "+NGUSIR", "+NIAA", "+NIAALUP", "+NIALUP", "+NIAQ", "+NIAR", "+NIARSARE", "+NIARSUAAR", "+NIINNAR", "+NIKU", "+NIKUQ", "+NIKUU", "+NIP", "+NIQ", "+NIQAR", "+NIQQISAATE", "+NIQ_AJUR", "+NIR", "+NIRAR", "+NIRLIUR", "+NIRLUP", "+NIRPAA", "+NIRPAAQ", "+NIRPAARPAA", "+NIRSAQ", "+NIRTUUQ", "+NIRU", "+NIRUJUSSUAQ", "+NIRUMAAQ", "+NIRUMAAR", "+NISAQ", "+NIT", "+NIUTAA", "+NIUTE", "+NNAAQ", "+NNAP", "+NNGA", "+NNGIR", "+NNGIRSAA", "+NNGIRSAAR", "+NNGISUNGAR", "+NNGIT", "+NNGU", "+NNGUAKKULUP", "+NNGUALLAARE", "+NNGUAQ", "+NNGUAR", "+NNGUARAARSUK", "+NNGUASIK", "+NNGUATSIAR", "+NNGUJUUR", "+NNGUR", "+NNGUUJUNNGUAQ", "+NNI", "+PAAQ", "+PAJAAR", "+PAJUK", "+PAJUP", "+PAK", "+PALAAQ", "+PALAAR", "+PALLAK", "+PALLAP", "+PALUK", "+PALUP", "+PASIP", "+PIAQ", "+PIAR", "+PILUK", "+PILUP", "+PILUUR", "+QAR", "+QATE", "+QATESIRE", "+QATIGIIP", "+QATIGIIT", "+QATTAAR", "+QE", "+QINA", "+QQA", "+QQAAQ", "+QQAAR", "+QQAJAA", "+QQAJAR", "+QQAMMI", "+QQAMMIQ", "+QQAMMIR", "+QQAR", "+QQATAR", "+QQINNAAQ", "+QQINNAAR", "+QQIP", "+QQISSAAQ", "+QQISSAAR", "+QQU", "+QQURTU", "+QQURTUSI", "+QQURTUUQ", "+QQUSAAR", "+QQUTE", "+QQUUR", "+R", "+RAAR", "+RAARSUK", "+RAJUK", "+RAK", "+RALAAQ", "+RALAK", "+RAR", "+RARE", "+RATAANNAA", "+RATAR", "+RIAA", "+RIAANNAA", "+RIAAT", "+RIAQ", "+RIAR", "+RIATAAR", "+RIIR", "+RIP", "+RLAAQ", "+RRAK", "+RRATE", "+RSUR", "+RUJUK", "+RUJUP", "+RUJUUR", "+RULLIR", "+RULUP", "+RULUUR", "+RUR", "+RUSAAR", "+RUSAQ", "+RUTTUR", "+RUUSAAR", "+RUUSAQ", "+SAAR", "+SAR", "+SARE", "+SI", "+SIAAQ", "+SIAQ", "+SII", "+SIMA", "+SIMAAR", "+SINNAA", "+SINNAANNGUR", "+SINNAAQ", "+SINNAR", "+SIP", "+SIQ", "+SIR", "+SIRE", "+SIRIAR", "+SIRIIP", "+SIUR", "+SIUT", "+SSA", "+SSAALIQI", "+SSAAR", "+SSAARUTE", "+SSAASUA", "+SSAMAAQ", "+SSAMAAR", "+SSAMAARTIP", "+SSAQ", "+SSAQQIP", "+SSI", "+SSIAQ", "+SSIARE", "+SSIP", "+SSUSIQ", "+SUAQ", "+SUAR", "+SUATAAR", "+SUB", "+SUGE", "+SUNGAR", "+SUNNI", "+SUNNIP", "+SUNNIT", "+SUR", "+SURE", "+T", "+TAAQ", "+TAAR", "+TALLAP", "+TAQ", "+TAR", "+TARE", "+TARIAANNAA", "+TARIAARUTE", "+TARIAQ", "+TARIAQAR", "+TASSAA", "+TE", "+TIGE", "+TIP", "+TIR", "+TITIR", "+TSAALI", "+TSAALIUR", "+TSAP", "+TSIALAK", "+TSIAQ", "+TSIAR", "+TSIR", "+TTUR", "+TU", "+TUAQ", "+TUAR", "+TUGAQ", "+TUJAAR", "+TUKASSAA", "+TUQ", "+TUQAQ", "+TUR", "+TURSUU", "+TURUJUSSUANNGUR", "+TURUJUSSUU", "+TUSI", "+TUSSAA", "+TUSSANNGUR", "+TUU", "+TUUQ", "+TUUR", "+TUUSAAR", "+TUUSI", "+U", "+UMA", "+UMI", "+UMISAAR", "+UMMI", "+UMMIR", "+UNIQ", "+UR", "+USAAQ", "+USAAR", "+USAP", "+USAQ", "+USAR", "+USIAQ", "+USIQ", "+USSUR", "+UTE", "+UTIGE", "+VALLAAQ", "+VALLAAR", "+VIK", "+VIP", "+VISSUR", "+VVAARIK", "+VVAARIP"};
-SymbolNumberVector ders;
-size_t der = 0;
+std::vector<std::string> ders_txt{"+Der/nn", "+Der/nv", "+Der/vn", "+Der/vv", "+Der/xx"};
+std::vector<std::string> encls_txt{"+AA", "+AASIIT", "+AASIT", "+GUUQ", "+KASIK", "+LI", "+LU", "+LUUNNIIT", "+LUSUUQ", "+MAA", "+MAANNA", "+MAANNAA", "+MI", "+MITA", "+MITAAVA", "+PALAAQ", "+QQINNAAQ", "+TTAAQ", "+UKU", "+UKUA", "+UNA"};
 SymbolNumberVector dms;
 size_t dm = 0;
+SymbolNumberVector ders;
+size_t der = 0;
+SymbolNumberVector encls;
+size_t encl = 0;
 std::unordered_map<size_t, std::set<size_t>> seen_dvs;
 SymbolNumberVector completer;
+
+struct cmpl_t {
+    bool dms = false;
+    bool ders = false;
+    bool encl = false;
+
+    //cmpl_t(bool dms = false, bool ders = false, bool encl = false) : dms(dms), ders(ders), encl(encl) {}
+};
 
 class HeaderParsingException: public std::exception
 {
@@ -950,24 +961,24 @@ protected:
     virtual void try_epsilon_transitions(SymbolNumber * input_symbol,
                                          SymbolNumber * output_symbol,
                                          SymbolNumber * original_output_string,
-                                         TransitionTableIndex i, bool in_dms = false, bool in_ders = false);
+                                         TransitionTableIndex i, cmpl_t in_cmpl = {});
 
     void try_epsilon_indices(SymbolNumber * input_symbol,
                              SymbolNumber * output_symbol,
                              SymbolNumber * original_output_string,
-                             TransitionTableIndex i, bool in_dms = false, bool in_ders = false);
+                             TransitionTableIndex i, cmpl_t in_cmpl = {});
 
     void find_transitions(SymbolNumber input,
                           SymbolNumber * input_symbol,
                           SymbolNumber * output_symbol,
                           SymbolNumber * original_output_string,
-                          TransitionTableIndex i, bool in_dms = false, bool in_ders = false);
+                          TransitionTableIndex i, cmpl_t in_cmpl = {});
 
     void find_index(SymbolNumber input,
                     SymbolNumber * input_symbol,
                     SymbolNumber * output_symbol,
                     SymbolNumber * original_output_string,
-                    TransitionTableIndex i, bool in_dms = false, bool in_ders = false);
+                    TransitionTableIndex i, cmpl_t in_cmpl = {});
 
     virtual void note_analysis(SymbolNumber * whole_output_string);
 
@@ -984,7 +995,7 @@ protected:
     void get_analyses(SymbolNumber * input_symbol,
                       SymbolNumber * output_symbol,
                       SymbolNumber * original_output_string,
-                      TransitionTableIndex i, bool in_dms = false, bool in_ders = false);
+                      TransitionTableIndex i, cmpl_t in_cmpl = {});
 
     Weight get_final_index_weight(TransitionTableIndex i) {
         return indices[i]->final_weight();
@@ -1018,7 +1029,7 @@ public:
 
     void analyze(SymbolNumber * input_string)
         {
-            get_analyses(input_string, &output_string[0], &output_string[0], START_INDEX);
+            get_analyses(input_string, &output_string[0], &output_string[0], START_INDEX, {});
         }
 
 
@@ -1052,7 +1063,7 @@ class TransducerWFd: public TransducerW
     void try_epsilon_transitions(SymbolNumber * input_symbol,
                                  SymbolNumber * output_symbol,
                                  SymbolNumber * original_output_string,
-                                 TransitionTableIndex i, bool in_dms = false, bool in_ders = false);
+                                 TransitionTableIndex i, cmpl_t in_cmpl = {});
 
     bool PushState(FlagDiacriticOperation op);
 

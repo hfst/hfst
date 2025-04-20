@@ -1462,7 +1462,7 @@ void TransducerW::try_epsilon_transitions(SymbolNumber * input_symbol,
                                           SymbolNumber * output_symbol,
                                           SymbolNumber *
                                           original_output_string,
-                                          TransitionTableIndex i, bool in_dms, bool in_ders)
+                                          TransitionTableIndex i, cmpl_t in_cmpl)
 {
 #if OL_FULL_DEBUG
   std::cerr << "try epsilon transitions " << i << " " << current_weight << std::endl;
@@ -1480,7 +1480,7 @@ void TransducerW::try_epsilon_transitions(SymbolNumber * input_symbol,
       get_analyses(input_symbol,
                    output_symbol+1,
                    original_output_string,
-                   transitions[i]->target(), in_dms, in_ders);
+                   transitions[i]->target(), in_cmpl);
       current_weight -= transitions[i]->get_weight();
       ++i;
     }
@@ -1491,15 +1491,17 @@ void TransducerWFd::try_epsilon_transitions(SymbolNumber * input_symbol,
                                             SymbolNumber * output_symbol,
                                             SymbolNumber *
                                             original_output_string,
-                                            TransitionTableIndex i, bool in_dms, bool in_ders)
+                                            TransitionTableIndex i, cmpl_t in_cmpl)
 {
   if (transitions.size() <= i)
     { return; }
 
   // Endless loop protection
-  if (!in_dms && output_symbol > &output_string.back()) {
+  if (!in_cmpl.dms && output_symbol > &output_string.back()) {
     return;
   }
+
+  //std::cerr << __PRETTY_FUNCTION__ << ' ' << __LINE__ << ' ' << in_cmpl.dms << ' ' << in_cmpl.ders << ' ' << in_cmpl.encl << std::endl;
 
   while (true)
     {
@@ -1510,7 +1512,7 @@ void TransducerWFd::try_epsilon_transitions(SymbolNumber * input_symbol,
           get_analyses(input_symbol,
                        output_symbol+1,
                        original_output_string,
-                       transitions[i]->target(), in_dms, in_ders);
+                       transitions[i]->target(), in_cmpl);
           current_weight -= transitions[i]->get_weight();
           ++i;
         } else if (transitions[i]->get_input() != NO_SYMBOL_NUMBER &&
@@ -1528,7 +1530,7 @@ void TransducerWFd::try_epsilon_transitions(SymbolNumber * input_symbol,
               get_analyses(input_symbol,
                            output_symbol+1,
                            original_output_string,
-                           transitions[i]->target(), in_dms, in_ders);
+                           transitions[i]->target(), in_cmpl);
               current_weight -= transitions[i]->get_weight();
               statestack.pop_back();
             }
@@ -1550,7 +1552,7 @@ void TransducerWFd::try_epsilon_transitions(SymbolNumber * input_symbol,
 void TransducerW::try_epsilon_indices(SymbolNumber * input_symbol,
                                       SymbolNumber * output_symbol,
                                       SymbolNumber * original_output_string,
-                                      TransitionTableIndex i, bool in_dms, bool in_ders)
+                                      TransitionTableIndex i, cmpl_t in_cmpl)
 {
 #if OL_FULL_DEBUG
   std::cerr << "try indices " << i << " " << current_weight << std::endl;
@@ -1561,7 +1563,7 @@ void TransducerW::try_epsilon_indices(SymbolNumber * input_symbol,
                               output_symbol,
                               original_output_string,
                               indices[i]->target() -
-                              TRANSITION_TARGET_TABLE_START, in_dms, in_ders);
+                              TRANSITION_TARGET_TABLE_START, in_cmpl);
     }
 }
 
@@ -1569,7 +1571,7 @@ void TransducerW::find_transitions(SymbolNumber input,
                                    SymbolNumber * input_symbol,
                                    SymbolNumber * output_symbol,
                                    SymbolNumber * original_output_string,
-                                   TransitionTableIndex i, bool in_dms, bool in_ders)
+                                   TransitionTableIndex i, cmpl_t in_cmpl)
 {
 #if OL_FULL_DEBUG
   std::cerr << "find transitions " << i << " " << current_weight << std::endl;
@@ -1580,8 +1582,10 @@ void TransducerW::find_transitions(SymbolNumber input,
   return;
     }
 
+    //std::cerr << __PRETTY_FUNCTION__ << ' ' << __LINE__ << ' ' << in_cmpl.dms << ' ' << in_cmpl.ders << ' ' << in_cmpl.encl << std::endl;
+
   // Endless loop protection
-  if (!in_dms && output_symbol > &output_string.back()) {
+  if (!in_cmpl.dms && output_symbol > &output_string.back()) {
     return;
   }
 
@@ -1590,7 +1594,7 @@ void TransducerW::find_transitions(SymbolNumber input,
 
       if (transitions[i]->get_input() == input)
         {
-          if (in_ders) {
+          if (in_cmpl.ders) {
             seen_dvs[dm].insert(der);
             return;
           }
@@ -1599,7 +1603,7 @@ void TransducerW::find_transitions(SymbolNumber input,
           get_analyses(input_symbol,
                        output_symbol+1,
                        original_output_string,
-                       transitions[i]->target(), in_dms, in_ders);
+                       transitions[i]->target(), in_cmpl);
           current_weight -= transitions[i]->get_weight();
         }
       else
@@ -1615,7 +1619,7 @@ void TransducerW::find_index(SymbolNumber input,
                              SymbolNumber * input_symbol,
                              SymbolNumber * output_symbol,
                              SymbolNumber * original_output_string,
-                             TransitionTableIndex i, bool in_dms, bool in_ders)
+                             TransitionTableIndex i, cmpl_t in_cmpl)
 {
 #if OL_FULL_DEBUG
   std::cerr << "find index " << i << " " << current_weight << std::endl;
@@ -1625,6 +1629,8 @@ void TransducerW::find_index(SymbolNumber input,
       return;
     }
 
+    //std::cerr << __PRETTY_FUNCTION__ << ' ' << __LINE__ << ' ' << in_cmpl.dms << ' ' << in_cmpl.ders << ' ' << in_cmpl.encl << std::endl;
+
   if (indices[i+input]->get_input() == input)
     {
 
@@ -1633,7 +1639,7 @@ void TransducerW::find_index(SymbolNumber input,
                        output_symbol,
                        original_output_string,
                        indices[i+input]->target() -
-                       TRANSITION_TARGET_TABLE_START, in_dms, in_ders);
+                       TRANSITION_TARGET_TABLE_START, in_cmpl);
     }
 }
 
@@ -1923,7 +1929,7 @@ void TransducerWFdUniq::printAnalyses(std::string prepend)
 void TransducerW::get_analyses(SymbolNumber * input_symbol,
                                SymbolNumber * output_symbol,
                                SymbolNumber * original_output_string,
-                               TransitionTableIndex i, bool in_dms, bool in_ders)
+                               TransitionTableIndex i, cmpl_t in_cmpl)
 {
 #if OL_FULL_DEBUG
   std::cerr << "get analyses " << i << " " << current_weight << std::endl;
@@ -1940,8 +1946,10 @@ void TransducerW::get_analyses(SymbolNumber * input_symbol,
       }
   }
 
+  //std::cerr << __PRETTY_FUNCTION__ << ' ' << __LINE__ << ' ' << in_cmpl.dms << ' ' << in_cmpl.ders << ' ' << in_cmpl.encl << std::endl;
+
   // Endless loop protection
-  if (output_symbol > &output_string.back()) {
+  if (!in_cmpl.dms && output_symbol > &output_string.back()) {
     return;
   }
 
@@ -1952,7 +1960,7 @@ void TransducerW::get_analyses(SymbolNumber * input_symbol,
       try_epsilon_transitions(input_symbol,
                               output_symbol,
                               original_output_string,
-                              i+1, in_dms, in_ders);
+                              i+1, in_cmpl);
 
       // input-string ended.
       if (*input_symbol == NO_SYMBOL_NUMBER)
@@ -1977,7 +1985,7 @@ void TransducerW::get_analyses(SymbolNumber * input_symbol,
             }
             //*/
 
-          if (!in_dms) {
+          if (!in_cmpl.dms) {
             for (dm=0 ; dm<dms.size() ; ++dm) {
               if (seen_dvs.count(dm)) {
                 continue;
@@ -1985,23 +1993,25 @@ void TransducerW::get_analyses(SymbolNumber * input_symbol,
             auto s = dms[dm];
               SymbolNumberVector inputs{s, NO_SYMBOL_NUMBER, NO_SYMBOL_NUMBER};
               SymbolNumberVector outputs(1000, NO_SYMBOL_NUMBER);
+              //std::cerr << __PRETTY_FUNCTION__ << ' ' << __LINE__ << ' ' << in_cmpl.dms << ' ' << in_cmpl.ders << ' ' << in_cmpl.encl << std::endl;
               find_transitions(s,
                          &inputs[1],
                          &outputs[0],
                          &outputs[0],
-                         i+1, true);
+                         i+1, {true});
             }
           }
-          else if (!in_ders) {
+          else if (!in_cmpl.ders) {
             for (der=0 ; der<ders.size() ; ++der) {
               auto s = ders[der];
               SymbolNumberVector inputs{s, NO_SYMBOL_NUMBER, NO_SYMBOL_NUMBER};
               SymbolNumberVector outputs(1000, NO_SYMBOL_NUMBER);
+              //std::cerr << __PRETTY_FUNCTION__ << ' ' << __LINE__ << ' ' << in_cmpl.dms << ' ' << in_cmpl.ders << ' ' << in_cmpl.encl << std::endl;
               find_transitions(s,
                          &inputs[1],
                          &outputs[0],
                          &outputs[0],
-                         i+1, true, true);
+                         i+1, {true, true});
             }
           }
 
@@ -2016,7 +2026,7 @@ void TransducerW::get_analyses(SymbolNumber * input_symbol,
                        input_symbol,
                        output_symbol,
                        original_output_string,
-                       i+1, in_dms, in_ders);
+                       i+1, in_cmpl);
     }
   else
     {
@@ -2024,7 +2034,7 @@ void TransducerW::get_analyses(SymbolNumber * input_symbol,
       try_epsilon_indices(input_symbol,
                           output_symbol,
                           original_output_string,
-                          i+1, in_dms, in_ders);
+                          i+1, in_cmpl);
       // input-string ended.
       if (*input_symbol == NO_SYMBOL_NUMBER)
         {
@@ -2045,7 +2055,7 @@ void TransducerW::get_analyses(SymbolNumber * input_symbol,
             }
             //*/
 
-            if (!in_dms) {
+            if (!in_cmpl.dms) {
               for (dm=0 ; dm<dms.size() ; ++dm) {
                 if (seen_dvs.count(dm)) {
                   continue;
@@ -2053,23 +2063,25 @@ void TransducerW::get_analyses(SymbolNumber * input_symbol,
                 auto s = dms[dm];
                 SymbolNumberVector inputs{s, NO_SYMBOL_NUMBER, NO_SYMBOL_NUMBER};
                 SymbolNumberVector outputs(1000, NO_SYMBOL_NUMBER);
+                //std::cerr << __PRETTY_FUNCTION__ << ' ' << __LINE__ << ' ' << in_cmpl.dms << ' ' << in_cmpl.ders << ' ' << in_cmpl.encl << std::endl;
                 find_index(s,
                            &inputs[1],
                            &outputs[0],
                            &outputs[0],
-                           i+1, true);
+                           i+1, {true});
               }
             }
-            else if (!in_ders) {
+            else if (!in_cmpl.ders) {
               for (der=0 ; der<ders.size() ; ++der) {
                 auto s = ders[der];
                 SymbolNumberVector inputs{s, NO_SYMBOL_NUMBER, NO_SYMBOL_NUMBER};
                 SymbolNumberVector outputs(1000, NO_SYMBOL_NUMBER);
+                //std::cerr << __PRETTY_FUNCTION__ << ' ' << __LINE__ << ' ' << in_cmpl.dms << ' ' << in_cmpl.ders << ' ' << in_cmpl.encl << std::endl;
                 find_index(s,
                            &inputs[1],
                            &outputs[0],
                            &outputs[0],
-                           i+1, true, true);
+                           i+1, {true, true});
               }
             }
 
@@ -2083,6 +2095,6 @@ void TransducerW::get_analyses(SymbolNumber * input_symbol,
                  input_symbol,
                  output_symbol,
                  original_output_string,
-                 i+1, in_dms, in_ders);
+                 i+1, in_cmpl);
     }
 }
