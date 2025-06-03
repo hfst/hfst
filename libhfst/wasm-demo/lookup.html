@@ -1,0 +1,125 @@
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>HFST WASM Lookup Demo</title>
+</head>
+
+<body>
+  <h1>HFST Word Analysis</h1>
+
+  <div>
+    <h2>1. Upload an HFST transducer file</h2>
+    <input type="file" id="transducerFile">
+    <div id="uploadStatus">Please upload a transducer file</div>
+  </div>
+
+  <div>
+    <h2>2. Analyze words</h2>
+    <input type="text" id="wordInput" placeholder="Enter a word to analyze">
+    <button id="analyzeButton" disabled>Analyze</button>
+    <div id="results"></div>
+  </div>
+
+  <!-- Load the libhfst.js file -->
+  <script src="../libhfst.js"></script>
+  <script>
+    let hfst;
+    let currentTransducer = null;
+
+    // Initialize HFST module
+    async function initHfst() {
+      console.log('Loading HFST module...');
+      await createHfstModule().then((hfstModule) => {
+        hfst = hfstModule;
+        console.log('    ...HFST module loaded as `hfst`');
+
+        // Enable file upload once HFST is ready
+        document.getElementById('transducerFile').addEventListener('change', handleFileUpload);
+      });
+    }
+
+    // Handle transducer file upload
+    async function handleFileUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const uploadStatus = document.getElementById('uploadStatus');
+      uploadStatus.textContent = `Loading ${file.name}...`;
+
+      try {
+        // Read the file
+        const arrayBuffer = await file.arrayBuffer();
+        const uint8Array = new Uint8Array(arrayBuffer);
+
+        // Write to Emscripten's filesystem
+        const filename = `/${file.name}`;
+        hfst.FS.writeFile(filename, uint8Array);
+
+        // Load the transducer
+        currentTransducer = loadTransducer(filename);
+
+        uploadStatus.textContent = `Transducer "${file.name}" loaded successfully!`;
+        document.getElementById('analyzeButton').disabled = false;
+      } catch (error) {
+        console.error('Error loading transducer:', error);
+        uploadStatus.textContent = `Error: ${error.message}`;
+        document.getElementById('analyzeButton').disabled = true;
+      }
+    }
+
+    function loadTransducer(path) {
+      let instream = new hfst.HfstInputStream(path);
+      transducer = instream.read();
+      if (!instream.is_eof()) {  // If stream has not reached end-of-file
+        console.warn(`The given transducer file (${path}) contains
+            more than one transducer. Only the first one is loaded.`);
+      }
+      instream.close();
+      return transducer;
+    }
+
+    // Initialize the application
+    initHfst();
+
+    document.getElementById('analyzeButton').addEventListener('click', analyzeWord);
+
+    function analyzeWord() {
+      const word = document.getElementById('wordInput').value.trim();
+      const resultsDiv = document.getElementById('results');
+
+      if (!word) {
+        resultsDiv.textContent = 'Please enter a word to analyze';
+        return;
+      }
+
+      if (!currentTransducer) {
+        resultsDiv.textContent = 'Please upload a transducer file first';
+        return;
+      }
+
+      try {
+        const results = currentTransducer.lookup(word);
+        console.log(`Results (${word}):`, results);
+
+        if (results.length === 0) {
+          resultsDiv.textContent = 'No analysis found for: ' + word;
+        } else {
+          let resultHtml = '<p>Analysis results:</p><ul>';
+
+          for (let result of results) {
+            resultHtml += '<li>' + result[0].join('') + ' (weight: ' + result[1] + ')</li>';
+          }
+
+          resultHtml += '</ul>';
+          resultsDiv.innerHTML = resultHtml;
+        }
+      } catch (error) {
+        console.error('Error in lookup:', error);
+        resultsDiv.textContent = 'Error analyzing word: ' + error.message;
+      }
+    }
+  </script>
+</body>
+
+</html>

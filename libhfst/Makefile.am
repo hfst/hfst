@@ -18,5 +18,19 @@ apidoc: Doxyfile
 	$(DOXYGEN) $<
 endif
 
+if EMSCRIPTEN
+all-local: src/libhfst.la
+	$(LIBTOOL) --mode=link $(CXX) $(CXXFLAGS) $(LDFLAGS) \
+	  src/EmscriptenBindings.o \
+	  $(abs_top_builddir)/wasm-deps/lib/libfst.a \
+	  $(abs_top_builddir)/wasm-deps/lib/libfoma.a \
+	  -Wl,--whole-archive src/.libs/libhfst.a -Wl,--no-whole-archive \
+	  $(abs_top_builddir)/wasm-deps/lib/libicuuc.a \
+	  $(abs_top_builddir)/wasm-deps/lib/libicudata.a \
+	  $(abs_top_builddir)/wasm-deps/lib/libicui18n.a \
+	  -o libhfst.js
+
+endif
+
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = hfst.pc hfst_c.pc

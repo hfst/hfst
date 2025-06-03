@@ -26,6 +26,7 @@ enum OutputFormat {
     giellacg,
     conllu,
     visl,
+    jsonl,
 };
 
 struct TokenizeSettings {

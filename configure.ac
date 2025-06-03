@@ -560,6 +560,8 @@ AC_ARG_ENABLE([xfst],
 			  [if test x$enable_no_tools != xno; then enable_xfst=no; else enable_xfst=yes; fi])
 AM_CONDITIONAL([WANT_XFST], [test x$enable_xfst != xno])
 
+# Check if we're building with Emscripten
+AM_CONDITIONAL([EMSCRIPTEN], [AS_CASE(["$host_alias"], [wasm*-*-*], [true], [false])])
 
 # Disable stress tests by default
 AC_ARG_ENABLE([stress-tests],
@@ -585,6 +587,7 @@ AS_IF([test "x$enable_fsmbook_tests" != "xno" -a "x$enable_xfst" == "xno"],
 AC_PROG_CC
 AC_PROG_CXX
 LT_INIT
+rm -f a.out.js a.out.wasm a.wasm  # Remove dummy wasm files not clean up by macros
 AC_PROG_AWK
 AC_PROG_CPP
 AC_PROG_YACC
@@ -625,8 +628,14 @@ AC_LANG_PUSH([C])
 
 AC_LANG_POP
 
-AX_CHECK_ICU([50],[AC_DEFINE([USE_ICU_UNICODE], 1,
+# ICU checks only if not using Emscripten
+AS_IF([AS_CASE(["$host_alias"], [wasm*-*-*], [false], [true])], [
+  AX_CHECK_ICU([50],[AC_DEFINE([USE_ICU_UNICODE], 1,
                     [if using icu for unicode string handling])],[AC_MSG_FAILURE([ICU-50 or newer is required])])
+], [
+  AC_DEFINE([USE_ICU_UNICODE], 1, [Using Emscripten ICU port])
+])
+
 AS_IF([test "x$with_readline" = "xyes"],
       [AC_SEARCH_LIBS([readline], [readline editline],
                       [AC_DEFINE([HAVE_READLINE], 1, [if readline can be used])],
@@ -684,7 +693,14 @@ AS_IF([test "x$with_readline" = "xyes"],
 # Checks for structures
 AC_CHECK_DECLS([program_name, program_invocation_name, program_invocation_short_name])
 AC_CHECK_DECLS([rl_completion_suppress_append, rl_completion_matches])
-AC_CHECK_FUNCS([floor strchr strdup strerror strncasecmp strcspn strtol strtoul error error_at_line strndup getline getdelim getopt_long strtod xstrdup set_program_name setprogname setlocale nl_langinfo get_current_dir_name])
+
+AC_CHECK_FUNCS([floor strchr strdup strerror strncasecmp strcspn strtol strtoul error error_at_line strndup getline getdelim getopt_long strtod set_program_name setprogname setlocale nl_langinfo get_current_dir_name])
+# Emscripten does not have xstrdup, but configure thinks it does, so set HAVE_XSTRDUP manually
+AS_IF([AS_CASE(["$host_alias"], [wasm*-*-*], [false], [true])], [
+  AC_CHECK_FUNCS([xstrdup])
+], [
+  AC_DEFINE([HAVE_XSTRDUP], [0], [Define to 0 when using Emscripten])
+])
 AC_CHECK_FUNCS([isatty])
 
 AM_CONDITIONAL([WINDOWS], [test x$version_type = xwindows])

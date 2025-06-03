@@ -522,7 +522,7 @@ PmatchContainer::PmatchContainer(std::istream &inputstream)
     toplevel = new hfst_ol::PmatchTransducer(
         inputstream, header.index_table_size(), header.target_table_size(),
         alphabet, "TOP", this);
-    while (inputstream.good())
+    while (inputstream.peek() != EOF && inputstream.good())
     {
         try
         {

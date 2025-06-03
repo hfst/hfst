@@ -102,6 +102,7 @@ print_usage()
             "  -C  --conllu             CoNLL-U format\n"
             "  -f, --finnpos            FinnPos output\n"
             "  -L, --visl               VISL input and output (implies -W, handles <s> as blocks and <STYLE> inline)\n"
+            "  -j, --jsonl              JSONL (JSON Lines) format\n"
             );
     fprintf(message_out,
             "Use standard streams for input and output (for now).\n"
@@ -352,21 +353,21 @@ inline void maybe_erase_newline(string& input_text)
 int process_input(hfst_ol::PmatchContainer & container,
                   std::ostream & outstream)
 {
-    if(settings.output_format == cg || settings.output_format == giellacg || settings.output_format == visl) {
+    if(settings.output_format == cg || settings.output_format == giellacg || settings.output_format == visl || settings.output_format == jsonl) {
         outstream << std::fixed << std::setprecision(10);
     }
     if(settings.output_format == giellacg || superblanks) {
         if(superblanks) {
-            verbose_printf("Processign giellacg with superblanks\n");
+            verbose_printf("Processing giellacg with superblanks\n");
             return process_input_0delim<true>(container, outstream);
         }
         else {
-            verbose_printf("Processign giellacg without superblanks\n");
+            verbose_printf("Processing giellacg without superblanks\n");
             return process_input_0delim<false>(container, outstream);
         }
     }
     if(settings.output_format == visl) {
-        verbose_printf("Processign VISL CG 3\n");
+        verbose_printf("Processing VISL CG 3\n");
         return process_input_visl(container, outstream);
     }
     string input_text;
@@ -434,10 +435,11 @@ int parse_options(int argc, char** argv)
                 {"conllu", no_argument, 0, 'C'},
                 {"finnpos", no_argument, 0, 'f'},
                 {"visl", no_argument, 0, 'L'},
+                {"jsonl", no_argument, 0, 'j'},
                 {0,0,0,0}
             };
         int option_index = 0;
-        int c = getopt_long(argc, argv, HFST_GETOPT_COMMON_SHORT "nkawWmub:t:l:zixcSgCfL",
+        int c = getopt_long(argc, argv, HFST_GETOPT_COMMON_SHORT "nkawWmub:t:l:zixcSgCfLj",
                              long_options, &option_index);
         if (-1 == c)
         {
@@ -532,6 +534,17 @@ int parse_options(int argc, char** argv)
             break;
         case 'f':
             settings.output_format = finnpos;
+            break;
+        case 'j':
+            settings.output_format = jsonl;
+            settings.print_weights = true;
+            settings.print_all = true;
+            settings.dedupe = true;
+            settings.hack_uncompose = true;
+            settings.verbose = false;
+            if(settings.max_weight_classes == std::numeric_limits<int>::max()) {
+                settings.max_weight_classes = 2;
+            }
             break;
 #include "inc/getopt-cases-error.h"
         }

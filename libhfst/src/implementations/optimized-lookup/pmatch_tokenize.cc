@@ -11,6 +11,15 @@
 
 #include <unicode/brkiter.h>
 #include <unicode/unistr.h>
+#include <iomanip> // Required for std::fixed, std::setprecision
+#include <limits>  // Required for std::numeric_limits
+#include <set>     // Required for std::set
+#include <sstream> // Required for std::ostringstream
+#include <vector>  // Required for std::vector
+#include <algorithm> // Required for std::copy, std::sort
+#include <iterator> // Required for std::ostream_iterator, std::back_inserter
+#include <cmath> // Required for std::isinf, std::isnan
+
 static UErrorCode characterBoundaryStatus = U_ZERO_ERROR;
 static icu::BreakIterator *characterBoundary
     = icu::BreakIterator::createCharacterInstance(NULL,
@@ -33,6 +42,54 @@ static const string wtag = "W"; // TODO: cg-conv has an argument --wtag, allow
 static bool IS_CG_TAG_MODIFIER_WARNED
     = false; // Only warn once on skipping modifier letters
 
+// Helper function to format weight as a CG numeric tag string (e.g., <W:0.5>)
+// Uses the same logic as previously in print_cg_subreading.
+static std::string
+format_weight_as_CG_numeric_tag(hfst_ol::Weight const &weight)
+{
+    if (std::isinf(weight))
+    {
+        return "<" + wtag + ":inf>";
+    }
+    if (std::isnan(weight))
+    {
+        return "<" + wtag + ":nan>";
+    }
+
+    std::ostringstream w_oss;
+    w_oss << std::fixed << std::setprecision(9) << weight;
+    std::string rounded = w_oss.str();
+
+    // CG-style trimming logic
+    bool seendot = false;
+    bool inzeroes = true;
+    size_t firstzero_len = rounded.length(); // Represents the length of the string to keep
+
+    for (size_t i = rounded.length(); i > 0; --i)
+    {
+        if (inzeroes && rounded[i - 1] == '0')
+        {
+            firstzero_len = i; // The new length would be up to, but not including, current char if it's a zero from the end
+        }
+        else
+        {
+            inzeroes = false;
+        }
+        if (rounded[i - 1] == '.')
+        {
+            seendot = true;
+            break;
+        }
+    }
+
+    if (seendot)
+    {
+        rounded = rounded.substr(0, firstzero_len);
+    }
+
+    return "<" + wtag + ":" + rounded + ">";
+}
+
 void
 print_escaping_backslashes(std::string const &str, std::ostream &outstream)
 {
@@ -44,6 +101,43 @@ print_escaping_backslashes(std::string const &str, std::ostream &outstream)
         i = j + 1;
     }
     outstream << str.substr(i, j - i);
+}
+
+// Helper function to escape strings for JSON output
+void
+print_json_escaped(std::string const &str, std::ostream &outstream)
+{
+    for (char const &c : str)
+    {
+        switch (c)
+        {
+        case '"':
+            outstream << "\\\"";
+            break;
+        case '\\':
+            outstream << "\\\\";
+            break;
+        case '\b':
+            outstream << "\\b";
+            break;
+        case '\f':
+            outstream << "\\f";
+            break;
+        case '\n':
+            outstream << "\\n";
+            break;
+        case '\r':
+            outstream << "\\r";
+            break;
+        case '\t':
+            outstream << "\\t";
+            break;
+        default:
+            // TODO: Handle other control characters if necessary
+            outstream << c;
+            break;
+        }
+    }
 }
 
 void
@@ -65,6 +159,12 @@ print_no_output(std::string const &input, std::ostream &outstream,
         outstream << ">\"" << std::endl << "\t\"";
         print_escaping_backslashes(input, outstream);
         outstream << "\" ?";
+    }
+    else if (s.output_format == jsonl)
+    {
+        outstream << "{\"w\":\"";
+        print_json_escaped(input, outstream);
+        outstream << "\"}";
     }
     //    std::cerr << "from print_no_output\n";
     outstream << "\n\n";
@@ -127,6 +227,12 @@ print_nonmatching_sequence(std::string const &str, std::ostream &outstream,
     else if (s.output_format == finnpos)
     {
         outstream << str << "\t_\t_\t_\t_";
+    }
+    else if (s.output_format == jsonl)
+    {
+        outstream << "{\"t\":\"";
+        print_json_escaped(str, outstream);
+        outstream << "\"}";
     }
     //    std::cerr << "from print_nonmatching_sequence\n";
     outstream << "\n";
@@ -385,33 +491,7 @@ print_cg_subreading(size_t const &indent,
 
     if (s.print_weights)
     {
-        std::ostringstream w;
-        w << std::fixed << std::setprecision(9) << weight;
-        std::string rounded = w.str();
-        bool seendot = false;
-        bool inzeroes = true;
-        size_t firstzero = rounded.length();
-        for (size_t i = rounded.length(); i > 0; --i)
-        {
-            if (inzeroes && rounded[i - 1] == '0')
-            {
-                firstzero = i; // not i-1, keep one zero
-            }
-            else
-            {
-                inzeroes = false;
-            }
-            if (rounded[i - 1] == '.')
-            {
-                seendot = true;
-                break;
-            }
-        }
-        if (seendot)
-        {
-            rounded = rounded.substr(0, firstzero);
-        }
-        outstream << " <" << wtag << ":" << rounded << ">";
+        outstream << " " << format_weight_as_CG_numeric_tag(weight);
     }
     if (in_beg != in_end)
     {
@@ -471,33 +551,7 @@ print_cg_subreading_ex(size_t const &indent,
     }
     if (s.print_weights)
     {
-        std::ostringstream w;
-        w << std::fixed << std::setprecision(9) << weight;
-        std::string rounded = w.str();
-        bool seendot = false;
-        bool inzeroes = true;
-        size_t firstzero = rounded.length();
-        for (size_t i = rounded.length(); i > 0; --i)
-        {
-            if (inzeroes && rounded[i - 1] == '0')
-            {
-                firstzero = i; // not i-1, keep one zero
-            }
-            else
-            {
-                inzeroes = false;
-            }
-            if (rounded[i - 1] == '.')
-            {
-                seendot = true;
-                break;
-            }
-        }
-        if (seendot)
-        {
-            rounded = rounded.substr(0, firstzero);
-        }
-        outstream << " <" << wtag << ":" << rounded << ">";
+        outstream << " " << format_weight_as_CG_numeric_tag(weight);
     }
     if (in_beg != in_end)
     {
@@ -908,6 +962,134 @@ empty_to_underscore(std::string to_test)
     return to_test;
 }
 
+// Helper function to process a single JSON segment and its subreadings recursively
+void process_json_segment(std::pair<hfst::StringVector::const_iterator, hfst::StringVector::const_iterator> segment,
+                         std::vector<std::pair<hfst::StringVector::const_iterator, hfst::StringVector::const_iterator>> &remaining_segments,
+                         hfst_ol::Weight const &weight,
+                         std::ostream &outstream,
+                         const TokenizeSettings &s,
+                         bool &first_tag)
+{
+    hfst::StringVector::const_iterator seg_beg = segment.first;
+    hfst::StringVector::const_iterator seg_end = segment.second;
+
+    // Find first tag in the segment
+    hfst::StringVector::const_iterator first_tag_it = seg_end;
+    for (auto it = seg_beg; it != seg_end; ++it) {
+        if (it->compare("@PMATCH_BACKTRACK@") == 0) continue;
+        if (is_cg_tag(*it)) {
+            first_tag_it = it;
+            break;
+        }
+    }
+
+    // Build lemma
+    std::ostringstream lemma_ss;
+    for (auto it = seg_beg; it != first_tag_it; ++it) {
+        if (it->compare("@PMATCH_BACKTRACK@") == 0) continue;
+        lemma_ss << *it;
+    }
+
+    // Build tags list
+    std::vector<std::string> tags;
+    for (auto it = first_tag_it; it != seg_end; ++it) {
+        if (it->compare("@PMATCH_BACKTRACK@") == 0) continue;
+        if (is_cg_tag(*it)) {
+            std::string tag = *it;
+            tag.erase(0, tag.find_first_not_of(' '));
+            tags.push_back(tag);
+        }
+    }
+
+    // Output this segment's data
+    outstream << "{\"l\":\"";
+    print_json_escaped(lemma_ss.str(), outstream);
+    outstream << "\",\"ts\":[";
+
+    bool first_tag_local = true;
+    for (const auto &tag : tags) {
+        if (!first_tag_local) {
+            outstream << ",";
+        }
+        outstream << "\"";
+        print_json_escaped(tag, outstream);
+        outstream << "\"";
+        first_tag_local = false;
+    }
+    outstream << "]";
+
+    // Process next subreading if available
+    if (!remaining_segments.empty()) {
+        outstream << ",\"s\":";
+        auto next_segment = remaining_segments.front();
+        remaining_segments.erase(remaining_segments.begin());
+        process_json_segment(next_segment, remaining_segments, weight, outstream, s, first_tag);
+    }
+
+    outstream << "}";
+}
+
+void
+print_json_reading(hfst::StringVector::const_iterator out_beg,
+                   hfst::StringVector::const_iterator out_end,
+                   hfst_ol::Weight const &weight,
+                   hfst::StringVector::const_iterator in_beg,
+                   hfst::StringVector::const_iterator in_end,
+                   size_t &part,
+                   const Location *loc,
+                   std::ostream &outstream, const TokenizeSettings &s,
+                   bool &first_reading)
+{
+    if (!first_reading)
+    {
+        outstream << ",";
+    }
+    first_reading = false;
+
+    // We need to split the output into segments based on the separator and analyze them separately
+    std::vector<std::pair<hfst::StringVector::const_iterator, hfst::StringVector::const_iterator>> segments;
+
+    // Find all separators from right to left and build segments
+    hfst::StringVector::const_iterator segment_end = out_end;
+    size_t out_part_idx = (part > 0) ? loc->output_parts.at(part - 1) : 0;
+    hfst::StringVector::const_iterator segment_start = (out_part_idx > 0) ?
+        (loc->output_symbol_strings.begin() + out_part_idx) : out_beg;
+
+    // Scan from right to left to find all separators
+    bool found_separator = false;
+    for (hfst::StringVector::const_iterator it = out_end; it > segment_start; --it) {
+        if (it != out_end && subreading_separator.compare(*(it-1)) == 0) {
+            // Found a separator - add segment from separator+1 to current segment_end
+            segments.push_back(std::make_pair(it, segment_end));
+            segment_end = it - 1; // Move end to before the separator
+            found_separator = true;
+        }
+    }
+
+    // Add the leftmost segment (or the only segment if no separators)
+    segments.push_back(std::make_pair(segment_start, segment_end));
+
+    // Process all segments recursively
+    if (!segments.empty()) {
+        // Start with the rightmost segment (main reading)
+        auto main_segment = segments[0];
+
+        // Create a list of remaining segments (subreadings)
+        std::vector<std::pair<hfst::StringVector::const_iterator, hfst::StringVector::const_iterator>> remaining_segments;
+        for (size_t i = 1; i < segments.size(); i++) {
+            remaining_segments.push_back(segments[i]);
+        }
+
+        // Process main segment and recursively handle subreadings
+        bool dummy_first_tag = true;
+        process_json_segment(main_segment, remaining_segments, weight, outstream, s, dummy_first_tag);
+    }
+    else {
+        // This should never happen, but just in case
+        outstream << "\"l\":\"\",\"ts\":[]";
+    }
+}
+
 void
 print_location_vector(hfst_ol::PmatchContainer &container,
                       LocationVector const &locations, std::ostream &outstream,
@@ -1129,6 +1311,56 @@ print_location_vector(hfst_ol::PmatchContainer &container,
         {
             outstream << std::endl;
         }
+    }
+    else if (s.output_format == jsonl && locations.size() != 0)
+    {
+        outstream << "{\"w\":\"";
+        print_json_escaped(locations.at(0).input, outstream);
+        outstream << "\"";
+        // Determine if there are any valid readings to print.
+        // A reading is invalid if its output is empty, contains " ??", is "@_NONMATCHING_@",
+        // or its weight is infinite.
+        std::vector<const hfst_ol::Location*> valid_locations_to_process;
+        for (LocationVector::const_iterator loc_it = locations.begin();
+             loc_it != locations.end(); ++loc_it)
+        {
+            if (loc_it->output.empty() ||
+                loc_it->output.find(" ??") != string::npos ||
+                loc_it->output.compare("@_NONMATCHING_@") == 0 ||
+                loc_it->weight >= std::numeric_limits<float>::max())
+            {
+                continue; // Skip invalid readings
+            }
+            valid_locations_to_process.push_back(&(*loc_it));
+        }
+
+        if (!valid_locations_to_process.empty())
+        {
+            outstream << ",\"rs\":[";
+            bool first_reading = true;
+            for (const hfst_ol::Location* original_loc_ptr : valid_locations_to_process)
+            {
+                // No need to re-filter; original_loc_ptr points to a valid location.
+                Location *hack = new Location(*original_loc_ptr);
+                if (s.hack_uncompose)
+                {
+                    container.uncompose(*hack);
+                }
+
+                size_t initial_part = hack->input_parts.size();
+                print_json_reading(hack->output_symbol_strings.begin(),
+                                   hack->output_symbol_strings.end(),
+                                   hack->weight,
+                                   hack->input_symbol_strings.begin(),
+                                   hack->input_symbol_strings.end(),
+                                   initial_part,
+                                   hack,
+                                   outstream, s, first_reading);
+                delete hack;
+            }
+            outstream << "]";
+        }
+        outstream << "}\n";
     }
     //    std::cerr << "from print_location_vector\n";
 }
