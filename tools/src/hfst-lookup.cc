@@ -850,7 +850,7 @@ lookup_printf(const char *format, const HfstOneLevelPath *input,
         if (anal_start == NULL)
         {
             // give up trying
-            anal_start = lookupform;
+            anal_start = lookup_end;
         }
         b = static_cast<char *>(
             calloc(sizeof(char), anal_start - lookupform + 1));
