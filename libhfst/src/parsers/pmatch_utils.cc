@@ -166,6 +166,14 @@ WordVecFloat vector_similarity_projection_factor;
 std::map<std::string, hfst::HfstTransducer> named_transducers;
 PmatchUtilityTransducers *utils = NULL;
 
+// Maps a compiled Lst() symbol (@L....@) to the pmatch source line where the
+// Lst() was defined.
+std::map<std::string, int> lst_line_map;
+
+// De-duplicate overlap warnings: the same Lst() can get checked multiple times
+// (e.g. from both sides of a disjunction).
+std::set<std::string> lst_overlap_warned;
+
 void
 warn(std::string warning)
 {
@@ -1393,6 +1401,29 @@ init_globals(void)
     named_object_evaluation_stack_depth = 0;
     need_delimiters = false;
     pmatchnerrs = 0;
+    lst_line_map.clear();
+    lst_overlap_warned.clear();
+}
+
+static void
+register_lst_line_numbers_from_transducer(const HfstTransducer *t, int line)
+{
+    if (t == NULL || line <= 0)
+    {
+        return;
+    }
+    hfst::StringSet ss = t->get_alphabet();
+    for (hfst::StringSet::const_iterator it = ss.begin(); it != ss.end(); ++it)
+    {
+        if (it->find("@L.") == 0)
+        {
+            // Keep first occurrence if seen before.
+            if (lst_line_map.count(*it) == 0)
+            {
+                lst_line_map[*it] = line;
+            }
+        }
+    }
 }
 
 string
@@ -3455,6 +3486,7 @@ PmatchUnaryOperation::evaluate(void)
     else if (op == MakeList)
     {
         HfstTransducer *tmp = make_list(retval);
+        register_lst_line_numbers_from_transducer(tmp, line_defined);
         delete retval;
         retval = tmp;
     }
@@ -3579,6 +3611,108 @@ PmatchUnaryOperation::evaluate(void)
     return retval;
 }
 
+static void print_unicode_codepoints(std::ostream &os, const std::string &s) {
+    for (size_t i = 0; i < s.size(); ) {
+        unsigned char c = s[i];
+        uint32_t codepoint = 0;
+        size_t len = 0;
+        if ((c & 0x80) == 0) { codepoint = c; len = 1; }
+        else if ((c & 0xE0) == 0xC0) { codepoint = ((c & 0x1F) << 6) | (s[i+1] & 0x3F); len = 2; }
+        else if ((c & 0xF0) == 0xE0) { codepoint = ((c & 0x0F) << 12) | ((s[i+1] & 0x3F) << 6) | (s[i+2] & 0x3F); len = 3; }
+        else if ((c & 0xF8) == 0xF0) { codepoint = ((c & 0x07) << 18) | ((s[i+1] & 0x3F) << 12) | ((s[i+2] & 0x3F) << 6) | (s[i+3] & 0x3F); len = 4; }
+        else { codepoint = c; len = 1; }
+        os << "U+" << std::hex << std::uppercase << std::setw(4) << std::setfill('0') << codepoint;
+        i += len;
+        if (i < s.size()) os << ", ";
+    }
+}
+
+
+// Pass a map from Lst() symbol to line number. Emits one warning per Lst()
+// symbol (so line numbers stay unambiguous).
+void warn_if_list_overlap(const hfst::StringSet &list_set,
+                          const hfst::StringSet &literal_set,
+                          const std::map<std::string, int> &lst_line_map)
+{
+    for (hfst::StringSet::const_iterator it = list_set.begin();
+         it != list_set.end(); ++it)
+    {
+        const std::string &sym = *it;
+        if (sym.find("@L.") != 0)
+        {
+            continue;
+        }
+
+        std::vector<std::string> overlapping_chars;
+        int lst_line = -1;
+        std::map<std::string, int>::const_iterator line_it
+            = lst_line_map.find(sym);
+        if (line_it != lst_line_map.end())
+        {
+            lst_line = line_it->second;
+        }
+
+        // Parse the list content: @L.a_b_c@ -> a, b, c
+        size_t start = 3; // Skip @L.
+        size_t end = sym.find('_', start);
+        while (end != std::string::npos)
+        {
+            std::string sub = sym.substr(start, end - start);
+            if (literal_set.count(sub))
+            {
+                overlapping_chars.push_back(sub);
+            }
+            start = end + 1;
+            end = sym.find('_', start);
+        }
+        // Check last element (before final @)
+        if (start < sym.size())
+        {
+            std::string last = sym.substr(start, sym.length() - start - 1);
+            if (literal_set.count(last))
+            {
+                overlapping_chars.push_back(last);
+            }
+        }
+
+        if (overlapping_chars.empty())
+        {
+            continue;
+        }
+
+        // Ensure each Lst() only triggers a single warning per compilation.
+        std::string warn_key;
+        if (lst_line >= 0)
+        {
+            warn_key = std::to_string(lst_line);
+            warn_key.append("\t");
+            warn_key.append(sym);
+        }
+        else
+        {
+            warn_key = sym;
+        }
+        if (lst_overlap_warned.count(warn_key) != 0)
+        {
+            continue;
+        }
+        lst_overlap_warned.insert(warn_key);
+
+        std::cerr << "CRITICAL WARNING: "
+                     "Lst() contains symbols that overlap with literal definitions. "
+                     "This can cause exponential slowdown at runtime. "
+                     "This warning will become an error in a future release.\n";
+        std::cerr << "Remove the following symbols from Lst() (line " << (lst_line >= 0 ? std::to_string(lst_line) : "?") << "):";
+        for (size_t i = 0; i < overlapping_chars.size(); ++i)
+        {
+            std::cerr << "\n  '" << overlapping_chars[i] << "' (";
+            print_unicode_codepoints(std::cerr, overlapping_chars[i]);
+            std::cerr << ")";
+        }
+        std::cerr << std::endl;
+    }
+}
+
 HfstTransducer *
 PmatchBinaryOperation::evaluate(void)
 {
@@ -3645,6 +3779,10 @@ PmatchBinaryOperation::evaluate(void)
     }
     else if (op == Disjunct)
     {
+        hfst::StringSet lhs_syms = lhs->get_alphabet();
+        hfst::StringSet rhs_syms = rhs->get_alphabet();
+        warn_if_list_overlap(lhs_syms, rhs_syms, lst_line_map);
+        warn_if_list_overlap(rhs_syms, lhs_syms, lst_line_map);
         lhs->disjunct(*rhs);
     }
     else if (op == Intersect)
