@@ -3611,28 +3611,55 @@ PmatchUnaryOperation::evaluate(void)
     return retval;
 }
 
-static void print_unicode_codepoints(std::ostream &os, const std::string &s) {
-    for (size_t i = 0; i < s.size(); ) {
+static void
+print_unicode_codepoints(std::ostream &os, const std::string &s)
+{
+    for (size_t i = 0; i < s.size();)
+    {
         unsigned char c = s[i];
         uint32_t codepoint = 0;
         size_t len = 0;
-        if ((c & 0x80) == 0) { codepoint = c; len = 1; }
-        else if ((c & 0xE0) == 0xC0) { codepoint = ((c & 0x1F) << 6) | (s[i+1] & 0x3F); len = 2; }
-        else if ((c & 0xF0) == 0xE0) { codepoint = ((c & 0x0F) << 12) | ((s[i+1] & 0x3F) << 6) | (s[i+2] & 0x3F); len = 3; }
-        else if ((c & 0xF8) == 0xF0) { codepoint = ((c & 0x07) << 18) | ((s[i+1] & 0x3F) << 12) | ((s[i+2] & 0x3F) << 6) | (s[i+3] & 0x3F); len = 4; }
-        else { codepoint = c; len = 1; }
-        os << "U+" << std::hex << std::uppercase << std::setw(4) << std::setfill('0') << codepoint;
+        if ((c & 0x80) == 0)
+        {
+            codepoint = c;
+            len = 1;
+        }
+        else if ((c & 0xE0) == 0xC0)
+        {
+            codepoint = ((c & 0x1F) << 6) | (s[i + 1] & 0x3F);
+            len = 2;
+        }
+        else if ((c & 0xF0) == 0xE0)
+        {
+            codepoint = ((c & 0x0F) << 12) | ((s[i + 1] & 0x3F) << 6)
+                        | (s[i + 2] & 0x3F);
+            len = 3;
+        }
+        else if ((c & 0xF8) == 0xF0)
+        {
+            codepoint = ((c & 0x07) << 18) | ((s[i + 1] & 0x3F) << 12)
+                        | ((s[i + 2] & 0x3F) << 6) | (s[i + 3] & 0x3F);
+            len = 4;
+        }
+        else
+        {
+            codepoint = c;
+            len = 1;
+        }
+        os << "U+" << std::hex << std::uppercase << std::setw(4)
+           << std::setfill('0') << codepoint;
         i += len;
-        if (i < s.size()) os << ", ";
+        if (i < s.size())
+            os << ", ";
     }
 }
 
-
 // Pass a map from Lst() symbol to line number. Emits one warning per Lst()
 // symbol (so line numbers stay unambiguous).
-void warn_if_list_overlap(const hfst::StringSet &list_set,
-                          const hfst::StringSet &literal_set,
-                          const std::map<std::string, int> &lst_line_map)
+void
+warn_if_list_overlap(const hfst::StringSet &list_set,
+                     const hfst::StringSet &literal_set,
+                     const std::map<std::string, int> &lst_line_map)
 {
     for (hfst::StringSet::const_iterator it = list_set.begin();
          it != list_set.end(); ++it)
@@ -3698,11 +3725,13 @@ void warn_if_list_overlap(const hfst::StringSet &list_set,
         }
         lst_overlap_warned.insert(warn_key);
 
-        std::cerr << "CRITICAL WARNING: "
-                     "Lst() contains symbols that overlap with literal definitions. "
-                     "This can cause exponential slowdown at runtime. "
-                     "This warning will become an error in a future release.\n";
-        std::cerr << "Remove the following symbols from Lst() (line " << (lst_line >= 0 ? std::to_string(lst_line) : "?") << "):";
+        std::cerr
+            << "CRITICAL WARNING: "
+               "Lst() contains symbols that overlap with literal definitions. "
+               "This can cause exponential slowdown at runtime. "
+               "This warning will become an error in a future release.\n";
+        std::cerr << "Remove the following symbols from Lst() (line "
+                  << (lst_line >= 0 ? std::to_string(lst_line) : "?") << "):";
         for (size_t i = 0; i < overlapping_chars.size(); ++i)
         {
             std::cerr << "\n  '" << overlapping_chars[i] << "' (";
