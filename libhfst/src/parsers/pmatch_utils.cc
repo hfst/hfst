@@ -3657,10 +3657,9 @@ print_unicode_codepoints(std::ostream &os, const std::string &s)
 // Pass a map from Lst() symbol to line number. Emits one warning per Lst()
 // symbol (so line numbers stay unambiguous).
 void
-fix_list_overlap(HfstTransducer *lhs, HfstTransducer *rhs,
-                 const hfst::StringSet &list_set,
-                 const hfst::StringSet &literal_set,
-                 const std::map<std::string, int> &lst_line_map)
+warn_if_list_overlap(const hfst::StringSet &list_set,
+                     const hfst::StringSet &literal_set,
+                     const std::map<std::string, int> &lst_line_map)
 {
     for (hfst::StringSet::const_iterator it = list_set.begin();
          it != list_set.end(); ++it)
@@ -3672,7 +3671,6 @@ fix_list_overlap(HfstTransducer *lhs, HfstTransducer *rhs,
         }
 
         std::vector<std::string> overlapping_chars;
-        std::vector<std::string> retained_chars;
         int lst_line = -1;
         std::map<std::string, int>::const_iterator line_it
             = lst_line_map.find(sym);
@@ -3690,10 +3688,6 @@ fix_list_overlap(HfstTransducer *lhs, HfstTransducer *rhs,
             if (literal_set.count(sub))
             {
                 overlapping_chars.push_back(sub);
-            }
-            else
-            {
-                retained_chars.push_back(sub);
             }
             start = end + 1;
             end = sym.find('_', start);
@@ -3730,22 +3724,13 @@ fix_list_overlap(HfstTransducer *lhs, HfstTransducer *rhs,
             continue;
         }
         lst_overlap_warned.insert(warn_key);
-        std::string newlist = "@L.";
-        bool first = true;
-        for (auto &s : retained_chars)
-        {
-            if (!first)
-            {
-                newlist += "_";
-            }
-            newlist += s;
-            first = false;
-        }
-        newlist += "@";
+
         std::cerr
-            << "Lst() contains symbols that overlap with literal definitions. "
-               "This can cause exponential slowdown at runtime.\n";
-        std::cerr << "Removing the following symbols from Lst() (line "
+            << "CRITICAL WARNING: "
+               "Lst() contains symbols that overlap with literal definitions. "
+               "This can cause exponential slowdown at runtime. "
+               "This warning will become an error in a future release.\n";
+        std::cerr << "Remove the following symbols from Lst() (line "
                   << (lst_line >= 0 ? std::to_string(lst_line) : "?") << "):";
         for (size_t i = 0; i < overlapping_chars.size(); ++i)
         {
@@ -3754,10 +3739,6 @@ fix_list_overlap(HfstTransducer *lhs, HfstTransducer *rhs,
             std::cerr << ")";
         }
         std::cerr << std::endl;
-        std::cerr << "Replacing all " << sym
-                  << " instances with new list: " << newlist << std::endl;
-        lhs->substitute(sym, newlist);
-        rhs->substitute(sym, newlist);
     }
 }
 
@@ -3829,8 +3810,8 @@ PmatchBinaryOperation::evaluate(void)
     {
         hfst::StringSet lhs_syms = lhs->get_alphabet();
         hfst::StringSet rhs_syms = rhs->get_alphabet();
-        fix_list_overlap(lhs, rhs, lhs_syms, rhs_syms, lst_line_map);
-        fix_list_overlap(rhs, lhs, rhs_syms, lhs_syms, lst_line_map);
+        warn_if_list_overlap(lhs_syms, rhs_syms, lst_line_map);
+        warn_if_list_overlap(rhs_syms, lhs_syms, lst_line_map);
         lhs->disjunct(*rhs);
     }
     else if (op == Intersect)
