@@ -274,6 +274,8 @@ strdup_token_part()
 char *
 strip_percents(const char *s, bool do_zeros)
 {
+    std::ostream *err = hfst::lexc::lexc_->get_stream(
+        (hfst::lexc::lexc_->get_error_stream()));
     char *rv = 0;
     if (do_zeros)
     {
@@ -306,6 +308,16 @@ strip_percents(const char *s, bool do_zeros)
         {
             if (*c != '0')
             {
+                if ((*c != ':') && (*c != '<') && (*c != ' ') && (*c != ';')
+                    && (*c != '%') && (*c != '"') && (*c != '@')
+                    && (*c != '!'))
+                {
+                    char *errmsg = (char *)malloc(
+                        sizeof(char) * strlen(c)
+                        + strlen("Unrecognised escape %%\n") + 1);
+                    sprintf(errmsg, "Unrecognised escape %%%c\n", *c);
+                    error_at_current_token(0, 0, errmsg);
+                }
                 *p = *c;
                 p++;
             }
@@ -356,10 +368,7 @@ strip_percents(const char *s, bool do_zeros)
     if (escaping)
     {
         // fprintf(stderr, "Stray escape char %% in %s\n", s);
-        std::ostream *err = hfst::lexc::lexc_->get_stream(
-            (hfst::lexc::lexc_->get_error_stream()));
-        *err << "Stray escape char %% in " << s << std::endl;
-        hfst::lexc::lexc_->flush(err);
+        error_at_current_token(0, 0, "Stray escape char %%\n");
         return NULL;
     }
     return rv;
