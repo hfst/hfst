@@ -314,8 +314,15 @@ strip_percents(const char *s, bool do_zeros)
                 {
                     char *errmsg = (char *)malloc(
                         sizeof(char) * strlen(c)
-                        + strlen("Unrecognised escape %%\n") + 1);
-                    sprintf(errmsg, "Unrecognised escape %%%c\n", *c);
+                        + strlen("Unrecognised escape %%") + 1);
+                    if (*c > 0)
+                    {
+                        sprintf(errmsg, "Unrecognised escape %%%c", *c);
+                    }
+                    else
+                    {
+                        sprintf(errmsg, "Unrecognised escape %%%s", c);
+                    }
                     error_at_current_token(0, 0, errmsg);
                 }
                 *p = *c;
