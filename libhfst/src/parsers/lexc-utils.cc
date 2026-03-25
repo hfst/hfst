@@ -323,7 +323,7 @@ strip_percents(const char *s, bool do_zeros)
                     {
                         sprintf(errmsg, "Unrecognised escape %%%s", c);
                     }
-                    error_at_current_token(0, 0, errmsg);
+                    warning_at_current_token(0, 0, errmsg);
                 }
                 *p = *c;
                 p++;
@@ -375,7 +375,7 @@ strip_percents(const char *s, bool do_zeros)
     if (escaping)
     {
         // fprintf(stderr, "Stray escape char %% in %s\n", s);
-        error_at_current_token(0, 0, "Stray escape char %%\n");
+        warning_at_current_token(0, 0, "Stray escape char %%\n");
         return NULL;
     }
     return rv;
@@ -513,6 +513,32 @@ error_at_current_token(int, int, const char *format)
     free(leader);
 }
 
+void
+warning_at_current_token(int, int, const char *format)
+{
+    char *leader = strdup_token_positions();
+    char *token = strdup_token_part();
+    // fprintf(stderr, "%s: %s %s\n", leader, format, token);
+    std::ostream *err = hfst::lexc::lexc_->get_stream(
+        (hfst::lexc::lexc_->get_error_stream()));
+    if (should_colourise())
+    {
+        *err << COLOUR_BOLD;
+    }
+    *err << leader << ": ";
+    if (should_colourise())
+    {
+        *err << COLOUR_YELLOW;
+    }
+    *err << format << ": ";
+    if (should_colourise())
+    {
+        *err << COLOUR_RESET;
+    }
+    *err << token << std::endl;
+    hfst::lexc::lexc_->flush(err);
+    free(leader);
+}
 pair<vector<string>, vector<string> >
 find_med_alingment(const vector<string> &s1, const vector<string> &s2)
 {

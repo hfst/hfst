@@ -110,6 +110,8 @@ char* strdup_nonconst_part(const char* token,
 // help flex/yacc with meaningful error messages
 //! @brief print error_at_line style error message for current token
 void error_at_current_token(int status, int errnum, const char* format);
+//! @brief print error_at_line style warning message for current token
+void warning_at_current_token(int status, int errnum, const char* format);
 
 //! @brief Finds med alignment between two strings
 //! Given an upper-lower string lexicon entry, the upper-lower pair is aligned by minimum edit distance with the following costs:
