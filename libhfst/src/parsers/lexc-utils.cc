@@ -309,8 +309,8 @@ strip_percents(const char *s, bool do_zeros)
             if (*c != '0')
             {
                 if ((*c != ':') && (*c != '<') && (*c != ' ') && (*c != ';')
-                    && (*c != '%') && (*c != '"') && (*c != '@')
-                    && (*c != '!'))
+                    && (*c != '%') && (*c != '"') && (*c != '@') && (*c != '!')
+                    && (*c != '>'))
                 {
                     char *errmsg = (char *)malloc(
                         sizeof(char) * strlen(c)
