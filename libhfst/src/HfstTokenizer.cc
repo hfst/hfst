@@ -10,7 +10,10 @@
 #include "HfstTokenizer.h"
 #include "HfstFlagDiacritics.h"
 #include <cassert>
+#include <iostream>
 #include <string>
+
+#include <unicode/ustring.h>
 
 #ifndef MAIN_TEST
 
@@ -440,76 +443,24 @@ unsigned int
 HfstTokenizer::check_utf8_correctness_and_calculate_length(
     const std::string &input_string)
 {
-    unsigned int retval = 0;
-    // Check that input_string is made up from utf-8 sequences.
-    for (std::string::const_iterator it = input_string.begin();
-         it != input_string.end(); ++it)
+    UErrorCode status = U_ZERO_ERROR;
+    int32_t length = 0;
+    u_strFromUTF8(NULL, 0, &length, input_string.c_str(), -1, &status);
+    if (status == U_BUFFER_OVERFLOW_ERROR)
     {
-        // The initial byte of the sequence.
-        unsigned char initial_char = *it;
-        size_t additional_chars = 0;
-
-        // The bytes 192, 193, 245, 246 and 247 are invalid in utf8.
-        if (initial_char == 192 || initial_char == 193 || initial_char == 245
-            || initial_char == 246 || initial_char == 247)
-        {
-            HFST_THROW_MESSAGE(IncorrectUtf8CodingException,
-                               "leading octet in [192, 193, 245, 246, 247]");
-        }
-        // Case 0xxxxxxx, i.e. ASCII byte.
-        else if ((128 & initial_char) == 0)
-        {
-            additional_chars = 0;
-        }
-        // Case 10xxxxxx cannot be an initial byte.
-        else if ((64 & initial_char) == 0)
-        {
-            HFST_THROW_MESSAGE(IncorrectUtf8CodingException,
-                               "leading octet & 10000000b");
-        }
-        // Case 110xxxxx, i.e. read one more byte.
-        else if ((32 & initial_char) == 0)
-        {
-            additional_chars = 1;
-        }
-        // Case 1110xxxx, i.e. read two more bytes.
-        else if ((16 & initial_char) == 0)
-        {
-            additional_chars = 2;
-        }
-        // Case 11110xxx, i.e. read three more bytes.
-        else if ((8 & initial_char) == 0)
-        {
-            additional_chars = 3;
-        }
-        // Case 11111xxx is not allowed in utf8.
-        else
-        {
-            HFST_THROW_MESSAGE(IncorrectUtf8CodingException,
-                               "leading octet & 11111000b");
-        }
-
-        // Read the continuation bytes.
-        for (size_t i = 0; i < additional_chars; ++i)
-        {
-            ++it;
-            // String ends too early.
-            if (it == input_string.end())
-            {
-                HFST_THROW_MESSAGE(IncorrectUtf8CodingException,
-                                   "eos in multioctet sequence");
-            }
-            unsigned char byte = *it;
-            // All continuation bytes look like 10xxxxxx.
-            if (!(128 & byte && 64 ^ byte))
-            {
-                HFST_THROW_MESSAGE(IncorrectUtf8CodingException,
-                                   "not continuation octet & 100000000b");
-            }
-        }
-        retval = retval + 1;
+        // this is dumb
+        status = U_ZERO_ERROR;
     }
-    return retval;
+    if (U_FAILURE(status))
+    {
+        std::cerr << "DEBUG: " << status << ": " << u_errorName(status)
+                  << std::endl;
+        HFST_THROW_MESSAGE(IncorrectUtf8CodingException, u_errorName(status));
+    }
+    else
+    {
+        return length;
+    }
 }
 
 }
