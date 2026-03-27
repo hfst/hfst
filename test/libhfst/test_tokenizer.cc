@@ -86,7 +86,25 @@ main(int argc, char **argv)
         assert(false);
     }
 
+    // 11110000:10011111:10010010:10101001
+    verbose_print("Case: 11110000 10011111 10010010 10101001");
+    line[0] = get_bin(1, 1, 1, 1, 0, 0, 0, 0);
+    line[1] = get_bin(1, 0, 0, 1, 1, 1, 1, 1);
+    line[2] = get_bin(1, 0, 0, 1, 0, 0, 1, 0);
+    line[3] = get_bin(1, 0, 1, 0, 1, 0, 0, 1);
+    line[4] = 0;
+
+    try
+    {
+        utf8_tokenizer.check_utf8_correctness(line);
+    }
+    catch (const IncorrectUtf8CodingException &e)
+    {
+        assert(false);
+    }
+
     // Four byte, three byte, two byte and single byte sequence.
+    // (these are just overlong variants of nulls...)
     verbose_print("Case: 11110000, 10000000, 10000000, 10000000,\n");
     verbose_print("11100000, 10000000, 10000000, 11010000, 10000000,\n");
     verbose_print("01000000");
@@ -106,10 +124,10 @@ main(int argc, char **argv)
     try
     {
         utf8_tokenizer.check_utf8_correctness(line);
+        assert(false);
     }
     catch (const IncorrectUtf8CodingException &e)
     {
-        assert(false);
     }
 
     // Negative Cases
