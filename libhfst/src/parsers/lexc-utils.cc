@@ -310,18 +310,18 @@ strip_percents(const char *s, bool do_zeros)
             {
                 if ((*c != ':') && (*c != '<') && (*c != ' ') && (*c != ';')
                     && (*c != '%') && (*c != '"') && (*c != '@') && (*c != '!')
-                    && (*c != '>'))
+                    && (*c != '>') && (*c != '#'))
                 {
                     char *errmsg = (char *)malloc(
                         sizeof(char) * strlen(c)
-                        + strlen("Unrecognised escape %%") + 1);
+                        + strlen("Unnecessary escape %%") + 1);
                     if (*c > 0)
                     {
-                        sprintf(errmsg, "Unrecognised escape %%%c", *c);
+                        sprintf(errmsg, "Unnecessary escape %%%c", *c);
                     }
                     else
                     {
-                        sprintf(errmsg, "Unrecognised escape %%%s", c);
+                        sprintf(errmsg, "Unnecessary escape %%%s", c);
                     }
                     warning_at_current_token(0, 0, errmsg);
                 }
