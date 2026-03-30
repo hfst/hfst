@@ -190,6 +190,7 @@ LexcCompiler::reset()
     lexiconNames_.clear();
     noFlags_.clear();
     continuations_.clear();
+    alphabets_.clear();
     currentLexiconName_ = ""; // ?
     string hash("#");
     lexiconNames_.insert(hash);
@@ -413,6 +414,7 @@ LexcCompiler::addNoFlag(const string &lexname)
 LexcCompiler &
 LexcCompiler::addAlphabet(const string &alpha)
 {
+    alphabets_.insert(alpha);
     tokenizer_.add_multichar_symbol(alpha);
     if (!quiet_ && verbose_)
     {

@@ -186,6 +186,7 @@ class LexcCompiler
     std::set<std::string> lexiconNames_;
     std::set<std::string> noFlags_;
     std::set<std::string> continuations_;
+    std::set<std::string> alphabets_;
     std::string currentLexiconName_;
     size_t totalEntries_;
     size_t currentEntries_;
