@@ -22,6 +22,9 @@
 #include <string>
 #include <vector>
 
+#include <unicode/ubrk.h>
+#include <unicode/ustring.h>
+
 using std::map;
 using std::pair;
 using std::set;
@@ -430,9 +433,54 @@ LexcCompiler::addStringEntry(const string &data, const string &continuation,
                              double weight)
 {
     // string str = replace_zero(data);
-
     currentEntries_++;
     totalEntries_++;
+    UErrorCode status = U_ZERO_ERROR;
+    UChar *ICUdata = (UChar *)malloc(sizeof(UChar) * (data.length() + 1));
+    int32_t length = 0;
+    ICUdata = u_strFromUTF8(ICUdata, data.length() + 1, &length, data.c_str(),
+                            -1, &status);
+    if (U_FAILURE(status))
+    {
+        fprintf(stderr, "ICU error converting UTF-8 %s to UChars: %s\n",
+                data.c_str(), u_errorName(status));
+    }
+    status = U_ZERO_ERROR;
+    UBreakIterator *graphemes;
+    graphemes = ubrk_open(UBRK_CHARACTER, "C", NULL, -1, &status);
+    if (U_FAILURE(status))
+    {
+        fprintf(stderr, "ICU error trying to open grapheme segmenter: %s\n",
+                u_errorName(status));
+    }
+    status = U_ZERO_ERROR;
+    ubrk_setText(graphemes, ICUdata, length, &status);
+    if (U_FAILURE(status))
+    {
+        fprintf(stderr, "ICU error trying to get graphemes from %s: %s\n",
+                data.c_str(), u_errorName(status));
+    }
+    status = U_ZERO_ERROR;
+    int32_t prev = 0;
+    int32_t next = 0;
+    for (prev = ubrk_first(graphemes); prev != UBRK_DONE;
+         next = ubrk_next(graphemes))
+    {
+        if ((prev != next) && (next != UBRK_DONE))
+        {
+            status = U_ZERO_ERROR;
+            char *grapheme
+                = (char *)malloc(sizeof(char) * (next - prev) * 4 + 1);
+            grapheme = u_strToUTF8(grapheme, (next - prev) * 4 + 1, &length,
+                                   &ICUdata[prev], next - prev, &status);
+            if (U_FAILURE(status))
+            {
+                fprintf(stderr, "ICU error getting UTF-8 from grpaheme: %s\n",
+                        u_errorName(status));
+            }
+        }
+        prev = next;
+    }
     continuations_.insert(continuation);
     string encodedCont = string(continuation);
     if (with_flags_)
@@ -1374,7 +1422,6 @@ LexcCompiler::printConnectedness(bool &warnings_generated)
     }
     return *this;
 }
-
 }
 }
 
