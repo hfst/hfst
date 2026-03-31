@@ -161,6 +161,8 @@ class LexcCompiler
     const LexcCompiler &printConnectedness(bool &warnings_printed);
 
   private:
+    LexcCompiler &unicodeCheck_(const string &data);
+
     bool quiet_;
     bool verbose_;
     bool align_strings_;

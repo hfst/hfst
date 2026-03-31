@@ -427,14 +427,9 @@ LexcCompiler::addAlphabet(const string &alpha)
     return *this;
 }
 
-// Construct vector nameJoiner data contJoiner and add to trie
 LexcCompiler &
-LexcCompiler::addStringEntry(const string &data, const string &continuation,
-                             double weight)
+LexcCompiler::unicodeCheck_(const string &data)
 {
-    // string str = replace_zero(data);
-    currentEntries_++;
-    totalEntries_++;
     UErrorCode status = U_ZERO_ERROR;
     UChar *ICUdata = (UChar *)malloc(sizeof(UChar) * (data.length() + 1));
     int32_t length = 0;
@@ -478,9 +473,47 @@ LexcCompiler::addStringEntry(const string &data, const string &continuation,
                 fprintf(stderr, "ICU error getting UTF-8 from grpaheme: %s\n",
                         u_errorName(status));
             }
+            if (!alphabets_.contains(grapheme))
+            {
+                char *errm
+                    = (char *)malloc(sizeof(char) * (strlen(grapheme) + 128));
+                int rv = sprintf(errm, "adding %s into Multichar_Symbols",
+                                 grapheme);
+                if (u_strHasMoreChar32Than(&ICUdata[prev], next - prev, 1))
+                {
+                    warning_at_current_token(0, 0, errm);
+                    fprintf(stderr,
+                            "To prevent future problems, add %s (U+%04X "
+                            "U+%04X...) to "
+                            "Multichar_Symbols section\n",
+                            grapheme, ICUdata[prev], ICUdata[prev + 1]);
+                    addAlphabet(grapheme);
+                }
+                else if (verbose_ && !quiet_)
+                {
+                    warning_at_current_token(0, 0, errm);
+                    addAlphabet(grapheme);
+                }
+                // free(errm);
+            }
+            // free(grapheme);
         }
         prev = next;
     }
+    // ubrk_close(graphemes);
+    // free(ICUdata);
+    return *this;
+}
+
+// Construct vector nameJoiner data contJoiner and add to trie
+LexcCompiler &
+LexcCompiler::addStringEntry(const string &data, const string &continuation,
+                             double weight)
+{
+    // string str = replace_zero(data);
+    currentEntries_++;
+    totalEntries_++;
+    unicodeCheck_(data);
     continuations_.insert(continuation);
     string encodedCont = string(continuation);
     if (with_flags_)
@@ -613,6 +646,8 @@ LexcCompiler::addStringPairEntry(const string &upper, const string &lower,
 
     currentEntries_++;
     totalEntries_++;
+    unicodeCheck_(upper);
+    unicodeCheck_(lower);
     continuations_.insert(continuation);
     string encodedCont = string(continuation);
     if (with_flags_)
