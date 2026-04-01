@@ -642,6 +642,14 @@ AC_CHECK_HEADERS([limits.h stdlib.h string.h error.h glob.h locale.h langinfo.h]
 
 AC_LANG_PUSH([C++])
 
+# Needed for M_LN2 and friends
+CPPFLAGS="$CPPFLAGS -D_GNU_SOURCE -D_USE_MATH_DEFINES"
+
+# On 32bit x86, we need to use SSE for precise floating point arithmetics in OpenFST
+AX_CHECK_COMPILE_FLAG([-msse], [CPPFLAGS="$CPPFLAGS -msse"], [])
+AX_CHECK_COMPILE_FLAG([-msse2], [CPPFLAGS="$CPPFLAGS -msse2"], [])
+AX_CHECK_COMPILE_FLAG([-mfpmath=sse], [CPPFLAGS="$CPPFLAGS -mfpmath=sse"], [])
+
 found_fstlib_h=no
 # Checks for highest supported C++ standard that the installed OpenFST will work with
 # This settles for C++17 for OpenFST 1.7.9, but higher for >= 1.8.0
@@ -659,14 +667,6 @@ AS_IF([test "$version_flag" = none], [
   AC_MSG_ERROR([Could not enable at least C++17 - upgrade your compiler])
 ])
 CXXFLAGS="$CXXFLAGS ${version_flag}"
-
-# Needed for M_LN2 and friends
-CPPFLAGS="$CPPFLAGS -D_GNU_SOURCE -D_USE_MATH_DEFINES"
-
-# On 32bit x86, we need to use SSE for precise floating point arithmetics in OpenFST
-AX_CHECK_COMPILE_FLAG([-msse], [CPPFLAGS="$CPPFLAGS -msse"], [])
-AX_CHECK_COMPILE_FLAG([-msse2], [CPPFLAGS="$CPPFLAGS -msse2"], [])
-AX_CHECK_COMPILE_FLAG([-mfpmath=sse], [CPPFLAGS="$CPPFLAGS -mfpmath=sse"], [])
 
 AC_CHECK_HEADERS([ext/slist])
 
