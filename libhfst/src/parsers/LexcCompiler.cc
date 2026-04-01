@@ -599,41 +599,48 @@ warn_about_one_sided_flags(
     {
         if (symbol_pair.first != symbol_pair.second)
         {
+            char *errm = (char *)malloc(sizeof(char *)
+                                            * (symbol_pair.first.length()
+                                               + symbol_pair.second.length())
+                                        + 128);
+            sprintf(errm, "one-sided flag diacritic %s:%s",
+                    symbol_pair.first.c_str(), symbol_pair.second.c_str());
             if (treat_one_sided_flags_as_errors_)
             {
                 // error messages are always printed
-                *errorstr_ << std::endl
-                           << "*** ERROR: one-sided flag diacritic: "
-                           << symbol_pair.first << ":" << symbol_pair.second
-                           << " [--Werror]" << std::endl;
+                *errorstr_ << std::endl << errm << " [--Werror]" << std::endl;
                 lexc_->flush(errorstr_);
                 throw "one-sided flag";
             }
             if (!quiet_one_sided_flags_)
             {
-                hfst::lexc::error_at_current_token(
-                    0, 0, "Warning: one-sided flag diacritic.");
+                hfst::lexc::warning_at_current_token(0, 0, errm);
             }
+            free(errm);
         }
         return;
     }
-    if (FdOperation::is_diacritic(symbol_pair.second))
+    else if (FdOperation::is_diacritic(symbol_pair.second))
     {
+        char *errm = (char *)malloc(
+            sizeof(char *)
+                * (symbol_pair.first.length() + symbol_pair.second.length())
+            + 128);
+        sprintf(errm, "one-sided flag diacritic %s:%s",
+                symbol_pair.first.c_str(), symbol_pair.second.c_str());
         if (treat_one_sided_flags_as_errors_)
         {
             // error messages are always printed
-            *hfst::lexc::errorstr_
-                << std::endl
-                << "*** ERROR: one-sided flag diacritic: " << symbol_pair.first
-                << ":" << symbol_pair.second << " [--Werror]" << std::endl;
+            *hfst::lexc::errorstr_ << std::endl
+                                   << errm << " [--Werror]" << std::endl;
             lexc_->flush(errorstr_);
             throw "one-sided flag";
         }
         if (!quiet_one_sided_flags_)
         {
-            hfst::lexc::error_at_current_token(
-                0, 0, "Warning: one-sided flag diacritic.");
+            hfst::lexc::warning_at_current_token(0, 0, errm);
         }
+        free(errm);
     }
 }
 
@@ -832,13 +839,7 @@ LexcCompiler::addXreEntry(const string &regexp, const string &continuation,
     HfstTransducer *newPaths = xre_.compile(regexp);
     if (newPaths == NULL)
     {
-        std::ostream *err = get_stream(error_);
-        if (should_colourise())
-        {
-            *err << COLOUR_RED << "Error: " << COLOUR_RESET;
-        }
-        *err << "Unable to parse regular expression" << std::endl;
-        flush(err);
+        error_at_current_token(0, 0, "Unable to parse regular expression");
         parseErrors_ = true;
         return *this;
     }
@@ -993,26 +994,12 @@ LexcCompiler::setCurrentLexiconName(const string &lexiconName)
     }
     else if ((firstLexicon) && (lexiconName != "Root"))
     {
-        if (!quiet_)
-        {
-            if (should_colourise())
-            {
-                *err << COLOUR_YELLOW << "Warning: " << COLOUR_RESET;
-            }
-            *err << "first lexicon is not named Root" << std::endl;
-        }
+        warning_at_current_token(0, 0, "first lexicon is not named Root");
         setInitialLexiconName(lexiconName);
     }
     else if ((!firstLexicon) && (lexiconName == "Root"))
     {
-        if (!quiet_)
-        {
-            if (should_colourise())
-            {
-                *err << COLOUR_YELLOW << "Warning: " << COLOUR_RESET;
-            }
-            *err << "Root is not first the first lexicon" << std::endl;
-        }
+        warning_at_current_token(0, 0, "Root is not first the first lexicon");
         setInitialLexiconName(lexiconName);
     }
     if (!firstLexicon && !quiet_)
@@ -1055,16 +1042,13 @@ LexcCompiler::compileLexical()
     printConnectedness(warnings_generated);
     if (warnings_generated && treat_warnings_as_errors_)
     {
-        if (!quiet_)
+        if (should_colourise())
         {
-            if (should_colourise())
-            {
-                *err << COLOUR_RED << "*** ERROR: " << COLOUR_RESET;
-            }
-            *err << "could not parse lexc file: treating warnings "
-                    "as errors [--Werror] ***"
-                 << std::endl;
+            *err << COLOUR_RED << "*** ERROR: " << COLOUR_RESET;
         }
+        *err << "missing or unused LEXICONs (see above) and --Werror has "
+                "been enabled"
+             << std::endl;
         flush(err);
         return 0;
     }
@@ -1175,7 +1159,7 @@ LexcCompiler::compileLexical()
         }
     }
 
-    /// get right side of every pair
+    // get right side of every pair
     HfstBasicTransducer fsm(lexicons);
     StringSet rightSymbols;
     // Go through all states
