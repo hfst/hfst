@@ -844,6 +844,45 @@ LexcCompiler::addXreEntry(const string &regexp, const string &continuation,
     }
 
     newPaths->optimize();
+    auto newAlphabets = newPaths->get_alphabet();
+    for (const auto &newAlpha : newAlphabets)
+    {
+        if (!alphabets_.contains(newAlpha))
+        {
+            UErrorCode status = U_ZERO_ERROR;
+            UChar *ICUdata
+                = (UChar *)malloc(sizeof(UChar) * (newAlpha.length() + 1));
+            int32_t length = 0;
+            ICUdata = u_strFromUTF8(ICUdata, newAlpha.length() + 1, &length,
+                                    newAlpha.c_str(), -1, &status);
+            if (U_FAILURE(status))
+            {
+                fprintf(stderr,
+                        "ICU error converting UTF-8 %s to UChars: %s\n",
+                        newAlpha.c_str(), u_errorName(status));
+            }
+            char *errm
+                = (char *)malloc(sizeof(char) * (newAlpha.length() + 128));
+            int rv = sprintf(errm, "implicit Multichar_Symbol %s in regex",
+                             newAlpha.c_str());
+            if (u_strHasMoreChar32Than(ICUdata, -1, 1))
+            {
+                warning_at_current_token(0, 0, errm);
+                fprintf(stderr,
+                        "you shoudl add %s to Multichar_Symbols section\n",
+
+                        newAlpha.c_str());
+                fprintf(stderr, "U+%04X U+%04X ...\n", *(ICUdata),
+                        *(ICUdata + 1));
+            }
+            else if (verbose_ && !quiet_)
+            {
+                warning_at_current_token(0, 0, errm);
+            }
+            addAlphabet(newAlpha);
+            free(errm);
+        }
+    }
 
     // encode key
     // keep regexps with different continuations separate
