@@ -865,7 +865,13 @@ LexcCompiler::addXreEntry(const string &regexp, const string &continuation,
                 = (char *)malloc(sizeof(char) * (newAlpha.length() + 128));
             int rv = sprintf(errm, "implicit Multichar_Symbol %s in regex",
                              newAlpha.c_str());
-            if (u_strHasMoreChar32Than(ICUdata, -1, 1))
+            if (newAlpha == "@_EPSILON_SYMBOL_@"
+                || newAlpha == "@_UNKNOWN_SYMBOL_@"
+                || newAlpha == "@_IDENTITY_SYMBOL_@")
+            {
+                continue;
+            }
+            else if (u_strHasMoreChar32Than(ICUdata, -1, 1))
             {
                 warning_at_current_token(0, 0, errm);
                 fprintf(stderr,
