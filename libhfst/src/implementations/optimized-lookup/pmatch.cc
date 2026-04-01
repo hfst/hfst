@@ -10,10 +10,62 @@
 #include "pmatch.h"
 #include "hfst.h"
 
+#include <unicode/ubrk.h>
+#include <unicode/ustring.h>
+
 using hfst::HfstTransducer;
 
 namespace hfst_ol
 {
+int
+nByte_grapheme(const char *u8)
+{
+    UErrorCode status = U_ZERO_ERROR;
+    UChar *ICUdata = (UChar *)malloc(sizeof(UChar) * (strlen(u8) + 1));
+    int32_t length = 0;
+    ICUdata = u_strFromUTF8(ICUdata, strlen(u8) + 1, &length, u8, -1, &status);
+    if (U_FAILURE(status))
+    {
+        fprintf(stderr, "ICU error converting UTF-8 %s to UChars: %s\n", u8,
+                u_errorName(status));
+    }
+    status = U_ZERO_ERROR;
+    UBreakIterator *graphemes;
+    graphemes = ubrk_open(UBRK_CHARACTER, "C", NULL, -1, &status);
+    if (U_FAILURE(status))
+    {
+        fprintf(stderr, "ICU error trying to open grapheme segmenter: %s\n",
+                u_errorName(status));
+    }
+    status = U_ZERO_ERROR;
+    ubrk_setText(graphemes, ICUdata, length, &status);
+    if (U_FAILURE(status))
+    {
+        fprintf(stderr, "ICU error trying to get graphemes from %s: %s\n", u8,
+                u_errorName(status));
+    }
+    status = U_ZERO_ERROR;
+    int32_t begin = ubrk_first(graphemes);
+    int32_t end = ubrk_next(graphemes);
+    if (begin == end)
+    {
+        return 0;
+    }
+    if (end == UBRK_DONE)
+    {
+        return 0;
+    }
+    char *grapheme = (char *)malloc(sizeof(char) * (end - begin) * 4 + 1);
+    grapheme = u_strToUTF8(grapheme, (end - begin) * 4 + 1, &length,
+                           &ICUdata[begin], end - begin, &status);
+    if (U_FAILURE(status))
+    {
+        fprintf(stderr, "ICU error getting UTF-8 from grpaheme: %s\n",
+                u_errorName(status));
+    }
+    return (strlen(grapheme)); // strlen is number of bytes
+}
+
 PmatchAlphabet::PmatchAlphabet(std::istream &inputstream,
                                SymbolNumber symbol_count,
                                PmatchContainer *cont)
@@ -1820,7 +1872,7 @@ PmatchContainer::initialize_input(const char *input_s)
     SymbolNumber k = NO_SYMBOL_NUMBER;
     SymbolNumber boundary_sym = alphabet.get_special(boundary);
     char *single_codepoint_scratch;
-    char single_codepoint_scratch_orig[5] = {};
+    char *single_codepoint_scratch_orig;
     if (boundary_sym != NO_SYMBOL_NUMBER)
     {
         input.push_back(boundary_sym);
@@ -1830,9 +1882,11 @@ PmatchContainer::initialize_input(const char *input_s)
         char *original_input_loc = *input_str_ptr;
         if (single_codepoint_tokenization)
         {
-            int bytes_to_tokenize = nByte_utf8(**input_str_ptr);
+            int bytes_to_tokenize = nByte_grapheme(*input_str_ptr);
             if (bytes_to_tokenize > 0)
             {
+                single_codepoint_scratch_orig
+                    = (char *)malloc(sizeof(char) * bytes_to_tokenize + 1);
                 single_codepoint_scratch = single_codepoint_scratch_orig;
                 memcpy(single_codepoint_scratch, *input_str_ptr,
                        bytes_to_tokenize);
@@ -1854,13 +1908,14 @@ PmatchContainer::initialize_input(const char *input_s)
             // the encoder moves as far as it can during tokenization,
             // we want to go back to be in position to add one utf-8 char
             *input_str_ptr = original_input_loc;
-            int bytes_to_tokenize = nByte_utf8(**input_str_ptr);
+            int bytes_to_tokenize = nByte_grapheme(*input_str_ptr);
             if (bytes_to_tokenize == 0)
             {
                 // if utf-8 tokenization fails too, just grab a byte
                 bytes_to_tokenize = 1;
             }
-            char new_symbol[5];
+            char *new_symbol
+                = (char *)malloc(sizeof(char) * bytes_to_tokenize + 1);
             memcpy(new_symbol, *input_str_ptr, bytes_to_tokenize);
             new_symbol[bytes_to_tokenize] = '\0';
             (*input_str_ptr) += bytes_to_tokenize;

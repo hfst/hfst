@@ -92,7 +92,7 @@ print_usage()
         "  -W, --no-weights         Don't print weights (default; overrides "
         "earlier -w, or -w implied by -g, options)\n"
         "  -m, --tokenize-multichar Tokenize multicharacter symbols\n"
-        "                           (by default only one utf-8 character is "
+        "                           (by default only one grapheme is "
         "tokenized at a time\n"
         "                           regardless of what is present in the "
         "alphabet)\n"
