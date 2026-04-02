@@ -11,8 +11,10 @@
 #include "HfstFlagDiacritics.h"
 #include <cassert>
 #include <iostream>
+#include <string.h>
 #include <string>
 
+#include <unicode/ubrk.h>
 #include <unicode/ustring.h>
 
 #ifndef MAIN_TEST
@@ -128,7 +130,52 @@ HfstTokenizer::get_next_symbol_size(const char *symbol) const
     {
         return (int)(multi_char_symbol_end - symbol);
     }
-    if ((128 & *symbol) == 0)
+    UErrorCode status = U_ZERO_ERROR;
+    UChar *ICUdata = (UChar *)malloc(sizeof(UChar) * (strlen(symbol) + 1));
+    int32_t length = 0;
+    ICUdata = u_strFromUTF8(ICUdata, strlen(symbol) + 1, &length, symbol, -1,
+                            &status);
+    if (U_FAILURE(status))
+    {
+        fprintf(stderr, "ICU error converting UTF-8 %s to UChars: %s\n",
+                symbol, u_errorName(status));
+    }
+    status = U_ZERO_ERROR;
+    UBreakIterator *graphemes;
+    graphemes = ubrk_open(UBRK_CHARACTER, "C", NULL, -1, &status);
+    if (U_FAILURE(status))
+    {
+        fprintf(stderr, "ICU error trying to open grapheme segmenter: %s\n",
+                u_errorName(status));
+    }
+    status = U_ZERO_ERROR;
+    ubrk_setText(graphemes, ICUdata, length, &status);
+    if (U_FAILURE(status))
+    {
+        fprintf(stderr, "ICU error trying to get graphemes from %s: %s\n",
+                symbol, u_errorName(status));
+    }
+    status = U_ZERO_ERROR;
+    int32_t begin = ubrk_first(graphemes);
+    int32_t end = ubrk_next(graphemes);
+    if (begin == end)
+    {
+        return 0;
+    }
+    if (end == UBRK_DONE)
+    {
+        return 0;
+    }
+    char *grapheme = (char *)malloc(sizeof(char) * (end - begin) * 4 + 1);
+    grapheme = u_strToUTF8(grapheme, (end - begin) * 4 + 1, &length,
+                           &ICUdata[begin], end - begin, &status);
+    if (U_FAILURE(status))
+    {
+        fprintf(stderr, "ICU error getting UTF-8 from grpaheme: %s\n",
+                u_errorName(status));
+    }
+    return (strlen(grapheme)); // strlen is number of bytes
+    /*if ((128 & *symbol) == 0)
     {
         return 1;
     }
@@ -143,7 +190,7 @@ HfstTokenizer::get_next_symbol_size(const char *symbol) const
     else
     {
         return 4;
-    }
+    }*/
 }
 
 bool
