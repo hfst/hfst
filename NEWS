@@ -3,6 +3,18 @@
 This file contains all noteworthy changes in HFST development between releases.
 For full listing of changes see ChangeLog.
 
+## Noteworthy changes in 3.17.0
+
+* Character "tokenisers" that used to operate on bytes or UTF-8 sequences will
+  now operate on [graphemes](https://www.unicode.org/reports/tr29/tr29-23.html#Grapheme_Cluster_Boundaries),
+  this means that by default arcs in FSAs are expected to match combining
+  grapheme clusters, e.g. a base character plus all diacritics.
+  The implementation is based on ICU implementation of `u_brk`
+    * in lexc string entries, graphemes are compiled into a arcs
+    * in xerox regex curly braces, as well
+    * in tokenise without --multichar mode, input is tokenised by graphemens
+    * etc. etc. tbd
+
 ## Noteworthy changes in 3.16.2
 
 * Support for >OpenFst-1.8.0
@@ -998,3 +1010,5 @@ Noteworthy changes in release 2.1
 ---------------------------------
 
 * hfst-twolc and hfst-compose-intersect understand # like xerox originals
+
+<!-- vim: set ft=markdown: -->
