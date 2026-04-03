@@ -54,9 +54,9 @@ EC "%"{U8C}
 /* any ASCII */
 A7 [\x00-\x7e]
 /* special meaning in lexc */
-A7RESTRICTED [ <>%!;:""]
+A7RESTRICTED [ <%!;:""]
 /* non-restricted ASCII */
-A7UNRESTRICTED [\x21-\x7e]{-}[ <>%!;:""]
+A7UNRESTRICTED [\x21-\x7e]{-}[ <%!;:""]
 /* special meaning in xre */
 XRERESTRICTED [-\t <>%!:;@0~""\\&?$+*/_{}\]\[-]
 /* non-restricted ASCII in XRE */
@@ -271,3 +271,4 @@ LWSP [\r\n\t ]
 }
 
 %%
+/* vim: set ft=lex:*/
