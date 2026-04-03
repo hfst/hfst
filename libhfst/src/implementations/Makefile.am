@@ -192,7 +192,7 @@ ConvertOlTransducer_LDADD=../libhfst.la
 optimized_lookup_transducer_SOURCES=optimized-lookup/transducer.cc \
 	optimized-lookup/ospell.cc optimized-lookup/pmatch.cc optimized-lookup/find_epsilon_loops.cc
 optimized_lookup_transducer_CXXFLAGS=-DMAIN_TEST -Wno-deprecated
-optimized_lookup_transducer_LDADD=../libhfst.la
+optimized_lookup_transducer_LDADD=../libhfst.la $(ICU_LIBS)
 optimized_lookup_convert_SOURCES=optimized-lookup/convert.cc
 optimized_lookup_convert_CXXFLAGS=-DMAIN_TEST -Wno-deprecated
 optimized_lookup_convert_LDADD=../libhfst.la
