@@ -489,11 +489,6 @@ LexcCompiler::unicodeCheck_(const string &data)
                             grapheme, ICUdata[prev], ICUdata[prev + 1]);
                     addAlphabet(grapheme);
                 }
-                else if (verbose_ && !quiet_)
-                {
-                    warning_at_current_token(0, 0, errm);
-                    addAlphabet(grapheme);
-                }
                 // free(errm);
             }
             // free(grapheme);
@@ -579,6 +574,25 @@ LexcCompiler::addStringEntry(const string &data, const string &continuation,
         if (start_pos != std::string::npos)
         {
             it->second.replace(start_pos, zero.length(), "0");
+        }
+        if (!alphabets_.contains(it->first))
+        {
+            if ((it->first.starts_with("@")) && (it->first.ends_with("@")))
+            {
+                continue;
+            }
+            if ((it->first.starts_with("$")) && (it->first.ends_with("$")))
+            {
+                continue;
+            }
+            if (verbose_ && !quiet_)
+            {
+                char *errm
+                    = (char *)malloc(sizeof(char) * it->first.length() + 48);
+                sprintf(errm, "Adding %s to Alphabets", it->first.c_str());
+                warning_at_current_token(0, 0, errm);
+            }
+            addAlphabet(it->first.c_str());
         }
     }
     stringsTrie_.disjunct(newVector, hfst::double_to_float(weight));
@@ -801,6 +815,46 @@ LexcCompiler::addStringPairEntry(const string &upper, const string &lower,
         if (start_pos != std::string::npos)
         {
             it->second.replace(start_pos, zero.length(), "0");
+        }
+        if (!alphabets_.contains(it->first))
+        {
+            if ((it->first.starts_with("@")) && (it->first.ends_with("@")))
+            {
+                continue;
+            }
+            if ((it->first.starts_with("$")) && (it->first.ends_with("$")))
+            {
+                continue;
+            }
+            if (verbose_ && !quiet_)
+            {
+                char *errm
+                    = (char *)malloc(sizeof(char) * it->first.length() + 48);
+                sprintf(errm, "Adding %s to Alphabets", it->first.c_str());
+
+                warning_at_current_token(0, 0, errm);
+            }
+            addAlphabet(it->first.c_str());
+        }
+        if (!alphabets_.contains(it->second))
+        {
+            if ((it->second.starts_with("@")) && (it->second.ends_with("@")))
+            {
+                continue;
+            }
+            if ((it->second.starts_with("$")) && (it->second.ends_with("$")))
+            {
+                continue;
+            }
+            if (verbose_ && !quiet_)
+            {
+                char *errm
+                    = (char *)malloc(sizeof(char) * it->second.length() + 48);
+                sprintf(errm, "Adding %s to Alphabets", it->second.c_str());
+
+                warning_at_current_token(0, 0, errm);
+            }
+            addAlphabet(it->second.c_str());
         }
     }
 
