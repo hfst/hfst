@@ -251,7 +251,6 @@ TokenIOStream::read_delimited(const char delim)
 Token
 TokenIOStream::make_token(bool was_escaped)
 {
-    int c = is.peek();
     SymbolNumber s = symbolizer.extract_symbol(is);
     if (s == 0)
     {

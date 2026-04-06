@@ -238,7 +238,8 @@ ProcTransducerAlphabet::check_for_overlapping() const
             {
                 std::string ch = chars[j];
                 if (!is_alphabetic(ch.c_str())
-                    || symbolizer.find_symbol(ch.c_str()) == NO_SYMBOL_NUMBER)
+                    || symbolizer.find_symbol(ch.c_str()) == NO_SYMBOL_NUMBER
+                    || ch.length() > 1)
                 {
                     overlaps = false;
                     break;
