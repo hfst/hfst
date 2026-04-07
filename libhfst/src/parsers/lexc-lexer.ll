@@ -92,6 +92,11 @@ LWSP [\r\n\t ]
 %%
 
 
+<INITIAL>^{WSP}*("Alphabets"|"ALPHABETS"){LWSP}+ {
+    BEGIN MULTICHARS;
+    hfst::lexc::token_update_positions(hlexctext);
+    return ALPHABETS_START;
+}
 <INITIAL>^{WSP}*("Multichar_Symbols"|"MULTICHAR_SYMBOLS"){LWSP}+ {
     BEGIN MULTICHARS;
     hfst::lexc::token_update_positions(hlexctext);

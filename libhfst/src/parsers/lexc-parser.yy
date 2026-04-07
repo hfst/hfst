@@ -35,6 +35,13 @@ int hlexclex(void);
 // Actual functions to handle parsed stuff
 static
 void
+upgrade_alphabets()
+{
+    hfst::lexc::lexc_->setStrictAlphabets(true);
+}
+
+static
+void
 handle_multichar(const string& multichar)
 {
     //in multichars, both @ZERO@ ("%0") and literal 0 ("0") are allowed
@@ -43,15 +50,17 @@ handle_multichar(const string& multichar)
     string str = std::string(multichar);
     string zero = "@ZERO@";
     size_t start_pos = str.find(zero);
-    if(start_pos != std::string::npos)
+    if (start_pos != std::string::npos) {
         str.replace(start_pos, zero.length(), "0");
+    }
     hfst::lexc::lexc_->addAlphabet(str);
 
     str = std::string(multichar);
     zero = "0";
     start_pos = str.find(zero);
-    if(start_pos != std::string::npos)
+    if (start_pos != std::string::npos) {
         str.replace(start_pos, zero.length(), "@ZERO@");
+    }
     hfst::lexc::lexc_->addAlphabet(str);
 }
 
@@ -80,9 +89,8 @@ handle_lexicon_name(const string& lexiconName)
   {
     hfst::lexc::lexc_->setCurrentLexiconName(lexiconName);
   }
-  catch(const char * msg)
+  catch(const char *)
   {
-    (void)msg;
     return false;
   }
   return true;
@@ -145,27 +153,35 @@ handle_string_pair_entry(const string& upper, const string& lower,
     // handle epsilon "0"
     if (upper != "0" && lower != "0")
     {
-       try {
-         hfst::lexc::lexc_->addStringPairEntry(upper, lower, cont, weight);
-       } catch(const char * msg) {
-         (void)msg;
-         return false;
-       }
+        try 
+        {
+            hfst::lexc::lexc_->addStringPairEntry(upper, lower, cont, weight);
+        }
+        catch(const char * ) 
+        {
+            return false;
+        }
     }
     else
     {
-       std::string upper_(upper);
-       std::string lower_(lower);
-       if (upper == "0")
-         upper_ = std::string("");
-       if (lower == "0")
-         lower_ = std::string("");
-       try {
-         hfst::lexc::lexc_->addStringPairEntry(upper_, lower_, cont, weight);
-       } catch(const char * msg) {
-         (void)msg;
-         return false;
-       }
+        std::string upper_(upper);
+        std::string lower_(lower);
+        if (upper == "0")
+        {
+            upper_ = std::string("");
+        }
+        if (lower == "0")
+        {
+            lower_ = std::string("");
+        }
+        try 
+        {
+            hfst::lexc::lexc_->addStringPairEntry(upper_, lower_, cont, weight);
+        }
+        catch(const char * )
+        {
+            return false;
+        }
     }
     return true;
 }
@@ -186,8 +202,10 @@ static
 void
 hlexcwarn(const char* text)
 {
-  if (! hfst::lexc::lexc_->isQuiet())
-    { hfst::lexc::error_at_current_token(0, 0, text); }
+    if (!hfst::lexc::lexc_->isQuiet()) 
+    {
+        hfst::lexc::error_at_current_token(0, 0, text);
+    }
 }
 
 
@@ -218,7 +236,7 @@ handle_end()
     int number;
 }
 
-%token <number> ERROR MULTICHARS_START
+%token <number> ERROR MULTICHARS_START ALPHABETS_START
     DEFINITIONS_START END_START NOFLAGS_START
 %token <name>   LEXICON_START LEXICON_START_WRONG_CASE
     LEXICON_NAME ULSTRING ENTRY_GLOSS
@@ -238,6 +256,9 @@ MULTICHAR_PART: MULTICHAR_SYMBOLS2 MULTICHAR_SYMBOL_LIST
                  ;
 
 MULTICHAR_SYMBOLS2: MULTICHARS_START
+                | ALPHABETS_START {
+                    upgrade_alphabets();
+                }
                 ;
 
 MULTICHAR_SYMBOL_LIST: MULTICHAR_SYMBOL_LIST MULTICHAR_SYMBOL2

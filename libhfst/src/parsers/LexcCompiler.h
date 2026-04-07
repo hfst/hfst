@@ -98,6 +98,9 @@ class LexcCompiler
 
     bool areWarningsTreatedAsErrors();
 
+    bool isStrictAlphabets();
+    void setStrictAlphabets(bool strictness);
+
     LexcCompiler &setAllowMultipleSublexiconDefinitions(bool value);
 
     LexcCompiler &setAlignStrings(bool value);
@@ -171,6 +174,7 @@ class LexcCompiler
     bool rename_flags_;
     bool treat_warnings_as_errors_;
     bool allow_multiple_sublexicon_definitions_;
+    bool strict_alphabets_;
     std::ostream *error_;
 #ifdef WINDOWS
     bool output_to_console_;

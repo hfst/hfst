@@ -104,7 +104,7 @@ LexcCompiler *lexc_ = 0;
 LexcCompiler::LexcCompiler()
     : quiet_(false), verbose_(false), align_strings_(false),
       with_flags_(false), minimize_flags_(false), rename_flags_(false),
-      treat_warnings_as_errors_(false),
+      treat_warnings_as_errors_(false), strict_alphabets_(false),
       allow_multiple_sublexicon_definitions_(false), error_(&std::cerr),
       format_(TROPICAL_OPENFST_TYPE), xre_(TROPICAL_OPENFST_TYPE),
       initialLexiconName_("Root"), totalEntries_(0), currentEntries_(0),
@@ -122,7 +122,7 @@ LexcCompiler::LexcCompiler()
 LexcCompiler::LexcCompiler(ImplementationType impl)
     : quiet_(false), verbose_(false), align_strings_(false),
       with_flags_(false), minimize_flags_(false), rename_flags_(false),
-      treat_warnings_as_errors_(false),
+      treat_warnings_as_errors_(false), strict_alphabets_(false),
       allow_multiple_sublexicon_definitions_(false), error_(&std::cerr),
       format_(impl), xre_(impl), initialLexiconName_("Root"), totalEntries_(0),
       currentEntries_(0),
@@ -148,7 +148,7 @@ LexcCompiler::LexcCompiler(ImplementationType impl, bool withFlags,
                            bool alignStrings)
     : quiet_(false), verbose_(false), align_strings_(alignStrings),
       with_flags_(withFlags), minimize_flags_(false), rename_flags_(false),
-      treat_warnings_as_errors_(false),
+      treat_warnings_as_errors_(false), strict_alphabets_(false),
       allow_multiple_sublexicon_definitions_(false), error_(&std::cerr),
       format_(impl), xre_(impl), initialLexiconName_("Root"), totalEntries_(0),
       currentEntries_(0),
@@ -360,6 +360,18 @@ LexcCompiler::setTreatWarningsAsErrors(bool value)
     return *this;
 }
 
+bool
+LexcCompiler::isStrictAlphabets()
+{
+    return strict_alphabets_;
+}
+
+void
+LexcCompiler::setStrictAlphabets(bool strictness)
+{
+    strict_alphabets_ = strictness;
+}
+
 void
 LexcCompiler::set_error_stream(std::ostream *os)
 {
@@ -477,9 +489,16 @@ LexcCompiler::unicodeCheck_(const string &data)
             {
                 char *errm
                     = (char *)malloc(sizeof(char) * (strlen(grapheme) + 128));
-                int rv = sprintf(errm, "adding %s into Multichar_Symbols",
-                                 grapheme);
-                if (u_strHasMoreChar32Than(&ICUdata[prev], next - prev, 1))
+                int rv = sprintf(errm, "adding %s into Alphabets", grapheme);
+                if (isStrictAlphabets())
+                {
+                    error_at_current_token(0, 0, errm);
+                    fprintf(stderr,
+                            "Failing due to strict Alphabets option\n");
+                    parseErrors_ = true;
+                }
+                else if (u_strHasMoreChar32Than(&ICUdata[prev], next - prev,
+                                                1))
                 {
                     warning_at_current_token(0, 0, errm);
                     fprintf(stderr,
