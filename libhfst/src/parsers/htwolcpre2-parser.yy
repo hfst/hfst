@@ -242,12 +242,13 @@ void htwolcpre2error(const char * text)
 {
   //std::cerr << text << std::endl;
   htwolcpre2_input_reader.error(text);
-  (void)text;
   HFST_THROW(HfstException);
 }
 
 void htwolcpre2_semantic_error(const char * text)
-{ htwolcpre2_input_reader.error(text); }
+{
+  htwolcpre2_input_reader.error(text); 
+}
 
 // non_alphabet_symbol_queue is used to store the grammar symbols which are
 // not located in the Alphabet section of the grammar.
@@ -262,7 +263,11 @@ HandyDeque<std::string> htwolcpre2_alphabet_symbol_queue;
 // grammar.
 HandyDeque<std::string> total_alphabet_symbol_queue;
 
-namespace hfst { namespace twolcpre2 {
+namespace hfst 
+{ 
+namespace twolcpre2 
+{
+
 const HandyDeque<std::string> & get_total_alphabet_symbol_queue()
 {
   return total_alphabet_symbol_queue;
@@ -272,9 +277,14 @@ const HandyDeque<std::string> & get_non_alphabet_symbol_queue()
 {
   return htwolcpre2_non_alphabet_symbol_queue;
 }
-}}
 
-namespace hfst { namespace twolcpre2 {
+}
+}
+
+namespace hfst 
+{ 
+namespace twolcpre2 
+{
 
   void reset_parser()
   {
@@ -322,7 +332,11 @@ void insert_alphabet_pairs(const HandyDeque<std::string> &symbol_queue,
 
 // Add all pairs in the grammar, which are missing from the Alphabet section,
 // into the Alphabet section.
-namespace hfst { namespace twolcpre2 {
+namespace hfst 
+{
+namespace twolcpre2
+{
+
 void complete_alphabet(void)
 {
   HandySet<SymbolPair> symbol_pair_set;
@@ -339,4 +353,6 @@ void complete_alphabet(void)
       total_alphabet_symbol_queue.push_back(it->second);
     }
 }
-}}
+
+}
+}

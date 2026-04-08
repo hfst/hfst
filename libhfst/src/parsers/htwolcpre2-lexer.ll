@@ -310,10 +310,13 @@ __HFST_TWOLC_DEFINITION_NAME=[^ ]+ {
 }
 [^ ]+ {
   if (alphabet_ended)
-    { htwolcpre2_non_alphabet_symbol_queue.push_back(htwolcpre2text); }
+    { 
+        htwolcpre2_non_alphabet_symbol_queue.push_back(htwolcpre2text); 
+    }
   else
     { htwolcpre2_alphabet_symbol_queue.push_back(htwolcpre2text); }
   return SYMBOL;
 }
 
 %%
+/* vim: set ft=lex: */
