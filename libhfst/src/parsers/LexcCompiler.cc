@@ -558,8 +558,8 @@ LexcCompiler::unicodeCheck_(const string &data)
                 if (isStrictAlphabets())
                 {
                     error_at_current_token(0, 0, errm);
-                    fprintf(stderr,
-                            "Failing due to strict Alphabets option\n");
+                    fprintf(stderr, "Failing due to strict Alphabets option "
+                                    "[-Wmissing-alphabets]\n");
                     parseErrors_ = true;
                 }
                 else if (u_strHasMoreChar32Than(&ICUdata[prev], next - prev,
@@ -693,6 +693,7 @@ LexcCompiler::addStringEntry(const string &data, const string &continuation,
     return *this;
 }
 
+// callback function to stuff so static and uses global singleton :-(
 void
 LexcCompiler::warn_about_one_sided_flags(
     const std::pair<std::string, std::string> &symbol_pair)
@@ -1019,7 +1020,7 @@ LexcCompiler::addXreEntry(const string &regexp, const string &continuation,
             char *errm
                 = (char *)malloc(sizeof(char) * (newAlpha.length() + 128));
             sprintf(errm,
-                    "implicit Multichar_Symbol %s in regex "
+                    "implicit Alphabet %s in regex "
                     "[-Wmissing-alphabets]",
                     newAlpha.c_str());
             if (newAlpha == "@_EPSILON_SYMBOL_@"
@@ -1132,14 +1133,14 @@ LexcCompiler::setCurrentLexiconName(const string &lexiconName)
         {
             error_at_current_token(0, 0,
                                    "Lexicon is defined more than once! "
-                                   "[-Wrepeat-lexicons]");
+                                   "[-Wrepeated-lexicons]");
             parseErrors_ = true;
         }
         else if (warn_repeated_lexicons_)
         {
             warning_at_current_token(0, 0,
                                      "Lexicon is defined more than once! "
-                                     "[-Wrepeat-lexicons]");
+                                     "[-Wrepeated-lexicons]");
         }
     }
 
@@ -1639,7 +1640,7 @@ LexcCompiler::printConnectedness(bool &warnings_generated)
             for (vector<string>::iterator s = contMinusLex.begin();
                  s != contMinusLexEnd; ++s)
             {
-                if (!quiet_)
+                if (!quiet_ && warn_missing_lexicons_)
                 {
                     if (should_colourise() && treat_warnings_as_errors_)
                     {
@@ -1650,7 +1651,7 @@ LexcCompiler::printConnectedness(bool &warnings_generated)
                         *err << COLOUR_YELLOW << "Warning: " << COLOUR_RESET;
                     }
                     *err << "Sublexicon is mentioned but not "
-                            "defined. ("
+                            "defined. [-Wunused-lexicons] ("
                          << *s << ") " << std::endl;
                     flush(err);
                 }
@@ -1660,7 +1661,7 @@ LexcCompiler::printConnectedness(bool &warnings_generated)
         if (lexMinusContEnd - lexMinusCont.begin() > 0)
         {
             warnings_generated = true;
-            if (!quiet_)
+            if (!quiet_ && warn_unused_lexicons_)
             {
                 if (should_colourise() && treat_warnings_as_errors_)
                 {
@@ -1670,7 +1671,8 @@ LexcCompiler::printConnectedness(bool &warnings_generated)
                 {
                     *err << COLOUR_YELLOW << "Warning: " << COLOUR_RESET;
                 }
-                *err << "Sublexicons defined but not used" << std::endl;
+                *err << "Sublexicons defined but not used [-Wunused-lexicons]"
+                     << std::endl;
                 for (vector<string>::iterator s = lexMinusCont.begin();
                      s != lexMinusContEnd; ++s)
                 {

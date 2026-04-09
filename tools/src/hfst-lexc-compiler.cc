@@ -251,6 +251,46 @@ parse_options(int argc, char **argv)
                 warn_extra_lexicons = true;
                 warn_repeated_lexicons = true;
             }
+            else if (strcmp(optarg, "one-sided-flags") == 0)
+            {
+                warn_one_sided_flags = true;
+            }
+            else if (strcmp(optarg, "no-one-sided-flags") == 0)
+            {
+                warn_one_sided_flags = false;
+            }
+            else if (strcmp(optarg, "unused-lexicons") == 0)
+            {
+                warn_unused_lexicons = true;
+            }
+            else if (strcmp(optarg, "no-unused-lexicons") == 0)
+            {
+                warn_unused_lexicons = false;
+            }
+            else if (strcmp(optarg, "repeated-lexicons") == 0)
+            {
+                warn_repeated_lexicons = true;
+            }
+            else if (strcmp(optarg, "no-repeated-lexicons") == 0)
+            {
+                warn_repeated_lexicons = false;
+            }
+            else if (strcmp(optarg, "missing-lexicons") == 0)
+            {
+                warn_missing_lexicons = true;
+            }
+            else if (strcmp(optarg, "no-missing-lexicons") == 0)
+            {
+                warn_missing_lexicons = false;
+            }
+            else if (strcmp(optarg, "missing-alphabets") == 0)
+            {
+                warn_missing_alphabets = true;
+            }
+            else if (strcmp(optarg, "no-missing-alphabets") == 0)
+            {
+                warn_missing_alphabets = false;
+            }
             else
             {
                 fprintf(stderr, "Unknown warning option %s\n", optarg);
@@ -432,6 +472,30 @@ main(int argc, char **argv)
     lexc.setWarning("-Wrepeated-lexicons", warn_repeated_lexicons);
     lexc.setWarning("-Wmissing-lexicons", warn_missing_lexicons);
     lexc.setWarning("-Wmissing-alphabets", warn_missing_alphabets);
+    if (!silent && verbose)
+    {
+        printf("Warning settings: ");
+        if (treat_warnings_as_errors)
+        {
+            printf(" -Werror (fail on all warnings)");
+        }
+        if (warn_one_sided_flags)
+        {
+            printf(" -Wone-sided-flags");
+        }
+        if (warn_repeated_lexicons)
+        {
+            printf(" -Wrepeated-lexicons");
+        }
+        if (warn_missing_lexicons)
+        {
+            printf(" -Wmissing-lexicons");
+        }
+        if (warn_missing_alphabets)
+        {
+            printf(" -Wmissing-alphabets");
+        }
+    }
     retval = lexc_streams(lexc, *outstream);
     for (unsigned int i = 0; i < lexccount; i++)
     {
