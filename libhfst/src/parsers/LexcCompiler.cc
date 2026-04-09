@@ -107,9 +107,9 @@ LexcCompiler::LexcCompiler()
       treat_warnings_as_errors_(false), warn_everything_(false),
       warn_missing_lexicons_(false), warn_unused_lexicons_(false),
       warn_repeated_lexicons_(false), warn_missing_alphabets_(false),
-      error_(&std::cerr), format_(TROPICAL_OPENFST_TYPE),
-      xre_(TROPICAL_OPENFST_TYPE), initialLexiconName_("Root"),
-      totalEntries_(0), currentEntries_(0),
+      warn_unnecessary_escapes_(false), error_(&std::cerr),
+      format_(TROPICAL_OPENFST_TYPE), xre_(TROPICAL_OPENFST_TYPE),
+      initialLexiconName_("Root"), totalEntries_(0), currentEntries_(0),
 #ifdef WINDOWS
       output_to_console_(false), winoss_(std::ostringstream()),
       redirected_stream_(NULL),
@@ -127,8 +127,9 @@ LexcCompiler::LexcCompiler(ImplementationType impl)
       treat_warnings_as_errors_(false), warn_everything_(false),
       warn_missing_lexicons_(false), warn_unused_lexicons_(false),
       warn_repeated_lexicons_(false), warn_missing_alphabets_(false),
-      error_(&std::cerr), format_(impl), xre_(impl),
-      initialLexiconName_("Root"), totalEntries_(0), currentEntries_(0),
+      warn_unnecessary_escapes_(false), error_(&std::cerr), format_(impl),
+      xre_(impl), initialLexiconName_("Root"), totalEntries_(0),
+      currentEntries_(0),
 #ifdef WINDOWS
       output_to_console_(false), winoss_(std::ostringstream()),
       redirected_stream_(NULL),
@@ -154,8 +155,9 @@ LexcCompiler::LexcCompiler(ImplementationType impl, bool withFlags,
       treat_warnings_as_errors_(false), warn_everything_(false),
       warn_missing_lexicons_(false), warn_unused_lexicons_(false),
       warn_repeated_lexicons_(false), warn_missing_alphabets_(false),
-      error_(&std::cerr), format_(impl), xre_(impl),
-      initialLexiconName_("Root"), totalEntries_(0), currentEntries_(0),
+      warn_unnecessary_escapes_(false), error_(&std::cerr), format_(impl),
+      xre_(impl), initialLexiconName_("Root"), totalEntries_(0),
+      currentEntries_(0),
 #ifdef WINDOWS
       output_to_console_(false), winoss_(std::ostringstream()),
       redirected_stream_(NULL),
@@ -401,6 +403,10 @@ LexcCompiler::isWarning(const char *warning)
     {
         return warn_missing_alphabets_;
     }
+    else if (strcmp(warning, "-Wunnecessary-escapes") == 0)
+    {
+        return warn_unnecessary_escapes_;
+    }
     else
     {
         fprintf(stderr, "unknown warning %s\n", warning);
@@ -430,6 +436,10 @@ LexcCompiler::setWarning(const char *warning, bool value)
     else if (strcmp(warning, "-Wmissing-alphabets") == 0)
     {
         warn_repeated_lexicons_ = value;
+    }
+    else if (strcmp(warning, "-Wunnecessary-escapes") == 0)
+    {
+        warn_unnecessary_escapes_ = value;
     }
     else
     {

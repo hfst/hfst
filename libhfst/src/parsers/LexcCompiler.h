@@ -183,6 +183,7 @@ class LexcCompiler
     bool warn_repeated_lexicons_;
     bool warn_missing_alphabets_;
     bool warn_one_sided_flags_;
+    bool warn_unnecessary_escapes_;
     std::ostream *error_;
 #ifdef WINDOWS
     bool output_to_console_;

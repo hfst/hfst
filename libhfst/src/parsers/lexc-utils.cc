@@ -312,18 +312,34 @@ strip_percents(const char *s, bool do_zeros)
                     && (*c != '%') && (*c != '"') && (*c != '@') && (*c != '!')
                     && (*c != '>') && (*c != '#'))
                 {
-                    char *errmsg = (char *)malloc(
-                        sizeof(char) * strlen(c)
-                        + strlen("Unnecessary escape %%") + 1);
+                    char *errmsg
+                        = (char *)malloc(sizeof(char) * strlen(c)
+                                         + strlen("Unnecessary escape %% "
+                                                  "[-Wunnecessary-escapes]")
+                                         + 1);
                     if (*c > 0)
                     {
-                        sprintf(errmsg, "Unnecessary escape %%%c", *c);
+                        sprintf(errmsg,
+                                "Unnecessary escape %%%c "
+                                "[-Wunnecessary-escapes]",
+                                *c);
                     }
                     else
                     {
-                        sprintf(errmsg, "Unnecessary escape %%%s", c);
+                        sprintf(errmsg,
+                                "Unnecessary escape %%%s "
+                                "[-Wunnecessary-escapes]",
+                                c);
                     }
-                    warning_at_current_token(0, 0, errmsg);
+                    if (lexc_->isWarning("-Wunnecessary-escapes")
+                        && lexc_->areWarningsTreatedAsErrors())
+                    {
+                        error_at_current_token(0, 0, errmsg);
+                    }
+                    if (lexc_->isWarning("-Wunnecessary-escapes"))
+                    {
+                        warning_at_current_token(0, 0, errmsg);
+                    }
                 }
                 *p = *c;
                 p++;
