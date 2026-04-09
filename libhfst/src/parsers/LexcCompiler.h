@@ -100,6 +100,8 @@ class LexcCompiler
 
     bool isStrictAlphabets();
     void setStrictAlphabets(bool strictness);
+    void setWarning(const char *warning, bool value);
+    bool isWarning(const char *warning);
 
     LexcCompiler &setAllowMultipleSublexiconDefinitions(bool value);
 
@@ -165,6 +167,8 @@ class LexcCompiler
 
   private:
     LexcCompiler &unicodeCheck_(const string &data);
+    static void warn_about_one_sided_flags(
+        const std::pair<std::string, std::string> &symbol_pair);
 
     bool quiet_;
     bool verbose_;
@@ -173,8 +177,12 @@ class LexcCompiler
     bool minimize_flags_;
     bool rename_flags_;
     bool treat_warnings_as_errors_;
-    bool allow_multiple_sublexicon_definitions_;
-    bool strict_alphabets_;
+    bool warn_everything_;
+    bool warn_missing_lexicons_;
+    bool warn_unused_lexicons_;
+    bool warn_repeated_lexicons_;
+    bool warn_missing_alphabets_;
+    bool warn_one_sided_flags_;
     std::ostream *error_;
 #ifdef WINDOWS
     bool output_to_console_;
