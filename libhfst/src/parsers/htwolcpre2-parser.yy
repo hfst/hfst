@@ -45,9 +45,9 @@
 
 namespace hfst { namespace twolcpre2 {
 
-  void set_input(std::istream & istr)
+  void set_input(std::istream & istr, const std::string& filename)
   {
-    htwolcpre2_input_reader.set_input(istr);
+    htwolcpre2_input_reader.set_input(istr, filename);
   }
   int parse()
   {

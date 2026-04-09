@@ -22,7 +22,7 @@ namespace hfst
 namespace twolcpre1
 {
 int parse();
-void set_input(std::istream &istr);
+void set_input(std::istream &istr, const std::string &filename);
 void set_output(std::ostream &ostr);
 void set_warning_stream(std::ostream &ostr);
 void set_error_stream(std::ostream &ostr);
@@ -34,7 +34,7 @@ namespace hfst
 namespace twolcpre2
 {
 int parse();
-void set_input(std::istream &istr);
+void set_input(std::istream &istr, const std::string &filename);
 void complete_alphabet(void);
 const HandyDeque<std::string> &get_total_alphabet_symbol_queue();
 const HandyDeque<std::string> &get_non_alphabet_symbol_queue();
@@ -48,7 +48,7 @@ namespace hfst
 namespace twolcpre3
 {
 int parse();
-void set_input(std::istream &istr);
+void set_input(std::istream &istr, const std::string &filename);
 void set_grammar(TwolCGrammar *grammar);
 TwolCGrammar *get_grammar();
 void set_silent(bool val);
@@ -88,16 +88,19 @@ main(int argc, char *argv[])
         command_line.print_usage();
         exit(0);
     }
+    std::string filename = "???";
     if (!command_line.be_quiet)
     {
         if (!command_line.has_input_file)
         {
             std::cerr << "Reading input from STDIN." << std::endl;
+            filename = "<stdin>";
         }
         else
         {
             std::cerr << "Reading input from " << command_line.input_file_name
                       << "." << std::endl;
+            filename = command_line.input_file_name;
         }
         if (!command_line.has_output_file)
         {
@@ -117,7 +120,7 @@ main(int argc, char *argv[])
     silent = command_line.be_quiet;
     verbose = command_line.be_verbose;
 
-    hfst::twolcpre1::set_input(command_line.set_input_file());
+    hfst::twolcpre1::set_input(command_line.set_input_file(), filename);
 
     // Test that the output file is okay.
     (void)command_line.set_output_file();
@@ -142,7 +145,7 @@ main(int argc, char *argv[])
     }
 
     std::istringstream iss1(oss1.str());
-    hfst::twolcpre2::set_input(iss1);
+    hfst::twolcpre2::set_input(iss1, filename);
     if (!silent)
     {
         hfst::twolcpre2::set_error_stream(std::cerr);
@@ -174,7 +177,7 @@ main(int argc, char *argv[])
     try
     {
         std::istringstream iss2(oss2.str());
-        hfst::twolcpre3::set_input(iss2);
+        hfst::twolcpre3::set_input(iss2, filename);
         if (!silent)
         {
             hfst::twolcpre3::set_error_stream(std::cerr);

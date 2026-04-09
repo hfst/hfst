@@ -50,6 +50,7 @@ class InputReader
 {
   private:
     std::istream *input_stream;
+    std::string filename;
     size_t &counter;
     char buffer[HTWOLCBUFFERSIZE];
     size_t buffer_size;
@@ -68,6 +69,9 @@ class InputReader
 
     //! @brief Set the input stream from which the twolc-grmmar is read.
     void set_input(std::istream &file);
+    //! @brief Set the input stream from which the twolc-grmmar is read and
+    //! filename for error messaging.
+    void set_input(std::istream &file, const std::string &filename);
 
     //! @brief Set the output stream where \a warn prints its input.
     void set_warning_stream(std::ostream &os);

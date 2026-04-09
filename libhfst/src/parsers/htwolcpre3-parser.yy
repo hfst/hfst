@@ -22,6 +22,7 @@
 #include <iostream>
 #include <fstream>
 #include <cstdlib>
+#include <unistd.h>
 #include "io_src/InputReader.h"
 #include "grammar_defs.h"
 #include "HfstTwolcDefs.h"
@@ -35,6 +36,29 @@
 #define YYDEBUG 1
 #endif
 
+#define COLOUR_BOLD "\033[01m"
+#define COLOUR_RED "\033[31m"
+#define COLOUR_GREEN "\033[32m"
+#define COLOUR_YELLOW "\033[33m"
+#define COLOUR_BLUE "\033[34m"
+#define COLOUR_MAGENTA "\033[35m"
+#define COLOUR_CYAN "\033[36m"
+#define COLOUR_RESET "\033[0m"
+
+static bool
+should_colourise()
+{
+    if (isatty(1))
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+    return false;
+}
+
   extern int htwolcpre3lineno;
   extern char * htwolcpre3text;
   extern int htwolcpre3lineno;
@@ -45,7 +69,7 @@
   void htwolcpre3message(const std::string &m);
   int htwolcpre3lex();
   int htwolcpre3parse();
-  
+
   bool silent_ = false;
   bool verbose_ = false;
 
@@ -77,7 +101,7 @@ namespace hfst {
 
 namespace hfst { namespace twolcpre3 {
 
-  void set_input(std::istream & istr)
+  void set_input(std::istream & istr, const std::string& filename)
   {
     htwolcpre3_input_reader.set_input(istr);
   }
@@ -543,8 +567,6 @@ void htwolcpre3warn(const char * warning)
 {
 #ifdef DEBUG_TWOLC_3_GRAMMAR
   std::cerr << warning << std::endl;
-#else
-  (void)warning;
 #endif
   htwolcpre3_input_reader.warn(warning);
 }
@@ -552,7 +574,6 @@ void htwolcpre3warn(const char * warning)
 // Print error messge and throw an exception
 void htwolcpre3error(const char * text)
 {
-  (void)text;
   htwolcpre3_input_reader.error(text);
   HFST_THROW(HfstException);
 }
@@ -561,7 +582,14 @@ void htwolcpre3error(const char * text)
 void htwolcpre3_semantic_error(const char * text)
 {
   htwolcpre3_input_reader.error(text);
-  std::cerr << std::endl << "Error: " << text << std::endl;
+  if (should_colourise()) 
+  {
+    std::cerr << COLOUR_RED << "Error: " << COLOUR_RESET << text << std::endl;
+  }
+  else
+  {
+    std::cerr << std::endl << "Error: " << text << std::endl;
+  }
   HFST_THROW(HfstException);
 }
 

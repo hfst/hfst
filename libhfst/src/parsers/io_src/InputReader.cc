@@ -15,10 +15,35 @@
 //   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "InputReader.h"
+#include <unistd.h>
+
+#define COLOUR_BOLD "\033[01m"
+#define COLOUR_RED "\033[31m"
+#define COLOUR_GREEN "\033[32m"
+#define COLOUR_YELLOW "\033[33m"
+#define COLOUR_BLUE "\033[34m"
+#define COLOUR_MAGENTA "\033[35m"
+#define COLOUR_CYAN "\033[36m"
+#define COLOUR_RESET "\033[0m"
+
+static bool
+should_colourise()
+{
+    if (isatty(1))
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+    return false;
+}
 
 InputReader::InputReader(size_t &counter)
-    : input_stream(NULL), counter(counter), buffer_size(HTWOLCBUFFERSIZE),
-      buffer_index(0), warning_stream(NULL), error_stream(NULL)
+    : input_stream(NULL), filename("<unknown>"), counter(counter),
+      buffer_size(HTWOLCBUFFERSIZE), buffer_index(0), warning_stream(NULL),
+      error_stream(NULL)
 {
 }
 
@@ -37,6 +62,15 @@ void
 InputReader::set_input(std::istream &file)
 {
     input_stream = &file;
+    filename = "<stdin>";
+    input_stream->getline(buffer, buffer_size);
+}
+
+void
+InputReader::set_input(std::istream &file, const std::string &filename)
+{
+    input_stream = &file;
+    this->filename = filename;
     input_stream->getline(buffer, buffer_size);
 }
 
@@ -58,8 +92,20 @@ InputReader::warn(const std::string &warning)
     if (warning_stream != NULL)
     {
         *warning_stream << std::endl;
-        *warning_stream << warning << std::endl;
-        *warning_stream << "on line " << counter << ":" << std::endl;
+        if (should_colourise())
+        {
+            *warning_stream << COLOUR_BOLD;
+        }
+        *warning_stream << filename << ":" << counter << ": ";
+        if (should_colourise())
+        {
+            *warning_stream << COLOUR_RESET << COLOUR_YELLOW;
+        }
+        *warning_stream << warning << ":" << std::endl;
+        if (should_colourise())
+        {
+            *warning_stream << COLOUR_RESET;
+        }
         *warning_stream << buffer << std::endl;
     }
 }
@@ -70,8 +116,20 @@ InputReader::error(const std::string &err)
     if (error_stream != NULL)
     {
         *error_stream << std::endl;
-        *error_stream << err << std::endl;
-        *error_stream << "on line " << counter << ":" << std::endl;
+        if (should_colourise())
+        {
+            *error_stream << COLOUR_BOLD;
+        }
+        *error_stream << filename << ":" << counter << ": ";
+        if (should_colourise())
+        {
+            *error_stream << COLOUR_RESET << COLOUR_RED;
+        }
+        *error_stream << err << ":" << std::endl;
+        if (should_colourise())
+        {
+            *error_stream << COLOUR_RESET;
+        }
         *error_stream << buffer << std::endl;
         *error_stream << "Aborted." << std::endl << std::endl;
     }
