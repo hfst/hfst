@@ -582,21 +582,25 @@ LexcCompiler::unicodeCheck_(const string &data)
                 char *errm
                     = (char *)malloc(sizeof(char) * (strlen(grapheme) + 128));
                 sprintf(errm, "adding %s into Alphabets", grapheme);
-                if (isStrictAlphabets())
+                if (u_strHasMoreChar32Than(&ICUdata[prev], next - prev, 1))
                 {
-                    error_at_current_token(0, 0, errm);
-                    fprintf(stderr, "Failing due to strict Alphabets option "
-                                    "[-Wmissing-alphabets]\n");
-                    parseErrors_ = true;
-                }
-                else if (u_strHasMoreChar32Than(&ICUdata[prev], next - prev,
-                                                1))
-                {
-                    warning_at_current_token(0, 0, errm);
+
+                    if (treat_warnings_as_errors_)
+                    {
+                        error_at_current_token(0, 0, errm);
+                        parseErrors_ = true;
+                    }
+                    else
+                    {
+                        warning_at_current_token(0, 0, errm);
+                    }
+                    fprintf(stderr, "(This unicode sequence was treated as "
+                                    "several characters in older versions of "
+                                    "hfst-lexc)\n");
                     fprintf(stderr,
                             "To prevent future problems, add %s (U+%04X "
                             "U+%04X...) to "
-                            "Multichar_Symbols section\n",
+                            "Multichar_Symbols section\n\n",
                             grapheme, ICUdata[prev], ICUdata[prev + 1]);
                     addAlphabet(grapheme);
                 }

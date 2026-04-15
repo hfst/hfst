@@ -531,6 +531,7 @@ main(int argc, char **argv)
         {
             printf(" -Wunnecessary-escapes");
         }
+        printf("\n");
     }
     if (split_characters)
     {
