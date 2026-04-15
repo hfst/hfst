@@ -24,14 +24,14 @@ else
     done
 fi
 
-LEXCTESTS="basic.cat-dog-bird.lexc basic.colons.lexc basic.comments.lexc 
-          basic.empty-sides.lexc basic.escapes.lexc 
-          basic.infostrings.lexc basic.initial-lexicon-empty.lexc 
+LEXCTESTS="basic.cat-dog-bird.lexc basic.colons.lexc basic.comments.lexc
+          basic.empty-sides.lexc basic.escapes.lexc
+          basic.infostrings.lexc basic.initial-lexicon-empty.lexc
           basic.multichar-symbols.lexc
           basic.no-Root.lexc
-          basic.multi-entry-lines.lexc basic.no-newline-at-end.lexc 
-          basic.punctuation.lexc basic.root-loop.lexc 
-          basic.spurious-lexicon.lexc basic.string-pairs.lexc 
+          basic.multi-entry-lines.lexc basic.no-newline-at-end.lexc
+          basic.punctuation.lexc basic.root-loop.lexc
+          basic.spurious-lexicon.lexc basic.string-pairs.lexc
           basic.two-lexicons.lexc basic.UTF-8.lexc basic.zeros-epsilons.lexc
           basic.lowercase-lexicon-end.lexc
           basic.multichar-escaped-zero.lexc
@@ -40,8 +40,8 @@ LEXCTESTS="basic.cat-dog-bird.lexc basic.colons.lexc basic.comments.lexc
           hfst.weights.lexc
           xre.more-than-twice.lexc
           xre.less-than-twice.lexc
-          xre.automatic-multichar-symbols.lexc xre.basic.lexc 
-          xre.definitions.lexc xre.months.lexc xre.nested-definitions.lexc 
+          xre.automatic-multichar-symbols.lexc xre.basic.lexc
+          xre.definitions.lexc xre.months.lexc xre.nested-definitions.lexc
           xre.numeric-star.lexc xre.sharp.lexc xre.quotations.lexc
           xre.star-plus-optional.lexc
           no-newline-before-sublexicon.lexc xre.any-variations.lexc"
@@ -53,9 +53,9 @@ LEXCTESTS="basic.cat-dog-bird.lexc basic.colons.lexc basic.comments.lexc
           # basic.multichar-symbol-with-0.lexc  - hfst works fine, foma wrong
           # basic.multichar-flag-with-zero.lexc - foma wrong
 
-          
-                    
-          
+
+
+
 LEXCXFAIL="xfail.bogus.lexc xfail.ISO-8859-1.lexc xfail.lexicon-semicolon.lexc xfail.sublexicon-defined-more-than-once.lexc"
 
 LEXCWARN="warn.sublexicon-mentioned-but-not-defined.lexc warn.one-sided-flags.lexc"
@@ -81,7 +81,7 @@ for i in .sfst .ofst .foma ; do
             FNAME=;
             FFLAG=;;
     esac
-    
+
     #echo "---- $FNAME --------"
 
     if ! ($FORMAT_TOOL --test-format $FNAME ) ; then
@@ -100,16 +100,16 @@ for i in .sfst .ofst .foma ; do
         rm test
     fi
     for f in $LEXCTESTS $LEXCWARN ; do
-        
+
         #check non-flag result
         if ! $TOOL $FFLAG $srcdir/$f -o test 2> /dev/null; then
             echo lexc $FFLAG $f failed with $?
             exit 1
         fi
-        
+
         RESULT="$f.result.prolog"
 
-     # create foma result     
+     # create foma result
      #   RESULT_GZ="$RESULT.gz"
      #       echo "read lexc $srcdir/$f \n
      #       save stack test.foma.gz \n
@@ -118,9 +118,9 @@ for i in .sfst .ofst .foma ; do
      #   gunzip test.foma.gz
      #   mv test.foma $RESULT
      #   rm tmp-foma-script
-     
+
         $TXT2FST --prolog $FFLAG -i $RESULT -o $RESULT.tmp
-           
+
          #echo "comparing file: $f"
          if ! $COMPARE_TOOL -e -s $RESULT.tmp test ; then
              echo "results differ: $f"
@@ -128,19 +128,19 @@ for i in .sfst .ofst .foma ; do
          fi
         rm $RESULT.tmp
         rm test
-        
-        
+
+
         # check flag results
         RESULT="$f.flag.result.prolog"
- 
+
 
         if ! $TOOL -F $FFLAG $srcdir/$f -o test 2> /dev/null; then
             echo hfst-lexc -F $FFLAG $f failed with $?
             exit 1
         fi
-        
+
         $TXT2FST --prolog $FFLAG -i $RESULT -o $RESULT.tmp
-           
+
          #echo "comparing flag file: $f"
          if ! $COMPARE_TOOL -e -s $RESULT.tmp test ; then
              echo "flag results differ: $f: "$RESULT".tmp != test"
@@ -148,16 +148,16 @@ for i in .sfst .ofst .foma ; do
          fi
         rm $RESULT.tmp
         rm test
-        
-        
-        
+
+
+
     done
 
     for f in $LEXCWARN ; do
-        if $TOOL --Werror $FFLAG $srcdir/$f -o test 2> /dev/null; then
+        if $TOOL -Wall -Werror $FFLAG $srcdir/$f -o test 2> /dev/null; then
             echo lexc $FFLAG $f passed although --Werror was used
             exit 1
-        fi        
+        fi
     done
 
     if ! $TOOL $FFLAG $srcdir/basic.multi-file-1.lexc \
