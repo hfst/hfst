@@ -448,7 +448,7 @@ LexcCompiler::setWarning(const char *warning, bool value)
     }
     else if (strcmp(warning, "-Wmissing-alphabets") == 0)
     {
-        warn_repeated_lexicons_ = value;
+        warn_missing_alphabets_ = value;
     }
     else if (strcmp(warning, "-Wunnecessary-escapes") == 0)
     {

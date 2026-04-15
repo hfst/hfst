@@ -67,7 +67,6 @@ static bool warn_everything = false;
 static bool warn_missing_lexicons = false;
 static bool warn_unused_lexicons = false;
 static bool warn_repeated_lexicons = false;
-static bool warn_extra_lexicons = false;
 static bool warn_one_sided_flags = false;
 static bool warn_missing_alphabets = false;
 static bool warn_unnecessary_escapes = false;
@@ -263,8 +262,11 @@ parse_options(int argc, char **argv)
                 warn_one_sided_flags = true;
                 warn_everything = true;
                 warn_missing_lexicons = true;
-                warn_extra_lexicons = true;
+                warn_unused_lexicons = true;
                 warn_repeated_lexicons = true;
+                warn_missing_alphabets = true;
+                warn_unnecessary_escapes = true;
+                warn_missing_alphabets = true;
             }
             else if (strcmp(optarg, "one-sided-flags") == 0)
             {
