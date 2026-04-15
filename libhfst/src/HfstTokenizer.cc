@@ -116,7 +116,8 @@ MultiCharSymbolTrie::find(const char *p) const
 HfstTokenizer::HfstTokenizer() {}
 
 int
-HfstTokenizer::get_next_symbol_size(const char *symbol) const
+HfstTokenizer::get_next_symbol_size(const char *symbol,
+                                    bool split_characters) const
 {
     if (!*symbol)
     {
@@ -130,67 +131,76 @@ HfstTokenizer::get_next_symbol_size(const char *symbol) const
     {
         return (int)(multi_char_symbol_end - symbol);
     }
-    UErrorCode status = U_ZERO_ERROR;
-    UChar *ICUdata = (UChar *)malloc(sizeof(UChar) * (strlen(symbol) + 1));
-    int32_t length = 0;
-    ICUdata = u_strFromUTF8(ICUdata, strlen(symbol) + 1, &length, symbol, -1,
-                            &status);
-    if (U_FAILURE(status))
+    /* take next combining grapheme cluster */
+    if (!split_characters)
     {
-        fprintf(stderr, "ICU error converting UTF-8 %s to UChars: %s\n",
-                symbol, u_errorName(status));
+        UErrorCode status = U_ZERO_ERROR;
+        UChar *ICUdata = (UChar *)malloc(sizeof(UChar) * (strlen(symbol) + 1));
+        int32_t length = 0;
+        ICUdata = u_strFromUTF8(ICUdata, strlen(symbol) + 1, &length, symbol,
+                                -1, &status);
+        if (U_FAILURE(status))
+        {
+            fprintf(stderr, "ICU error converting UTF-8 %s to UChars: %s\n",
+                    symbol, u_errorName(status));
+        }
+        status = U_ZERO_ERROR;
+        UBreakIterator *graphemes;
+        graphemes = ubrk_open(UBRK_CHARACTER, "C", NULL, -1, &status);
+        if (U_FAILURE(status))
+        {
+            fprintf(stderr,
+                    "ICU error trying to open grapheme segmenter: %s\n",
+                    u_errorName(status));
+        }
+        status = U_ZERO_ERROR;
+        ubrk_setText(graphemes, ICUdata, length, &status);
+        if (U_FAILURE(status))
+        {
+            fprintf(stderr, "ICU error trying to get graphemes from %s: %s\n",
+                    symbol, u_errorName(status));
+        }
+        status = U_ZERO_ERROR;
+        int32_t begin = ubrk_first(graphemes);
+        int32_t end = ubrk_next(graphemes);
+        if (begin == end)
+        {
+            return 0;
+        }
+        if (end == UBRK_DONE)
+        {
+            return 0;
+        }
+        char *grapheme = (char *)malloc(sizeof(char) * (end - begin) * 4 + 1);
+        grapheme = u_strToUTF8(grapheme, (end - begin) * 4 + 1, &length,
+                               &ICUdata[begin], end - begin, &status);
+        if (U_FAILURE(status))
+        {
+            fprintf(stderr, "ICU error getting UTF-8 from grpaheme: %s\n",
+                    u_errorName(status));
+        }
+        return (strlen(grapheme)); // strlen is number of bytes
     }
-    status = U_ZERO_ERROR;
-    UBreakIterator *graphemes;
-    graphemes = ubrk_open(UBRK_CHARACTER, "C", NULL, -1, &status);
-    if (U_FAILURE(status))
-    {
-        fprintf(stderr, "ICU error trying to open grapheme segmenter: %s\n",
-                u_errorName(status));
-    }
-    status = U_ZERO_ERROR;
-    ubrk_setText(graphemes, ICUdata, length, &status);
-    if (U_FAILURE(status))
-    {
-        fprintf(stderr, "ICU error trying to get graphemes from %s: %s\n",
-                symbol, u_errorName(status));
-    }
-    status = U_ZERO_ERROR;
-    int32_t begin = ubrk_first(graphemes);
-    int32_t end = ubrk_next(graphemes);
-    if (begin == end)
-    {
-        return 0;
-    }
-    if (end == UBRK_DONE)
-    {
-        return 0;
-    }
-    char *grapheme = (char *)malloc(sizeof(char) * (end - begin) * 4 + 1);
-    grapheme = u_strToUTF8(grapheme, (end - begin) * 4 + 1, &length,
-                           &ICUdata[begin], end - begin, &status);
-    if (U_FAILURE(status))
-    {
-        fprintf(stderr, "ICU error getting UTF-8 from grpaheme: %s\n",
-                u_errorName(status));
-    }
-    return (strlen(grapheme)); // strlen is number of bytes
-    /*if ((128 & *symbol) == 0)
-    {
-        return 1;
-    }
-    else if ((32 & *symbol) == 0)
-    {
-        return 2;
-    }
-    else if ((16 & *symbol) == 0)
-    {
-        return 3;
-    }
+    /* split_characters => take next UTF-8 only */
     else
     {
-        return 4;
-    }*/
+        if ((128 & *symbol) == 0)
+        {
+            return 1;
+        }
+        else if ((32 & *symbol) == 0)
+        {
+            return 2;
+        }
+        else if ((16 & *symbol) == 0)
+        {
+            return 3;
+        }
+        else
+        {
+            return 4;
+        }
+    }
 }
 
 bool
@@ -221,14 +231,15 @@ HfstTokenizer::add_skip_symbol(const std::string &symbol)
 }
 
 StringPairVector
-HfstTokenizer::tokenize(const std::string &input_string) const
+HfstTokenizer::tokenize(const std::string &input_string,
+                        bool split_characters) const
 {
     check_utf8_correctness(input_string);
     StringPairVector spv;
     const char *s = input_string.c_str();
     while (*s)
     {
-        int symbol_size = get_next_symbol_size(s);
+        int symbol_size = get_next_symbol_size(s, split_characters);
         std::string symbol(s, 0, symbol_size);
         s += symbol_size;
         if (is_skip_symbol(symbol))
@@ -241,7 +252,8 @@ HfstTokenizer::tokenize(const std::string &input_string) const
 }
 
 StringVector
-HfstTokenizer::tokenize_one_level(const std::string &input_string) const
+HfstTokenizer::tokenize_one_level(const std::string &input_string,
+                                  bool split_characters) const
 {
     check_utf8_correctness(input_string);
 
@@ -249,7 +261,7 @@ HfstTokenizer::tokenize_one_level(const std::string &input_string) const
     const char *s = input_string.c_str();
     while (*s)
     {
-        int symbol_size = get_next_symbol_size(s);
+        int symbol_size = get_next_symbol_size(s, split_characters);
         std::string symbol(s, 0, symbol_size);
         s += symbol_size;
         if (is_skip_symbol(symbol))
@@ -303,15 +315,18 @@ HfstTokenizer::tokenize_space_separated(const std::string &str)
 
 StringPairVector
 HfstTokenizer::tokenize(const std::string &input_string,
-                        const std::string &output_string) const
+                        const std::string &output_string,
+                        bool split_characters) const
 {
     check_utf8_correctness(input_string);
     check_utf8_correctness(output_string);
 
     StringPairVector spv;
 
-    StringPairVector input_spv = tokenize(input_string.c_str());
-    StringPairVector output_spv = tokenize(output_string.c_str());
+    StringPairVector input_spv
+        = tokenize(input_string.c_str(), split_characters);
+    StringPairVector output_spv
+        = tokenize(output_string.c_str(), split_characters);
 
     if (input_spv.size() < output_spv.size())
     {
@@ -347,6 +362,7 @@ HfstTokenizer::tokenize(const std::string &input_string,
 StringPairVector
 HfstTokenizer::tokenize(
     const std::string &input_string, const std::string &output_string,
+    bool split_characters,
     void (*warn_about_pair)(
         const std::pair<std::string, std::string> &symbol_pair)) const
 {
@@ -355,8 +371,10 @@ HfstTokenizer::tokenize(
 
     StringPairVector spv;
 
-    StringPairVector input_spv = tokenize(input_string.c_str());
-    StringPairVector output_spv = tokenize(output_string.c_str());
+    StringPairVector input_spv
+        = tokenize(input_string.c_str(), split_characters);
+    StringPairVector output_spv
+        = tokenize(output_string.c_str(), split_characters);
 
     if (input_spv.size() < output_spv.size())
     {
@@ -400,6 +418,7 @@ HfstTokenizer::tokenize(
 StringPairVector
 HfstTokenizer::tokenize_and_align_flag_diacritics(
     const std::string &input_string, const std::string &output_string,
+    bool split_characters,
     void (*warn_about_pair)(
         const std::pair<std::string, std::string> &symbol_pair)) const
 {
@@ -408,8 +427,10 @@ HfstTokenizer::tokenize_and_align_flag_diacritics(
 
     StringPairVector spv;
 
-    StringPairVector input_spv = tokenize(input_string.c_str());
-    StringPairVector output_spv = tokenize(output_string.c_str());
+    StringPairVector input_spv
+        = tokenize(input_string.c_str(), split_characters);
+    StringPairVector output_spv
+        = tokenize(output_string.c_str(), split_characters);
 
     assert(input_spv.size() > 0 && output_spv.size() > 0);
     StringPairVector::const_iterator it = input_spv.begin();

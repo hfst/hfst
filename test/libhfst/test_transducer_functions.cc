@@ -456,11 +456,12 @@ main(int argc, char **argv)
                 ssize_t limit = -1;
 
                 /* strings to lookup */
-                StringVector lookup_cat = tok.tokenize_one_level("cat");
-                StringVector lookup_dog = tok.tokenize_one_level("dog");
-                StringVector lookup_mouse = tok.tokenize_one_level("mouse");
+                StringVector lookup_cat = tok.tokenize_one_level("cat", false);
+                StringVector lookup_dog = tok.tokenize_one_level("dog", false);
+                StringVector lookup_mouse
+                    = tok.tokenize_one_level("mouse", false);
                 StringVector lookup_hippopotamus
-                    = tok.tokenize_one_level("hippopotamus");
+                    = tok.tokenize_one_level("hippopotamus", false);
 
                 /* where results of lookup are stored */
                 HfstOneLevelPaths *results_cat;
@@ -503,26 +504,28 @@ main(int argc, char **argv)
                 }
 
                 /* check that the results are correct */
-                StringVector expected_path = tok.tokenize_one_level("cats");
+                StringVector expected_path
+                    = tok.tokenize_one_level("cats", false);
 
                 assert(do_hfst_lookup_paths_contain(
                     *results_cat, expected_path, 3, test_weight));
 
-                expected_path = tok.tokenize_one_level("dogs");
+                expected_path = tok.tokenize_one_level("dogs", false);
                 assert(do_hfst_lookup_paths_contain(
                     *results_dog, expected_path, 2.5, test_weight));
 
-                expected_path = tok.tokenize_one_level("mice");
+                expected_path = tok.tokenize_one_level("mice", false);
                 assert(do_hfst_lookup_paths_contain(
                     *results_mouse, expected_path, 1.7, test_weight));
 
-                expected_path = tok.tokenize_one_level("hippopotami");
+                expected_path = tok.tokenize_one_level("hippopotami", false);
                 if (types[i] != LOG_OPENFST_TYPE)
                     assert(do_hfst_lookup_paths_contain(*results_hippopotamus,
                                                         expected_path, 1.2,
                                                         test_weight));
 
-                expected_path = tok.tokenize_one_level("hippopotamuses");
+                expected_path
+                    = tok.tokenize_one_level("hippopotamuses", false);
                 if (types[i] != LOG_OPENFST_TYPE)
                     assert(do_hfst_lookup_paths_contain(*results_hippopotamus,
                                                         expected_path, 1.4,

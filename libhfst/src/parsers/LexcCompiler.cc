@@ -104,12 +104,13 @@ LexcCompiler *lexc_ = 0;
 LexcCompiler::LexcCompiler()
     : quiet_(false), verbose_(false), align_strings_(false),
       with_flags_(false), minimize_flags_(false), rename_flags_(false),
-      treat_warnings_as_errors_(false), warn_everything_(false),
-      warn_missing_lexicons_(false), warn_unused_lexicons_(false),
-      warn_repeated_lexicons_(false), warn_missing_alphabets_(false),
-      warn_unnecessary_escapes_(false), error_(&std::cerr),
-      format_(TROPICAL_OPENFST_TYPE), xre_(TROPICAL_OPENFST_TYPE),
-      initialLexiconName_("Root"), totalEntries_(0), currentEntries_(0),
+      split_characters_(false), treat_warnings_as_errors_(false),
+      warn_everything_(false), warn_missing_lexicons_(false),
+      warn_unused_lexicons_(false), warn_repeated_lexicons_(false),
+      warn_missing_alphabets_(false), warn_unnecessary_escapes_(false),
+      error_(&std::cerr), format_(TROPICAL_OPENFST_TYPE),
+      xre_(TROPICAL_OPENFST_TYPE), initialLexiconName_("Root"),
+      totalEntries_(0), currentEntries_(0),
 #ifdef WINDOWS
       output_to_console_(false), winoss_(std::ostringstream()),
       redirected_stream_(NULL),
@@ -124,12 +125,12 @@ LexcCompiler::LexcCompiler()
 LexcCompiler::LexcCompiler(ImplementationType impl)
     : quiet_(false), verbose_(false), align_strings_(false),
       with_flags_(false), minimize_flags_(false), rename_flags_(false),
-      treat_warnings_as_errors_(false), warn_everything_(false),
-      warn_missing_lexicons_(false), warn_unused_lexicons_(false),
-      warn_repeated_lexicons_(false), warn_missing_alphabets_(false),
-      warn_unnecessary_escapes_(false), error_(&std::cerr), format_(impl),
-      xre_(impl), initialLexiconName_("Root"), totalEntries_(0),
-      currentEntries_(0),
+      split_characters_(false), treat_warnings_as_errors_(false),
+      warn_everything_(false), warn_missing_lexicons_(false),
+      warn_unused_lexicons_(false), warn_repeated_lexicons_(false),
+      warn_missing_alphabets_(false), warn_unnecessary_escapes_(false),
+      error_(&std::cerr), format_(impl), xre_(impl),
+      initialLexiconName_("Root"), totalEntries_(0), currentEntries_(0),
 #ifdef WINDOWS
       output_to_console_(false), winoss_(std::ostringstream()),
       redirected_stream_(NULL),
@@ -152,12 +153,12 @@ LexcCompiler::LexcCompiler(ImplementationType impl, bool withFlags,
                            bool alignStrings)
     : quiet_(false), verbose_(false), align_strings_(alignStrings),
       with_flags_(withFlags), minimize_flags_(false), rename_flags_(false),
-      treat_warnings_as_errors_(false), warn_everything_(false),
-      warn_missing_lexicons_(false), warn_unused_lexicons_(false),
-      warn_repeated_lexicons_(false), warn_missing_alphabets_(false),
-      warn_unnecessary_escapes_(false), error_(&std::cerr), format_(impl),
-      xre_(impl), initialLexiconName_("Root"), totalEntries_(0),
-      currentEntries_(0),
+      split_characters_(false), treat_warnings_as_errors_(false),
+      warn_everything_(false), warn_missing_lexicons_(false),
+      warn_unused_lexicons_(false), warn_repeated_lexicons_(false),
+      warn_missing_alphabets_(false), warn_unnecessary_escapes_(false),
+      error_(&std::cerr), format_(impl), xre_(impl),
+      initialLexiconName_("Root"), totalEntries_(0), currentEntries_(0),
 #ifdef WINDOWS
       output_to_console_(false), winoss_(std::ostringstream()),
       redirected_stream_(NULL),
@@ -381,6 +382,18 @@ LexcCompiler::setStrictAlphabets(bool strictness)
 }
 
 bool
+LexcCompiler::hasSplitCharacters()
+{
+    return split_characters_;
+}
+
+void
+LexcCompiler::setSplitCharacters(bool splitness)
+{
+    split_characters_ = splitness;
+}
+
+bool
 LexcCompiler::isWarning(const char *warning)
 {
     if (strcmp(warning, "-Wone-sided-flags") == 0)
@@ -517,6 +530,10 @@ LexcCompiler::addAlphabet(const string &alpha)
 LexcCompiler &
 LexcCompiler::unicodeCheck_(const string &data)
 {
+    if (split_characters_)
+    {
+        return *this;
+    }
     UErrorCode status = U_ZERO_ERROR;
     UChar *ICUdata = (UChar *)malloc(sizeof(UChar) * (data.length() + 1));
     int32_t length = 0;
@@ -642,8 +659,8 @@ LexcCompiler::addStringEntry(const string &data, const string &continuation,
     tokenizer_.add_multichar_symbol(joinerEnc);
     tokenizer_.add_multichar_symbol("0");      // epsilon
     tokenizer_.add_multichar_symbol("@ZERO@"); // literal zero
-    StringPairVector newVector(
-        tokenizer_.tokenize(joinerEnc + data + encodedCont));
+    StringPairVector newVector(tokenizer_.tokenize(
+        joinerEnc + data + encodedCont, split_characters_));
     // "0"      -> "@0@"  (single symbols)
     // "@ZERO@" -> "0"    (everywhere)
     std::string zero("@ZERO@");
@@ -812,7 +829,8 @@ LexcCompiler::addStringPairEntry(const string &upper, const string &lower,
 
     if (align_strings_)
     {
-        StringPairVector tmp = tokenizer_.tokenize(upper, lower);
+        StringPairVector tmp
+            = tokenizer_.tokenize(upper, lower, split_characters_);
         vector<string> one;
         vector<string> two;
 
@@ -843,15 +861,16 @@ LexcCompiler::addStringPairEntry(const string &upper, const string &lower,
 
         newVector = tokenizer_.tokenize(
             joinerEnc + as1 + encodedCont, joinerEnc + as2 + encodedCont,
+            split_characters_,
             &hfst::lexc::LexcCompiler::warn_about_one_sided_flags);
     }
     else
     {
         StringPairVector upperV;
-        upperV = tokenizer_.tokenize(upper);
+        upperV = tokenizer_.tokenize(upper, split_characters_);
 
         StringPairVector lowerV;
-        lowerV = tokenizer_.tokenize(lower);
+        lowerV = tokenizer_.tokenize(lower, split_characters_);
 
         int upperSize = hfst::size_t_to_int(upperV.size());
         int lowerSize = hfst::size_t_to_int(lowerV.size());
@@ -865,7 +884,7 @@ LexcCompiler::addStringPairEntry(const string &upper, const string &lower,
             }
             newVector = tokenizer_.tokenize(
                 joinerEnc + upper + encodedCont,
-                joinerEnc + lower + epsilons + encodedCont,
+                joinerEnc + lower + epsilons + encodedCont, split_characters_,
                 &hfst::lexc::LexcCompiler::warn_about_one_sided_flags);
         }
         else if (upperSize < lowerSize)
@@ -877,14 +896,14 @@ LexcCompiler::addStringPairEntry(const string &upper, const string &lower,
             }
             newVector = tokenizer_.tokenize(
                 joinerEnc + upper + epsilons + encodedCont,
-                joinerEnc + lower + encodedCont,
+                joinerEnc + lower + encodedCont, split_characters_,
                 &hfst::lexc::LexcCompiler::warn_about_one_sided_flags);
         }
         else
         {
             newVector = tokenizer_.tokenize(
                 joinerEnc + upper + encodedCont,
-                joinerEnc + lower + encodedCont,
+                joinerEnc + lower + encodedCont, split_characters_,
                 &hfst::lexc::LexcCompiler::warn_about_one_sided_flags);
         }
     }
@@ -1109,7 +1128,7 @@ LexcCompiler::addXreEntry(const string &regexp, const string &continuation,
     }
     tokenizer_.add_multichar_symbol(joinerEnc);
     StringPairVector newVector(
-        tokenizer_.tokenize(joinerEnc + regex_key + encodedCont));
+        tokenizer_.tokenize(joinerEnc + regex_key + encodedCont, false));
     stringsTrie_.disjunct(newVector, hfst::double_to_float(weight));
 
     return *this;
@@ -1297,7 +1316,7 @@ LexcCompiler::compileLexical()
 
             // joiners trie version (later compose)
             StringPairVector newVector(
-                tokenizer_.tokenize(joinerEnc + joinerEnc));
+                tokenizer_.tokenize(joinerEnc + joinerEnc, false));
             joinersTrie_.disjunct(newVector, 0);
 
             allJoinersToEpsilon.insert(
@@ -1354,7 +1373,7 @@ LexcCompiler::compileLexical()
 
             // joiners trie version (later compose)
             StringPairVector newVector(
-                tokenizer_.tokenize(flagPstring + flagRstring));
+                tokenizer_.tokenize(flagPstring + flagRstring, false));
             joinersTrie_.disjunct(newVector, 0);
         }
     }
@@ -1395,7 +1414,7 @@ LexcCompiler::compileLexical()
     {
         String alph = *it;
         tokenizer_.add_multichar_symbol(alph);
-        StringPairVector newVector(tokenizer_.tokenize(alph));
+        StringPairVector newVector(tokenizer_.tokenize(alph, false));
         joinersTrie_.disjunct(newVector, 0);
     }
 

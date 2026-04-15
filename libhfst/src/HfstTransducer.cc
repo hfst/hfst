@@ -777,7 +777,7 @@ HfstOneLevelPaths *
 HfstTransducer::lookup(const HfstTokenizer &tok, const std::string &s,
                        ssize_t limit, double time_cutoff) const
 {
-    StringVector sv = tok.tokenize_one_level(s);
+    StringVector sv = tok.tokenize_one_level(s, false);
     return lookup(sv, limit, time_cutoff);
 }
 
@@ -949,7 +949,8 @@ HfstTransducer::HfstTransducer(const std::string &utf8_str,
             "HfstTransducer(const std::string&, const HfstTokenizer&,"
             " ImplementationType)");
 
-    StringPairVector spv = multichar_symbol_tokenizer.tokenize(utf8_str);
+    StringPairVector spv
+        = multichar_symbol_tokenizer.tokenize(utf8_str, false);
     switch (type)
     {
 #if HAVE_SFST
@@ -1190,8 +1191,8 @@ HfstTransducer::HfstTransducer(const std::string &upper_utf8_str,
             "HfstTransducer(const std::string&, const std::string&, "
             "const HfstTokenizer&, ImplementationType");
 
-    StringPairVector spv
-        = multichar_symbol_tokenizer.tokenize(upper_utf8_str, lower_utf8_str);
+    StringPairVector spv = multichar_symbol_tokenizer.tokenize(
+        upper_utf8_str, lower_utf8_str, false);
 
     switch (type)
     {
@@ -6787,17 +6788,17 @@ main(int argc, char *argv[])
         a_paths_copy.convert(HFST_OLW_TYPE);
 
         HfstOneLevelPaths *results = a_paths_copy.lookup_fd(
-            flag_tokenizer.tokenize_one_level("ABCBA"));
+            flag_tokenizer.tokenize_one_level("ABCBA", false));
         assert(results->size() == 1);
         assert(hfst::symbols::remove_flags(results->begin()->second)
-               == flag_tokenizer.tokenize_one_level("ABCBA"));
+               == flag_tokenizer.tokenize_one_level("ABCBA", false));
         delete results;
 
         results = a_paths_copy.lookup_fd(
-            flag_tokenizer.tokenize_one_level("ABCAA"));
+            flag_tokenizer.tokenize_one_level("ABCAA", false));
         assert(results->size() == 1);
         assert(hfst::symbols::remove_flags(results->begin()->second)
-               == flag_tokenizer.tokenize_one_level("ABCAA"));
+               == flag_tokenizer.tokenize_one_level("ABCAA", false));
         delete results;
 
         HfstTransducer b_paths(any_symbol);
@@ -6816,17 +6817,17 @@ main(int argc, char *argv[])
         b_paths_copy.convert(HFST_OLW_TYPE);
 
         results = b_paths_copy.lookup_fd(
-            flag_tokenizer.tokenize_one_level("ABCBA"));
+            flag_tokenizer.tokenize_one_level("ABCBA", false));
         assert(results->size() == 1);
         assert(hfst::symbols::remove_flags(results->begin()->second)
-               == flag_tokenizer.tokenize_one_level("ABCBA"));
+               == flag_tokenizer.tokenize_one_level("ABCBA", false));
         delete results;
 
         results = b_paths_copy.lookup_fd(
-            flag_tokenizer.tokenize_one_level("ABCBB"));
+            flag_tokenizer.tokenize_one_level("ABCBB", false));
         assert(results->size() == 1);
         assert(hfst::symbols::remove_flags(results->begin()->second)
-               == flag_tokenizer.tokenize_one_level("ABCBB"));
+               == flag_tokenizer.tokenize_one_level("ABCBB", false));
         delete results;
 
         a_paths.harmonize_flag_diacritics(b_paths);
@@ -6835,25 +6836,25 @@ main(int argc, char *argv[])
 
         a_paths.convert(HFST_OLW_TYPE);
 
-        HfstOneLevelPaths *one_result
-            = a_paths.lookup_fd(flag_tokenizer.tokenize_one_level("ABCBA"));
+        HfstOneLevelPaths *one_result = a_paths.lookup_fd(
+            flag_tokenizer.tokenize_one_level("ABCBA", false));
         assert(one_result->size() == 1);
         assert(hfst::symbols::remove_flags(one_result->begin()->second)
-               == flag_tokenizer.tokenize_one_level("ABCBA"));
+               == flag_tokenizer.tokenize_one_level("ABCBA", false));
         delete one_result;
 
-        HfstOneLevelPaths *no_results
-            = a_paths.lookup_fd(flag_tokenizer.tokenize_one_level("ABCBB"));
+        HfstOneLevelPaths *no_results = a_paths.lookup_fd(
+            flag_tokenizer.tokenize_one_level("ABCBB", false));
         assert(no_results->size() == 0);
         delete no_results;
 
-        no_results
-            = a_paths.lookup_fd(flag_tokenizer.tokenize_one_level("ABCAA"));
+        no_results = a_paths.lookup_fd(
+            flag_tokenizer.tokenize_one_level("ABCAA", false));
         assert(no_results->size() == 0);
         delete no_results;
 
-        no_results
-            = a_paths.lookup_fd(flag_tokenizer.tokenize_one_level("ABCCC"));
+        no_results = a_paths.lookup_fd(
+            flag_tokenizer.tokenize_one_level("ABCCC", false));
         assert(no_results->size() == 0);
         delete no_results;
     }

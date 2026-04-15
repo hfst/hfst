@@ -214,7 +214,7 @@ read_model_form(std::istream &in, HfstTokenizer &tokenizer)
         = line.substr(std::string(MODEL_FORM_PREFIX).size());
 
     StringVector tokenized_model_form
-        = tokenizer.tokenize_one_level(model_form);
+        = tokenizer.tokenize_one_level(model_form, false);
     std::reverse(tokenized_model_form.begin(), tokenized_model_form.end());
 
     return tokenized_model_form;
@@ -245,7 +245,8 @@ StringVectorVector
 get_guesses(const std::string &word_form, HfstTransducer &guesser,
             size_t number_of_guesses, HfstTokenizer &tokenizer)
 {
-    StringVector tokenized_line = tokenizer.tokenize_one_level(word_form);
+    StringVector tokenized_line
+        = tokenizer.tokenize_one_level(word_form, false);
     std::reverse(tokenized_line.begin(), tokenized_line.end());
 
     HfstOneLevelPaths *paths = guesser.lookup_fd(tokenized_line);

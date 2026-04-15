@@ -163,8 +163,8 @@ typedef std::set<std::string> StringSet;
 bool
 is_special_symbol(const std::string &symbol)
 {
-    return symbol.size() > 2
-           and symbol[0] == '@' and * (symbol.rbegin()) == '@';
+    return symbol.size() > 2 and symbol[0] == '@'
+           and *(symbol.rbegin()) == '@';
 }
 
 std::string
@@ -247,7 +247,8 @@ check_multi_char_symbols(const HfstTransducer &lexicon,
                     continue;
                 }
 
-                if (tokenizer.tokenize_one_level(output_symbol).size() > 1)
+                if (tokenizer.tokenize_one_level(output_symbol, false).size()
+                    > 1)
                 {
                     return output_symbol;
                 }
@@ -346,7 +347,7 @@ compose_streams(HfstInputStream &firststream, HfstInputStream &secondstream)
     {
         HfstTransducer rule(secondstream);
         rule.convert(output_type);
-        const char *rulename = rule.get_name().c_str();
+        const char *rulename = strdup(rule.get_name().c_str());
         if (strlen(rulename) > 0)
         {
             verbose_printf("Reading and minimizing rule %s...\n", rulename);

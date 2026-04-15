@@ -75,6 +75,7 @@ static bool xerox_composition
     = true; // Compatibility with Xerox tools is the default
 static bool encode_weights = false;
 static bool enc = false;
+static bool split_characters = false;
 
 void
 print_usage()
@@ -110,6 +111,8 @@ print_usage()
         "is true).\n"
         "  -X, --xfst=VARIABLE     toggle xfst compatibility option "
         "VARIABLE.\n"
+        "   --split-characters     disable unicode character parsing for "
+        "multichars\n"
         "   -Wall                  enable all warnings:\n"
         "   -Wone-sided-flags      warn about one sided flag diacritics\n"
         "   -Wrepeated-lexicons    warn about repeat lexicon names\n"
@@ -169,10 +172,11 @@ parse_options(int argc, char **argv)
                 { "xfst", required_argument, 0, 'X' },
                 { "Werror", no_argument, 0, 'Q' },
                 { "Wstuff", required_argument, 0, 'W' },
+                { "split-characters", no_argument, 0, '9' },
                 { 0, 0, 0, 0 } };
         int option_index = 0;
         int c = getopt_long(argc, argv,
-                            HFST_GETOPT_COMMON_SHORT "Ef:o:AFMRx:X:QW:",
+                            HFST_GETOPT_COMMON_SHORT "Ef:o:AFMRx:X:QW:9",
                             long_options, &option_index);
         if (-1 == c)
         {
@@ -316,7 +320,9 @@ parse_options(int argc, char **argv)
                 return EXIT_FAILURE;
             }
             break;
-
+        case '9':
+            split_characters = true;
+            break;
 #include "inc/getopt-cases-error.h"
         }
     }
@@ -523,6 +529,12 @@ main(int argc, char **argv)
         {
             printf(" -Wunnecessary-escapes");
         }
+    }
+    if (split_characters)
+    {
+        fprintf(stderr,
+                "Warningn: Disabling unicode character tokenisation\n");
+        lexc.setSplitCharacters(true);
     }
     retval = lexc_streams(lexc, *outstream);
     for (unsigned int i = 0; i < lexccount; i++)

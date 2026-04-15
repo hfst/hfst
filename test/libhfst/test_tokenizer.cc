@@ -18,7 +18,7 @@ main(int argc, char **argv)
     HfstTokenizer tok1;
     tok1.add_multichar_symbol("foo");
     tok1.add_skip_symbol("bar");
-    StringPairVector tokenization1 = tok1.tokenize("fobaro");
+    StringPairVector tokenization1 = tok1.tokenize("fobaro", false);
     assert(tokenization1.size() == 3);
     assert(tokenization1[0] == StringPair("f", "f"));
     assert(tokenization1[1] == StringPair("o", "o"));
@@ -30,7 +30,7 @@ main(int argc, char **argv)
     HfstTokenizer tok2;
     tok2.add_multichar_symbol("foo");
     tok2.add_skip_symbol("fo");
-    StringPairVector tokenization2 = tok2.tokenize("foo");
+    StringPairVector tokenization2 = tok2.tokenize("foo", false);
     assert(tokenization2.size() == 1);
     assert(tokenization2[0] == StringPair("foo", "foo"));
 
@@ -40,7 +40,7 @@ main(int argc, char **argv)
     HfstTokenizer tok3;
     tok3.add_multichar_symbol("fo");
     tok3.add_skip_symbol("foo");
-    StringPairVector tokenization3 = tok3.tokenize("foo");
+    StringPairVector tokenization3 = tok3.tokenize("foo", false);
     assert(tokenization3.size() == 0);
 
     /* From two strings. */
@@ -50,7 +50,7 @@ main(int argc, char **argv)
     HfstTokenizer tok4;
     tok4.add_multichar_symbol("foo");
     tok4.add_skip_symbol("bar");
-    StringPairVector tokenization4 = tok4.tokenize("fooba", "foobar");
+    StringPairVector tokenization4 = tok4.tokenize("fooba", "foobar", false);
     assert(tokenization4.size() == 3);
     assert(tokenization4[0] == StringPair("foo", "foo"));
     assert(tokenization4[1] == StringPair("b", "@_EPSILON_SYMBOL_@"));

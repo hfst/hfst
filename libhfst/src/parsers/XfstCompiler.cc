@@ -742,7 +742,9 @@ XfstCompiler::lookup(char *line, HfstBasicTransducer *t)
     {
         tok.add_multichar_symbol(it);
     }
-    StringVector lookup_path = tok.tokenize_one_level(std::string(token));
+    // XXX: seting for splitc-chars ?
+    StringVector lookup_path
+        = tok.tokenize_one_level(std::string(token), false);
     free(token);
 
     size_t cutoff = -1;

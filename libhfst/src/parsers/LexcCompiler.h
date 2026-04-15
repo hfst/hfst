@@ -100,6 +100,8 @@ class LexcCompiler
 
     bool isStrictAlphabets();
     void setStrictAlphabets(bool strictness);
+    bool hasSplitCharacters();
+    void setSplitCharacters(bool splitness);
     void setWarning(const char *warning, bool value);
     bool isWarning(const char *warning);
 
@@ -176,6 +178,7 @@ class LexcCompiler
     bool with_flags_;
     bool minimize_flags_;
     bool rename_flags_;
+    bool split_characters_;
     bool treat_warnings_as_errors_;
     bool warn_everything_;
     bool warn_missing_lexicons_;

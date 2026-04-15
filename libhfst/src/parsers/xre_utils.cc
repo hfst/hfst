@@ -832,7 +832,7 @@ xfst_curly_label_to_transducer(const char *input, const char *output)
     if (strcmp(input, hfst::internal_unknown.c_str()) == 0)
     {
         HfstTokenizer tok;
-        StringVector sv = tok.tokenize_one_level(output);
+        StringVector sv = tok.tokenize_one_level(output, false);
         std::string first_token(sv.at(0));
         retval = new HfstTransducer(hfst::internal_unknown, first_token,
                                     hfst::xre::format);
@@ -853,7 +853,7 @@ xfst_curly_label_to_transducer(const char *input, const char *output)
     else if (strcmp(output, hfst::internal_unknown.c_str()) == 0)
     {
         HfstTokenizer tok;
-        StringVector sv = tok.tokenize_one_level(input);
+        StringVector sv = tok.tokenize_one_level(input, false);
         std::string first_token(sv.at(0));
         retval = new HfstTransducer(first_token, hfst::internal_unknown,
                                     hfst::xre::format);

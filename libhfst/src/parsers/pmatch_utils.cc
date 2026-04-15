@@ -1871,7 +1871,7 @@ read_text(std::string filename, ImplementationType type, bool spaced_text)
                 }
                 else
                 {
-                    StringPairVector spv = tok.tokenize(line);
+                    StringPairVector spv = tok.tokenize(line, false); // XXX
                     retval->disjunct(spv);
                 }
             }
@@ -3767,7 +3767,7 @@ PmatchBinaryOperation::evaluate(void)
             for (StringVector::iterator it = strings.begin();
                  it != strings.end(); ++it)
             {
-                StringPairVector spv = tok.tokenize(*it);
+                StringPairVector spv = tok.tokenize(*it, false); // XXX
                 retval->disjunct(spv);
             }
             retval->set_final_weights(hfst::double_to_float(weight), true);

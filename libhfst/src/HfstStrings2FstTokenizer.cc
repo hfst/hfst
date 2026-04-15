@@ -62,7 +62,7 @@ HfstStrings2FstTokenizer::add_multichar_symbol_head(
         throw EmptyMulticharSymbol();
     }
     StringVector tokenized_multichar_symbol
-        = tokenizer.tokenize_one_level(multichar_symbol);
+        = tokenizer.tokenize_one_level(multichar_symbol, false);
     std::string multichar_symbol_head(*tokenized_multichar_symbol.begin());
     tokenizer.add_multichar_symbol(std::string(BACKSLASH)
                                    + multichar_symbol_head);
@@ -79,7 +79,7 @@ HfstStrings2FstTokenizer::tokenize_pair_string(const std::string &str,
     }
     else
     {
-        tokenized_str = tokenizer.tokenize_one_level(str);
+        tokenized_str = tokenizer.tokenize_one_level(str, false);
         StringVector::iterator new_end = std::remove(
             tokenized_str.begin(), tokenized_str.end(), BACKSLASH);
         tokenized_str.erase(new_end, tokenized_str.end());
@@ -98,7 +98,7 @@ HfstStrings2FstTokenizer::tokenize_string_pair(const std::string &str,
     }
     else
     {
-        tokenized_str = tokenizer.tokenize_one_level(str);
+        tokenized_str = tokenizer.tokenize_one_level(str, false);
     }
     StringVector::iterator it;
     if ((it = find(tokenized_str.begin(), tokenized_str.end(), COL))
@@ -305,7 +305,7 @@ StringVector
 HfstStrings2FstTokenizer::split_at_spaces(const std::string &str)
 {
     std::string symbol;
-    StringVector sv = tokenizer.tokenize_one_level(str);
+    StringVector sv = tokenizer.tokenize_one_level(str, false);
     StringVector res;
     for (StringVector::const_iterator it = sv.begin(); it != sv.end(); ++it)
     {

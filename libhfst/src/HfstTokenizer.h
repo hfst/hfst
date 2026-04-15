@@ -87,7 +87,7 @@ class HfstTokenizer
   private:
     MultiCharSymbolTrie multi_char_symbols;
     StringSet skip_symbol_set;
-    int get_next_symbol_size(const char *symbol) const;
+    int get_next_symbol_size(const char *symbol, bool split_symbols) const;
     bool is_skip_symbol(String &s) const;
 
   public:
@@ -111,11 +111,12 @@ class HfstTokenizer
     HFSTDLL void add_multichar_symbol(const std::string &symbol);
 
     /** \brief Tokenize the string \a input_string. */
-    HFSTDLL StringPairVector tokenize(const std::string &input_string) const;
+    HFSTDLL StringPairVector tokenize(const std::string &input_string,
+                                      bool split_symbols) const;
 
     /** \brief Tokenize the string \a input_string. */
-    HFSTDLL StringVector
-    tokenize_one_level(const std::string &input_string) const;
+    HFSTDLL StringVector tokenize_one_level(const std::string &input_string,
+                                            bool split_symbols) const;
 
     HFSTDLL static StringPairVector
     tokenize_space_separated(const std::string &str);
@@ -127,15 +128,18 @@ class HfstTokenizer
         so that both tokenized strings have the same number of tokens.
      */
     HFSTDLL StringPairVector tokenize(const std::string &input_string,
-                                      const std::string &output_string) const;
+                                      const std::string &output_string,
+                                      bool split_symbols) const;
 
     HFSTDLL StringPairVector tokenize(
         const std::string &input_string, const std::string &output_string,
+        bool split_symbols,
         void (*warn_about_pair)(
             const std::pair<std::string, std::string> &symbol_pair)) const;
 
     HFSTDLL StringPairVector tokenize_and_align_flag_diacritics(
         const std::string &input_string, const std::string &output_string,
+        bool split_symbols,
         void (*warn_about_pair)(
             const std::pair<std::string, std::string> &symbol_pair)) const;
 

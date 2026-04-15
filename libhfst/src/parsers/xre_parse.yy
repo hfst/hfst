@@ -1094,7 +1094,7 @@ REGEXP12: LABEL { $$ = $1; }
                 while( fgets(line, 1000, f) != NULL )
                 {
                     hfst::xre::strip_newline(line);
-                    StringPairVector spv = tok.tokenize(line);
+                    StringPairVector spv = tok.tokenize(line, false); // XXX
                     tmp.disjunct(spv, 0);
                 }
                 fclose(f);
