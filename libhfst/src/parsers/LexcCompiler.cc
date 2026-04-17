@@ -1684,7 +1684,7 @@ LexcCompiler::printConnectedness(bool &warnings_generated)
                         *err << COLOUR_YELLOW << "Warning: " << COLOUR_RESET;
                     }
                     *err << "Sublexicon is mentioned but not "
-                            "defined. [-Wunused-lexicons] ("
+                            "defined. [-Wmissing-lexicons] ("
                          << *s << ") " << std::endl;
                     flush(err);
                 }
