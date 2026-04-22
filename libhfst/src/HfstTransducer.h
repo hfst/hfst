@@ -365,7 +365,7 @@ class HfstTransducer
     /* For internal use */
     static HfstTransducer &
     read_in_att_format(FILE *ifile, ImplementationType type,
-                       const std::string &epsilon_symbol);
+                       const std::string &epsilon_symbol, bool warn_negs);
 
   public:
     /* Whether the conversion requested can be done without losing
@@ -442,7 +442,7 @@ class HfstTransducer
     */
     static HfstTransducer &
     read_in_att_format(const std::string &filename, ImplementationType type,
-                       const std::string &epsilon_symbol);
+                       const std::string &epsilon_symbol, bool warn_negs);
 
   public:
     HFSTDLL static HfstTransducer *
@@ -670,10 +670,10 @@ represented in \a ifile.
 **/
     HFSTDLL HfstTransducer(FILE *ifile, ImplementationType type,
                            const std::string &epsilon_symbol,
-                           unsigned int &linecount);
+                           unsigned int &linecount, bool warn_negs);
 
     HFSTDLL HfstTransducer(FILE *ifile, ImplementationType type,
-                           const std::string &epsilon_symbol);
+                           const std::string &epsilon_symbol, bool warn_negs);
 
     /** \brief Destructor. **/
     HFSTDLL virtual ~HfstTransducer(void);

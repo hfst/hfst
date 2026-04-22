@@ -63,7 +63,7 @@ HfstBasicTransducer::HfstBasicTransducer(FILE *file)
     HfstBasicTransitions tr;
     state_vector.push_back(tr);
     unsigned int linecount = 0;
-    this->assign(read_in_att_format(file, "@0@", linecount));
+    this->assign(read_in_att_format(file, "@0@", linecount, false));
     name = std::string("");
 }
 
@@ -1719,7 +1719,8 @@ HfstBasicTransducer::write_in_att_format_number(FILE *file,
 
 bool
 HfstBasicTransducer::add_att_line(char *line,
-                                  const std::string &epsilon_symbol)
+                                  const std::string &epsilon_symbol,
+                                  bool warn_negs)
 {
     // scan one line that can have a maximum of five fields
     char a1[100];
@@ -1739,6 +1740,10 @@ HfstBasicTransducer::add_att_line(char *line,
     if (n == 5) // a transition line with weight
     {
         weight = hfst::double_to_float(atof(a5));
+    }
+    if ((weight < 0) && warn_negs)
+    {
+        fprintf(stderr, "Negative weight %f found :-(\n", weight);
     }
 
     if (n == 1 || n == 2) // a final state line
@@ -1791,7 +1796,8 @@ HfstBasicTransducer::add_att_line(char *line,
 HfstBasicTransducer
 HfstBasicTransducer::read_in_att_format(std::istream &is, FILE *file,
                                         std::string epsilon_symbol,
-                                        unsigned int &linecount)
+                                        unsigned int &linecount,
+                                        bool warn_negs)
 {
 
     if (file == NULL)
@@ -1817,12 +1823,16 @@ HfstBasicTransducer::read_in_att_format(std::istream &is, FILE *file,
         if (file == NULL)
         { /* we use streams */
             if (!is.getline(line, 255).eof())
+            {
                 break;
+            }
         }
         else
         { /* we use FILEs */
             if (NULL == fgets(line, 255, file))
+            {
                 break;
+            }
         }
 
         linecount++;
@@ -1847,7 +1857,7 @@ HfstBasicTransducer::read_in_att_format(std::istream &is, FILE *file,
         if (*line == '-') // transducer separator line is "--"
             return retval;
 
-        if (!retval.add_att_line(line, epsilon_symbol))
+        if (!retval.add_att_line(line, epsilon_symbol, warn_negs))
         {
             std::string message(line);
             HFST_THROW_MESSAGE(NotValidAttFormatException, message);
@@ -1865,10 +1875,11 @@ HfstBasicTransducer::read_in_att_format(std::istream &is, FILE *file,
 HfstBasicTransducer
 HfstBasicTransducer::read_in_att_format(std::istream &is,
                                         std::string epsilon_symbol,
-                                        unsigned int &linecount)
+                                        unsigned int &linecount,
+                                        bool warn_negs)
 {
     return read_in_att_format(is, NULL /* a dummy variable */, epsilon_symbol,
-                              linecount);
+                              linecount, warn_negs);
 }
 
 /** @brief Create an HfstTransitionGraph as defined
@@ -1879,10 +1890,11 @@ HfstBasicTransducer::read_in_att_format(std::istream &is,
     the line "--". */
 HfstBasicTransducer
 HfstBasicTransducer::read_in_att_format(FILE *file, std::string epsilon_symbol,
-                                        unsigned int &linecount)
+                                        unsigned int &linecount,
+                                        bool warn_negs)
 {
     return read_in_att_format(std::cin /* a dummy variable */, file,
-                              epsilon_symbol, linecount);
+                              epsilon_symbol, linecount, warn_negs);
 }
 
 // ----------------------------------------------

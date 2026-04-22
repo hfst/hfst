@@ -548,7 +548,8 @@ class HfstBasicTransducer
     HFSTDLL void write_in_att_format_number(FILE *file,
                                             bool write_weights = true);
 
-    bool add_att_line(char *line, const std::string &epsilon_symbol);
+    bool add_att_line(char *line, const std::string &epsilon_symbol,
+                      bool warn_negs);
 
     /* Create an HfstTransitionGraph as defined in AT&T format
        in istream \a is or FILE \a file. \a epsilon_symbol defines
@@ -561,7 +562,8 @@ class HfstBasicTransducer
        If \a file is not NULL, it is used and \a is is ignored. */
     HFSTDLL static HfstBasicTransducer
     read_in_att_format(std::istream &is, FILE *file,
-                       std::string epsilon_symbol, unsigned int &linecount);
+                       std::string epsilon_symbol, unsigned int &linecount,
+                       bool warn_negs);
 
     /** @brief Create an HfstTransitionGraph as defined in AT&T
         transducer format in istream \a is. \a epsilon_symbol
@@ -571,7 +573,7 @@ class HfstBasicTransducer
         the line "--". */
     HFSTDLL static HfstBasicTransducer
     read_in_att_format(std::istream &is, std::string epsilon_symbol,
-                       unsigned int &linecount);
+                       unsigned int &linecount, bool warn_negs);
 
     /** @brief Create an HfstTransitionGraph as defined
         in AT&T transducer format in FILE \a file.
@@ -581,7 +583,7 @@ class HfstBasicTransducer
         the line "--". */
     HFSTDLL static HfstBasicTransducer
     read_in_att_format(FILE *file, std::string epsilon_symbol,
-                       unsigned int &linecount);
+                       unsigned int &linecount, bool warn_negs);
 
     // ----------------------------------------------
     // -----       Substitution functions       -----

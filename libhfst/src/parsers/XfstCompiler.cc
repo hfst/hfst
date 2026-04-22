@@ -5403,7 +5403,7 @@ XfstCompiler::read_att_from_file(const char *filename)
             tmp = new HfstTransducer(infile, format_);
         else
             tmp = new HfstTransducer(infile, format_,
-                                     variables_["att-epsilon"]);
+                                     variables_["att-epsilon"], false); // XXX
         MAYBE_MINIMIZE(tmp);
         stack_.push(tmp);
         print_transducer_info();

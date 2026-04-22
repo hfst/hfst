@@ -59,10 +59,13 @@ static bool use_numbers = false; // not used
 // printname for epsilon
 static char *epsilonname = NULL;
 static const unsigned int EPSILON_KEY = 0;
-// check if there are epsilon cycles with a negative weight
-bool check_negative_epsilon_cycles = false;
 
-bool disjunct_multiple_transducers = false;
+// check if there are epsilon cycles with a negative weight
+static bool check_negative_epsilon_cycles = false;
+static bool warn_negative_weights = true;
+static bool warnings_are_errors = false;
+
+static bool disjunct_multiple_transducers = false;
 
 void
 print_usage()
@@ -125,6 +128,7 @@ parse_options(int argc, char **argv)
                 { "prolog", no_argument, 0, 'p' },
                 { "disjunct", no_argument, 0, 'j' },
                 { "check-negative-epsilon-cycles", no_argument, 0, 'C' },
+                { "Wstuff", required_argument, 0, 'W' },
                 { 0, 0, 0, 0 } };
         int option_index = 0;
         // add tool-specific options here
@@ -159,6 +163,31 @@ parse_options(int argc, char **argv)
             break;
         case 'C':
             check_negative_epsilon_cycles = true;
+            break;
+        case 'W':
+            if (strcmp(optarg, "error") == 0)
+            {
+                warnings_are_errors = true;
+            }
+            else if (strcmp(optarg, "no-error") == 0)
+            {
+                warnings_are_errors = false;
+            }
+            else if (strcmp(optarg, "negative-weights") == 0)
+            {
+                warn_negative_weights = true;
+            }
+            else if (strcmp(optarg, "no-negative-weights") == 0)
+            {
+                warn_negative_weights = false;
+            }
+            else
+            {
+                char *errm = (char *)malloc(sizeof(char) * 64);
+                sprintf(errm, "Unrecognised warning switch -W%s", optarg);
+                hfst_error(EXIT_FAILURE, 0, errm);
+                return EXIT_FAILURE;
+            }
             break;
 #include "inc/getopt-cases-error.h"
         }
@@ -281,7 +310,7 @@ process_stream(HfstOutputStream &outstream)
                     linecount);
                 return EXIT_FAILURE;
             }
-        }
+        } // read prolog
         else if (disjunct_multiple_transducers)
         {
             std::vector<HfstTransducer> transducers;
@@ -291,7 +320,8 @@ process_stream(HfstOutputStream &outstream)
                 while (!feof(inputfile))
                 {
                     HfstTransducer t(inputfile, output_format,
-                                     std::string(epsilonname));
+                                     std::string(epsilonname),
+                                     warn_negative_weights);
                     transducers.push_back(t);
                 }
             }
@@ -314,7 +344,8 @@ process_stream(HfstOutputStream &outstream)
             try
             {
                 HfstTransducer t(inputfile, output_format,
-                                 std::string(epsilonname), linecount);
+                                 std::string(epsilonname), linecount,
+                                 warn_negative_weights);
                 hfst_set_name(t, inputfilename, "text");
                 hfst_set_formula(t, inputfilename, "T");
                 if (check_negative_epsilon_cycles)

@@ -5687,7 +5687,8 @@ HfstTransducer::prolog_file_to_xfsm_transducer(const char *filename)
 }
 
 HfstTransducer::HfstTransducer(FILE *ifile, ImplementationType type,
-                               const std::string &epsilon_symbol)
+                               const std::string &epsilon_symbol,
+                               bool warn_negs)
     : type(type), anonymous(false), is_trie(false), name("")
 {
 #if HAVE_XFSM
@@ -5708,7 +5709,7 @@ HfstTransducer::HfstTransducer(FILE *ifile, ImplementationType type,
         /*hfst::implementations::HfstTransitionGraph<hfst::implementations::
           HfstTropicalTransducerTransitionData>::*/
         HfstBasicTransducer::read_in_att_format(
-            ifile, std::string(epsilon_symbol), linecount);
+            ifile, std::string(epsilon_symbol), linecount, warn_negs);
 
     // Conversion is done here.
     switch (type)
@@ -5768,7 +5769,7 @@ HfstTransducer::HfstTransducer(FILE *ifile, ImplementationType type,
 
 HfstTransducer::HfstTransducer(FILE *ifile, ImplementationType type,
                                const std::string &epsilon_symbol,
-                               unsigned int &linecount)
+                               unsigned int &linecount, bool warn_negs)
     : type(type), anonymous(false), is_trie(false), name("")
 {
 #if HAVE_XFSM
@@ -5788,7 +5789,7 @@ HfstTransducer::HfstTransducer(FILE *ifile, ImplementationType type,
         /*hfst::implementations::HfstTransitionGraph<hfst::implementations::
           HfstTropicalTransducerTransitionData>::*/
         HfstBasicTransducer::read_in_att_format(
-            ifile, std::string(epsilon_symbol), linecount);
+            ifile, std::string(epsilon_symbol), linecount, warn_negs);
 
     // Conversion is done here.
     switch (type)
@@ -5848,7 +5849,8 @@ HfstTransducer::HfstTransducer(FILE *ifile, ImplementationType type,
 HfstTransducer &
 HfstTransducer::read_in_att_format(const std::string &filename,
                                    ImplementationType type,
-                                   const std::string &epsilon_symbol)
+                                   const std::string &epsilon_symbol,
+                                   bool warn_negs)
 {
     if (type == XFSM_TYPE)
     {
@@ -5862,14 +5864,16 @@ HfstTransducer::read_in_att_format(const std::string &filename,
     }
     HfstTokenizer::check_utf8_correctness(epsilon_symbol);
 
-    HfstTransducer &retval = read_in_att_format(ifile, type, epsilon_symbol);
+    HfstTransducer &retval
+        = read_in_att_format(ifile, type, epsilon_symbol, warn_negs);
     fclose(ifile);
     return retval;
 }
 
 HfstTransducer &
 HfstTransducer::read_in_att_format(FILE *ifile, ImplementationType type,
-                                   const std::string &epsilon_symbol)
+                                   const std::string &epsilon_symbol,
+                                   bool warn_negs)
 {
     if (type == XFSM_TYPE)
     {
@@ -5888,7 +5892,7 @@ HfstTransducer::read_in_att_format(FILE *ifile, ImplementationType type,
         /*hfst::implementations::HfstTransitionGraph<hfst::implementations::
           HfstTropicalTransducerTransitionData>*/
         HfstBasicTransducer::read_in_att_format(
-            ifile, std::string(epsilon_symbol), foo);
+            ifile, std::string(epsilon_symbol), foo, warn_negs);
     HfstTransducer *retval = new HfstTransducer(net, type);
     (void)foo;
     return *retval;

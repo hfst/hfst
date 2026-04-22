@@ -62,7 +62,7 @@ int main(int argc, char **argv)
   try {
     unsigned int linecount = 0;
     HfstBasicTransducer foo
-      = HfstBasicTransducer::read_in_att_format(ifile, "@0@", linecount);
+      = HfstBasicTransducer::read_in_att_format(ifile, "@0@", linecount, false);
     (void)linecount;
     fclose(ifile);
     remove("test.att");
@@ -74,7 +74,7 @@ int main(int argc, char **argv)
     remove("test.att");
   }
 
-  
+
   verbose_print("HfstBasicTransducer: symbol handling");
 
   /* */
@@ -88,7 +88,7 @@ int main(int argc, char **argv)
   assert(alphabet.find("d") != alphabet.end());
   assert(alphabet.find("foo") == alphabet.end());
 
-  
+
   verbose_print("HfstBasicTransducer: substitute");
 
   HfstBasicTransducer tr;
@@ -103,7 +103,7 @@ int main(int argc, char **argv)
   tr.substitute(StringPair("a","b"), sps);
 
   verbose_print("HfstBasicTransducer: EmptyStringException");
-  
+
   try {
     HfstBasicTransducer empty_symbol;
     empty_symbol.add_transition(0, HfstBasicTransition(0, "", "", 0));
@@ -113,21 +113,21 @@ int main(int argc, char **argv)
     ;
   }
 
-  
+
   verbose_print("HfstBasicTransducer: unknown and indentity symbols");
 
   {
     // In the xerox formalism used here, "?" means the unknown symbol
     // and "?:?" the identity pair
-    
+
     HfstBasicTransducer tr1;
     tr1.add_state(1);
     tr1.set_final_weight(1, 0);
     tr1.add_transition
       (0, HfstBasicTransition(1, "@_UNKNOWN_SYMBOL_@", "foo", 0) );
-    
+
     // tr1 is now [ ?:foo ]
-    
+
     HfstBasicTransducer tr2;
     tr2.add_state(1);
     tr2.add_state(2);
@@ -137,16 +137,16 @@ int main(int argc, char **argv)
                   "@_IDENTITY_SYMBOL_@", 0) );
     tr2.add_transition
       (1, HfstBasicTransition(2, "bar", "bar", 0) );
-    
+
     // tr2 is now [ [ ?:? ] [ bar:bar ] ]
-    
+
     if (HfstTransducer::is_implementation_type_available(SFST_TYPE))
       {
 	ImplementationType type = SFST_TYPE;
 	HfstTransducer Tr1(tr1, type);
 	HfstTransducer Tr2(tr2, type);
 	Tr1.disjunct(Tr2);
-    
+
 	// Tr1 is now [ [ ?:foo | bar:foo ]  |  [[ ?:? | foo:foo ] [ bar:bar ]]]
       }
   }
@@ -175,11 +175,11 @@ int main(int argc, char **argv)
         std::cerr << source_state << "\t"
               << t.get_final_weight(source_state) << std::endl;
       }
-    
+
     source_state++;
       }
   }
 
-  
+
 }
 
