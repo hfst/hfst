@@ -109,6 +109,29 @@ hfst_error_at_line(int status, int errnum, const char *filename,
         exit(status);
     }
 }
+void
+hfst_warning_at_line(int status, int errnum, const char *filename,
+                   unsigned int linenum, const char *fmt, ...)
+{
+    maybe_print_colour(stderr, COLOUR_BOLD);
+    fprintf(stderr, "%s.%u: ", filename, linenum);
+    maybe_print_colour(stderr, COLOUR_YELLOW);
+    fprintf(stderr, "Warning: ");
+    maybe_print_colour(stderr, COLOUR_RESET);
+    va_list ap;
+    va_start(ap, fmt);
+    vfprintf(stderr, fmt, ap);
+    if (errnum != 0)
+    {
+        maybe_print_colour(stderr, COLOUR_MAGENTA);
+        fprintf(stderr, "%s", strerror(errnum));
+        maybe_print_colour(stderr, COLOUR_RESET);
+    }
+    if (status != 0)
+    {
+        exit(status);
+    }
+}
 #ifndef HAVE_ERROR
 void
 error(int status, int errnum, const char *fmt, ...)

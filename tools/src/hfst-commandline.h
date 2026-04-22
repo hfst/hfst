@@ -161,6 +161,12 @@ void hfst_error_at_line(int status, int errnum, const char *filename,
                         unsigned int linenum, const char *fmt, ...);
 
 /**
+ * @brief print potentially colourised warning message whne parsing a file.
+ */
+void hfst_warning_at_line(int status, int errnum, const char *filename,
+                          unsigned int linenum, const char *fmt, ...);
+
+/**
  *
  * @brief print standard usage message.
  *
