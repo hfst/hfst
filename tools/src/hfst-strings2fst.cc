@@ -81,6 +81,9 @@ static bool normalize_weights = false;
 static bool logarithmic_weights_e = false;
 static bool logarithmic_weights_10 = false;
 
+static bool warn_negative_weights = true;
+static bool warnings_are_errors = false;
+
 static hfst::ImplementationType output_format = hfst::UNSPECIFIED_TYPE;
 
 float
@@ -213,11 +216,12 @@ parse_options(int argc, char **argv)
                 { "has-spaces", no_argument, 0, 'S' },
                 { "multichar-symbols", required_argument, 0, 'm' },
                 { "format", required_argument, 0, 'f' },
+                { "Wstuff", required_argument, 0, 'W' },
                 { 0, 0, 0, 0 } };
         int option_index = 0;
         int c = getopt_long(argc, argv,
                             HFST_GETOPT_COMMON_SHORT HFST_GETOPT_UNARY_SHORT
-                            "je:234pSm:f:",
+                            "je:234pSm:f:W:",
                             long_options, &option_index);
         if (-1 == c)
         {
@@ -254,6 +258,31 @@ parse_options(int argc, char **argv)
             break;
         case 'f':
             output_format = hfst_parse_format_name(optarg);
+            break;
+        case 'W':
+            if (strcmp(optarg, "error") == 0)
+            {
+                warnings_are_errors = true;
+            }
+            else if (strcmp(optarg, "no-error") == 0)
+            {
+                warnings_are_errors = false;
+            }
+            else if (strcmp(optarg, "negative-weights") == 0)
+            {
+                warn_negative_weights = true;
+            }
+            else if (strcmp(optarg, "no-negative-weights") == 0)
+            {
+                warn_negative_weights = false;
+            }
+            else
+            {
+                char *errm = (char *)malloc(sizeof(char) * 64);
+                sprintf(errm, "unrecognised warning option -W%s", optarg);
+                hfst_error(EXIT_FAILURE, 0, errm);
+                return EXIT_FAILURE;
+            }
             break;
 #include "inc/getopt-cases-error.h"
         }
@@ -313,15 +342,34 @@ process_stream(HfstOutputStream &outstream)
             while (*p != '\0')
             {
                 if ((*p == '\n') || (*p == '\r'))
+                {
                     *p = '\0';
+                }
                 p++;
             }
 
             weight = hfst_strtoweight(tab + 1);
             weighted = true;
+            char *errm = (char *)malloc(sizeof(char) * 256);
+            sprintf(errm,
+                    "Found negative weight %f; negative weights are "
+                    "supported but iffy, if you really need them use "
+                    "-Wno-negative-weights",
+                    weight);
+            if ((weight < 0) && warn_negative_weights)
+            {
+                if (warnings_are_errors)
+                {
+                    hfst_error_at_line(EXIT_FAILURE, 0, inputfilename, line_n,
+                                       errm);
+                }
+                else
+                {
+                    hfst_warning_at_line(0, 0, inputfilename, line_n, errm);
+                }
+            }
         }
         *string_end = '\0';
-
         // Parse the string
         StringPairVector spv;
         try
@@ -352,7 +400,8 @@ process_stream(HfstOutputStream &outstream)
                 error_at_line(
                     EXIT_FAILURE, errno, inputfilename, line_n,
                     "String `%s' contains unescaped `:'-symbols,\n"
-                    "which are not pair separators. Use `\\:\' for literal "
+                    "which are not pair separators. Use `\\:\' for "
+                    "literal "
                     "`:'.\n"
                     "If you are compiling pair strings, use option -p.",
                     line);
