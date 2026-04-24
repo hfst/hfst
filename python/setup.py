@@ -5,7 +5,7 @@ setup for HFST-swig
 """
 
 import os
-from distutils.core import setup, Extension
+from setuptools import setup, Extension
 
 # handle hfst-specific commands
 import sys

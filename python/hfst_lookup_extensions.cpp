@@ -100,7 +100,7 @@ lookup_string(const hfst::HfstTransducer *tr, bool fd, const std::string &s,
     {
         tok.add_multichar_symbol(*it);
     }
-    StringVector sv = tok.tokenize_one_level(s);
+    StringVector sv = tok.tokenize_one_level(s, false);
     hfst::HfstTwoLevelPaths result;
     (void)time_cutoff;
     fsm.lookup(sv, result, NULL, NULL, limit, fd);

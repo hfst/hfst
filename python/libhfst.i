@@ -1126,11 +1126,11 @@ def __next__(self):
      HfstTokenizer();
      void add_skip_symbol(const std::string &symbol);
      void add_multichar_symbol(const std::string& symbol);
-     StringPairVector tokenize(const std::string &input_string) const;
-     StringVector tokenize_one_level(const std::string &input_string) const;
+     StringPairVector tokenize(const std::string &input_string, bool split_symbols) const;
+     StringVector tokenize_one_level(const std::string &input_string, bool split_symbols) const;
      static StringPairVector tokenize_space_separated(const std::string & str);
      StringPairVector tokenize(const std::string &input_string,
-                              const std::string &output_string) const;
+                              const std::string &output_string, bool split_symbols) const;
      static void check_utf8_correctness(const std::string &input_string);
   };
 
