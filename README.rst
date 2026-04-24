@@ -102,7 +102,7 @@ with configure switches and whether they are enabled or disabled by default.
 Compilation requirements
 ------------------------
 
-- OpenFST_ version 1.7.9 or older (newer does not work) (default)
+- OpenFST_, version 1.8.0 or newer (default)
 
   - to disable OpenFST support, configure switch ``--without-openfst`` may
     be used (however, this seriously limits the use of HFST)
