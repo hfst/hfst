@@ -5,6 +5,9 @@ For full listing of changes see ChangeLog.
 
 ## Noteworthy changes in 3.17.0
 
+* API breaks: HfstTokenizer, LexcCompiler, `read_in_att_format` functions
+  in HfstTransducer, HfstBasicTransducer, etc. to accommodate the following
+  unicode handling changes and error reporting:
 * Character "tokenisers" that used to operate on bytes or UTF-8 sequences will
   now operate on [graphemes](https://www.unicode.org/reports/tr29/tr29-23.html#Grapheme_Cluster_Boundaries),
   this means that by default arcs in FSAs are expected to match combining
@@ -21,7 +24,7 @@ For full listing of changes see ChangeLog.
 
 ## Noteworthy changes in 3.16.2
 
-* Support for >OpenFst-1.8.0
+* Support for `>OpenFst-1.8.0`
     * only functional change is removal of n-best paths search for log weight
       automata, it probably has errored out before but has slightly different
       error now (HfstException instead of openfst exit)
