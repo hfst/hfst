@@ -93,7 +93,8 @@ NewLexicalModel::to_lower_case(const std::string &word) const
 const WeightedStringVector &
 NewLexicalModel::get_first_word_analysis(const std::string &word)
 {
-    StringVector rev_tokenized_word = tokenizer.tokenize_one_level(word);
+    StringVector rev_tokenized_word
+        = tokenizer.tokenize_one_level(word, false);
     std::reverse(rev_tokenized_word.begin(), rev_tokenized_word.end());
 
     HfstOneLevelPaths *paths = lexical_model.lookup(rev_tokenized_word);
@@ -194,7 +195,8 @@ const WeightedStringVector &
 NewLexicalModel::cache_word_analyses(const std::string &word)
 {
     // Tokenize word and reverse the sequence of tokens.
-    StringVector rev_tokenized_word = tokenizer.tokenize_one_level(word);
+    StringVector rev_tokenized_word
+        = tokenizer.tokenize_one_level(word, false);
     std::reverse(rev_tokenized_word.begin(), rev_tokenized_word.end());
 
     bool upper_case = false;
@@ -325,7 +327,8 @@ NewLexicalModel::is_oov(const std::string &word)
 bool
 NewLexicalModel::is_lexicon_oov(const std::string &word)
 {
-    StringVector rev_tokenized_word = tokenizer.tokenize_one_level(word);
+    StringVector rev_tokenized_word
+        = tokenizer.tokenize_one_level(word, false);
     std::reverse(rev_tokenized_word.begin(), rev_tokenized_word.end());
 
     HfstOneLevelPaths *paths = lexical_model.lookup(rev_tokenized_word);

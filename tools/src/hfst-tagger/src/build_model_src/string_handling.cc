@@ -88,7 +88,7 @@ tokenize_lexicon_line(const std::string &line, HfstTokenizer &tokenizer)
         weight_str = split_line[2];
     }
 
-    StringVector entry = tokenizer.tokenize_one_level(word);
+    StringVector entry = tokenizer.tokenize_one_level(word, false);
 
     if (tag != "")
     {
