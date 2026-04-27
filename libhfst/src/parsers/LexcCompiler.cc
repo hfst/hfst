@@ -1080,7 +1080,6 @@ LexcCompiler::addXreEntry(const string &regexp, const string &continuation,
             else if (warn_missing_alphabets_)
             {
                 warning_at_current_token(0, 0, errm);
-                parseErrors_ = true;
             }
             addAlphabet(newAlpha);
             free(errm);
