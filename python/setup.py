@@ -50,7 +50,7 @@ libhfst_module = Extension('_libhfst',
                            )
 
 setup(name = 'libhfst_swig',
-      version = '3.16.0_beta',
+      version = '3.17.0_beta',
       author = 'HFST team',
       author_email = 'hfst-bugs@helsinki.fi',
       url = 'http://hfst.github.io/',

@@ -19,7 +19,7 @@
 HFST_NAME=hfst
 HFST_MAJOR=3
 HFST_MINOR=17
-HFST_EXTENSION=0
+HFST_EXTENSION=1
 HFST_VERSION=$HFST_MAJOR.$HFST_MINOR.$HFST_EXTENSION
 
 ### When the VERSION is INCREMENTED, REMEMBER to increment the LONGVERSION too.
@@ -28,10 +28,10 @@ HFST_VERSION=$HFST_MAJOR.$HFST_MINOR.$HFST_EXTENSION
 LIBHFST_NAME=hfst
 LIBHFST_MAJOR=3
 LIBHFST_MINOR=17
-LIBHFST_EXTENSION=0
+LIBHFST_EXTENSION=1
 LIBHFST_VERSION=$LIBHFST_MAJOR.$LIBHFST_MINOR.$LIBHFST_EXTENSION
 
-AC_INIT([hfst],[3.17.0],[https://github.com/hfst/hfst/issues],[hfst])
+AC_INIT([hfst],[3.17.1],[https://github.com/hfst/hfst/issues],[hfst])
 AC_CONFIG_AUX_DIR([build-aux])
 AM_INIT_AUTOMAKE([-Wall std-options foreign check-news subdir-objects])
 
@@ -44,8 +44,8 @@ AC_CONFIG_HEADERS([config.h libhfst/src/hfst.hpp])
 
 AC_SUBST([LIBHFST_MAJOR],     [3])
 AC_SUBST([LIBHFST_MINOR],     [17])
-AC_SUBST([LIBHFST_EXTENSION], [0])
-AC_SUBST([LIBHFST_VERSION],   [3.17.0])
+AC_SUBST([LIBHFST_EXTENSION], [1])
+AC_SUBST([LIBHFST_VERSION],   [3.17.1])
 AC_SUBST([LIBHFST_NAME],      [hfst])
 
 # long version = version vector cast in base 10000, for automatic comparisons

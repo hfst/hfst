@@ -3,6 +3,11 @@
 This file contains all noteworthy changes in HFST development between releases.
 For full listing of changes see ChangeLog.
 
+## Noteworthy changes in 3.17.1
+
+* fixes logic error where `hfst-lexc` would treat a warning about implicit
+  alphabet in XREs as a critical error even when `-Werror` is not asked
+
 ## Noteworthy changes in 3.17.0
 
 * API breaks: HfstTokenizer, LexcCompiler, `read_in_att_format` functions
