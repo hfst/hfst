@@ -3734,30 +3734,43 @@ fix_list_overlap(HfstTransducer *lhs, HfstTransducer *rhs,
         bool first = true;
         for (auto &s : retained_chars)
         {
-            if (!first)
-            {
-                newlist += "_";
-            }
             newlist += s;
+            newlist += "_";
             first = false;
         }
         newlist += "@";
-        std::cerr
-            << "Lst() contains symbols that overlap with literal definitions. "
-               "This can cause exponential slowdown at runtime.\n";
-        std::cerr << "Removing the following symbols from Lst() (line "
-                  << (lst_line >= 0 ? std::to_string(lst_line) : "?") << "):";
+        StringPair newsym = StringPair(newlist, newlist);
+        StringPairSet newpairs;
+        newpairs.insert(newsym);
+        if (verbose)
+        {
+            std::cerr << "Automatically optimising:"
+                      << "Removing the following symbols from Lst() (line "
+                      << (lst_line >= 0 ? std::to_string(lst_line) : "?")
+                      << "):";
+        }
         for (size_t i = 0; i < overlapping_chars.size(); ++i)
         {
-            std::cerr << "\n  '" << overlapping_chars[i] << "' (";
-            print_unicode_codepoints(std::cerr, overlapping_chars[i]);
-            std::cerr << ")";
+            StringPair overlapsym
+                = StringPair(overlapping_chars[i], overlapping_chars[i]);
+            if (verbose)
+            {
+                std::cerr << "\n  '" << overlapping_chars[i] << "' (";
+                print_unicode_codepoints(std::cerr, overlapping_chars[i]);
+                std::cerr << ")";
+            }
+            newpairs.insert(overlapsym);
         }
-        std::cerr << std::endl;
-        std::cerr << "Replacing all " << sym
-                  << " instances with new list: " << newlist << std::endl;
-        lhs->substitute(sym, newlist);
-        rhs->substitute(sym, newlist);
+        if (verbose)
+        {
+            std::cerr << std::endl;
+            std::cerr << "Replacing all " << sym
+                      << " instances with new list: " << newlist
+                      << " and abovementioned disjunction " << std::endl;
+        }
+        StringPair oldsym = StringPair(sym, sym);
+        lhs->substitute(oldsym, newpairs);
+        rhs->substitute(oldsym, newpairs);
     }
 }
 
