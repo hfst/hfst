@@ -5,6 +5,6 @@ includedir=@includedir@
 
 Name: hfst_c
 Description: C bindings for HFST library
-Version: 0.0.0
+Version: @LIBHFST_VERSION@
 Libs: -L${libdir} -l@LIBHFST_NAME@ -lhfst_c
 Cflags: -I${includedir}/hfst/

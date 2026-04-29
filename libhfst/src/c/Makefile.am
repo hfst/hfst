@@ -13,7 +13,7 @@ AM_CPPFLAGS=-I${top_srcdir}/libhfst/src
 
 libhfst_c_la_SOURCES=libhfst_c.cpp
 
-libhfst_c_la_LDFLAGS=-no-undefined -version-info 0:0:0
+libhfst_c_la_LDFLAGS=-no-undefined -version-info 56:1:0
 libhfst_c_la_LIBADD = $(top_builddir)/libhfst/src/libhfst.la $(ICU_LIBS)
 
 hfstincludedir=$(includedir)/hfst
