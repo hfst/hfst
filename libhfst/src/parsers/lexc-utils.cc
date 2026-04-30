@@ -335,8 +335,9 @@ strip_percents(const char *s, bool do_zeros)
                         && lexc_->areWarningsTreatedAsErrors())
                     {
                         error_at_current_token(0, 0, errmsg);
+                        lexc_->parseErrors_ = true;
                     }
-                    if (lexc_->isWarning("-Wunnecessary-escapes"))
+                    else if (lexc_->isWarning("-Wunnecessary-escapes"))
                     {
                         warning_at_current_token(0, 0, errmsg);
                     }

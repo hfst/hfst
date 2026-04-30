@@ -167,6 +167,7 @@ class LexcCompiler
     //! Works like xerox lexc, for compatibility.
     const LexcCompiler &printConnectedness(bool &warnings_printed);
 
+    bool parseErrors_;
   private:
     LexcCompiler &unicodeCheck_(const string &data);
     static void warn_about_one_sided_flags(
@@ -208,7 +209,6 @@ class LexcCompiler
     std::string currentLexiconName_;
     size_t totalEntries_;
     size_t currentEntries_;
-    bool parseErrors_;
 };
 
 // ugh, the global
