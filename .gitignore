@@ -19,18 +19,21 @@
 *.la
 *.a
 *.lib
+*.wasm
+libhfst.js
 
 # trs and log files
 *.trs
 *.log
 
 # Transducer files
-*.hfst
-*.ofst
-*.sfst
 *.foma
-*.hfstol
 *.genhfstol
+*.hfst
+*.hfstol
+*.ofst
+*.pmhfst
+*.sfst
 
 # Generated Python files and folders
 /python/__pycache__/
@@ -70,8 +73,9 @@
 
 # Back-up files
 *~
+.DS_Store
 
-# Generated files in installation check 
+# Generated files in installation check
 /check_installation/check-hfst-*.tar.gz
 /check_installation/python_tests/
 /check_installation/tool_tests/
@@ -211,7 +215,6 @@ stamp-h?
 /libhfst/src/parsers/htwolcpre3-lexer.cc
 /libhfst/src/parsers/htwolcpre3-parser.cc
 /libhfst/src/parsers/htwolcpre3-parser.hh
-										
 
 # Otherwise generated code
 /libhfst/hfst.pc
@@ -318,3 +321,8 @@ hfst-eliminate-flags
 
 /.ccls-cache
 /compile_commands.json
+
+/wasm-deps/
+
+# IDE config files
+.vscode

@@ -1,0 +1,162 @@
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>HFST WASM Tokenization Demo</title>
+</head>
+
+<body>
+  <h1>HFST Text Tokenization</h1>
+
+  <div>
+    <h2>1. Upload an HFST transducer file</h2>
+    <input type="file" id="transducerFile">
+    <div id="uploadStatus">Please upload a transducer file</div>
+  </div>
+
+  <div>
+    <h2>2. Tokenize words</h2>
+    <textarea id="textInput" placeholder="Enter text to tokenize" rows="10" cols="80"></textarea>
+    <br>
+    <select id="outputFormatSelect">
+      <option value="0">tokenize</option>
+      <option value="1">space_separated</option>
+      <option value="2">xerox</option>
+      <option value="3">cg</option>
+      <option value="4">finnpos</option>
+      <option value="5" selected>giellacg</option>
+      <option value="6">conllu</option>
+      <option value="7">visl</option>
+      <option value="8">jsonl</option>
+    </select>
+    <button id="tokenizeButton" disabled>Tokenize</button>
+    <div id="results"></div>
+  </div>
+
+  <!-- Load the libhfst.js file -->
+  <script src="../libhfst.js"></script>
+  <script>
+    let hfst;
+    let currentTransducer = null;
+    let tokenizeSettings;
+
+    // Initialize HFST module
+    async function initHfst() {
+      console.log('Loading HFST module...');
+      await createHfstModule().then((hfstModule) => {
+        hfst = hfstModule;
+        console.log('    ...HFST module loaded as `hfst`');
+
+        // Initialize tokenize settings once
+        tokenizeSettings = hfst.getDefaultTokenizeSettings();
+
+        // Enable file upload once HFST is ready
+        document.getElementById('transducerFile').addEventListener('change', handleFileUpload);
+      });
+    }
+
+    // Handle transducer file upload
+    async function handleFileUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const uploadStatus = document.getElementById('uploadStatus');
+      uploadStatus.textContent = `Loading ${file.name}...`;
+
+      try {
+        // Read the file
+        const arrayBuffer = await file.arrayBuffer();
+        const uint8Array = new Uint8Array(arrayBuffer);
+
+        // Write to Emscripten's filesystem
+        const filename = `/${file.name}`;
+        hfst.FS.writeFile(filename, uint8Array);
+
+        // Load the transducer
+        currentTransducer = hfst.createPmatchContainer(filename);
+
+        uploadStatus.textContent = `Transducer "${file.name}" loaded successfully!`;
+        document.getElementById('tokenizeButton').disabled = false;
+      } catch (error) {
+        console.error('Error loading transducer:', error);
+        uploadStatus.textContent = `Error: ${error.message}`;
+        document.getElementById('tokenizeButton').disabled = true;
+      }
+    }
+
+    // Initialize the application
+    initHfst();
+
+    document.getElementById('tokenizeButton').addEventListener('click', tokenize);
+
+    function tokenize() {
+      let text = document.getElementById('textInput').value.trim();
+      const outputFormat = parseInt(document.getElementById('outputFormatSelect').value);
+      const resultsDiv = document.getElementById('results');
+
+      // Reset settings to defaults before applying format-specific ones
+      tokenizeSettings.print_all = false;
+      tokenizeSettings.print_weights = false;
+      tokenizeSettings.dedupe = false;
+      tokenizeSettings.hack_uncompose = false;
+      // Note: beam, time_cutoff, max_weight_classes are not exposed in the UI, keep defaults
+
+      // Apply settings based on output format, mirroring hfst-tokenize CLI
+      tokenizeSettings.output_format = outputFormat;
+      switch (outputFormat) {
+        case hfst.OutputFormat.giellacg.value: // 5
+        case hfst.OutputFormat.jsonl.value: // 8 - Apply same settings as giellacg
+          tokenizeSettings.print_all = true;
+          tokenizeSettings.print_weights = true;
+          tokenizeSettings.dedupe = true;
+          tokenizeSettings.hack_uncompose = true;
+          // hfst-tokenize also sets max_weight_classes = 2 if not set, but we don't expose it here
+          break;
+        case hfst.OutputFormat.visl.value: // 7
+          tokenizeSettings.print_all = true;
+          tokenizeSettings.print_weights = false; // Explicitly false as per -L flag
+          tokenizeSettings.dedupe = true;
+          break;
+        // Other formats use the defaults set above
+        case hfst.OutputFormat.tokenize.value: // 0
+        case hfst.OutputFormat.space_separated.value: // 1
+        case hfst.OutputFormat.xerox.value: // 2
+        case hfst.OutputFormat.cg.value: // 3
+        case hfst.OutputFormat.finnpos.value: // 4
+        case hfst.OutputFormat.conllu.value: // 6
+        default:
+          // Defaults are already set
+          break;
+      }
+
+      console.log('Tokenize settings:', tokenizeSettings);
+
+      if (!text) {
+        resultsDiv.textContent = 'No text provided. Enter text above.';
+        return;
+      }
+
+      if (!currentTransducer) {
+        resultsDiv.textContent = 'Please upload a transducer file first';
+        return;
+      }
+
+      try {
+        const results = currentTransducer.tokenize(text, tokenizeSettings);
+        console.log(`results (${text}):`, results);
+
+        // Clear previous results and add new structure
+        resultsDiv.innerHTML = '<p>Tokenization results:</p>'; // Keep the paragraph
+        const preElement = document.createElement('pre');
+        preElement.textContent = results;
+        resultsDiv.appendChild(preElement);
+
+      } catch (error) {
+        console.error('Error in lookup:', error);
+        resultsDiv.textContent = 'Error analyzing word: ' + error.message;
+      }
+    }
+  </script>
+</body>
+
+</html>

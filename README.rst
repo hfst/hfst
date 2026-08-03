@@ -81,6 +81,22 @@ to install. Parts of the spell-checking tools are in *Finnish* overlay. If you
 use Paludis, just try to ``cave resolve sci-misc/hfst`` to get the current
 instructions.
 
+Compilation for WebAssembly (wasm)
+----------------------------------
+
+HFST can be compiled for WebAssembly using Emscripten. The script in
+`libhfst/wasm-demo/build-wasm.sh` shows an example of how to do this. It is
+intended to be run in a clean Ubuntu container (e.g. it installs dependencies
+that you may not want to install on your system). Once completed, you should
+have `libhfst.wasm` and `libhfst.js` in the `libhfst/` directory. You can run
+an http server in the `libhfst/` directory using::
+
+  python3 -m http.server
+
+...and then open `http://localhost:8000/wasm-demo/lookup.html` or
+`http://localhost:8000/wasm-demo/tokenize.html` in your browser to see example
+implementations.
+
 Installation for other systems
 ------------------------------
 

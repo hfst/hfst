@@ -27,6 +27,11 @@ HFST_SRCS=HfstApply.cc HfstInputStream.cc HfstTransducer.cc HfstOutputStream.cc\
 		  HfstPrintDot.cc HfstPrintPCKimmo.cc hfst-string-conversions.cc \
 		  string-utils.cc
 
+# Add Emscripten binding files to sources if we're building with Emscripten
+if EMSCRIPTEN
+HFST_SRCS += EmscriptenBindings.cc
+endif
+
 # libtool takes over
 libhfst_la_SOURCES = $(HFST_SRCS)
 libhfst_la_LIBADD = implementations/libhfstimplementations.la \
