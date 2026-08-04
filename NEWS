@@ -3,6 +3,13 @@
 This file contains all noteworthy changes in HFST development between releases.
 For full listing of changes see ChangeLog.
 
+## Noteworthy changes in 3.17.2
+
+* added jsonl format for tokeniser and some wasm support
+* fixed Lst optimisations in hfst-tokenise
+* fixed versioning of plain C bindings
+* fixed one more `-Werror` related issue
+
 ## Noteworthy changes in 3.17.1
 
 * fixes logic error where `hfst-lexc` would treat a warning about implicit
