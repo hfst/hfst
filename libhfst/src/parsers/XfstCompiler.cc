@@ -495,96 +495,12 @@ extract_output_paths(const HfstTwoLevelPaths &paths)
 bool
 is_valid_string(const StringVector &sv)
 {
-    // map features to latest values
-    std::map<std::string, std::string> values;
-    // and keep track of features whose values have been negatively set
-    std::set<std::string> negative_values;
-
-    for (const auto &it : sv)
+    FlagDiacriticTable fdt;
+    for (const auto &s : sv)
     {
-        if (FdOperation::is_diacritic(it))
-        {
-            std::string opstr = FdOperation::get_operator(it);
-            assert(opstr.size() == 1);
-            char op = opstr[0];
-            std::string feat = FdOperation::get_feature(it);
-            std::string val = FdOperation::get_value(it);
-
-            bool is_negatively_set
-                = (negative_values.find(feat) != negative_values.end());
-
-            switch (op)
-            {
-            case 'P': // positive set
-                values[feat] = val;
-                break;
-            case 'N': // negative set
-                values[feat] = val;
-                negative_values.insert(feat);
-                break;
-            case 'R': // require
-                if (val.empty())
-                { // empty require
-                    if (values[feat].empty())
-                    {
-                        return false;
-                    }
-                    else
-                    { // nonempty require
-                        if (is_negatively_set || (values[feat] != val))
-                        {
-                            return false;
-                        }
-                    }
-                }
-                break;
-            case 'D': // disallow
-                if (val.empty())
-                { // empty disallow
-                    if (values[feat] != "")
-                    {
-                        return false;
-                    }
-                }
-                else
-                {
-                    if ((!is_negatively_set) && (values[feat] == val))
-                    { // nonempty disallow
-                        return false;
-                    }
-                }
-                break;
-            case 'C': // clear
-                values[feat] = "";
-                break;
-            case 'U':                       // unification
-                if (values[feat].empty() || /* if the feature is unset or */
-                    ((!is_negatively_set) && (values[feat] == val))
-                    || /* the feature is at
-                        this value already
-                        or */
-                    (is_negatively_set
-                     && (values[feat] != val)) /* the feature is
-                                                  negatively set
-                                                  to something
-                                                  else */
-                )
-                {
-                    values[feat] = val;
-                }
-                else
-                {
-                    return false;
-                }
-                break;
-            default:
-                std::cerr << "ERROR: line: " << __LINE__ << std::endl;
-                throw; // for the compiler's peace of mind
-                break;
-            }
-        }
+        fdt.insert_symbol(s);
     }
-    return true;
+    return fdt.is_valid_string(sv);
 }
 
 bool
@@ -602,8 +518,9 @@ XfstCompiler::print_paths(const hfst::HfstOneLevelPaths &paths,
         bool something_printed = false; // to control printing spaces
 
         if ((variables_["obey-flags"] == "ON") && !is_valid_string(path))
+        {
             continue;
-
+        }
         retval = true; // something will be printed
 
         // go through the path
