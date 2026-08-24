@@ -3,6 +3,11 @@
 This file contains all noteworthy changes in HFST development between releases.
 For full listing of changes see ChangeLog.
 
+## Noteworthy changes in 3.17.3
+
+* determinisation optimisations from bbqsrc
+* fixed flag diacritic handling hfst-xfst #349
+
 ## Noteworthy changes in 3.17.2
 
 * added jsonl format for tokeniser and some wasm support
