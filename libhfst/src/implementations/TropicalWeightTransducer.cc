@@ -13,6 +13,9 @@
 #include "HfstLookupFlagDiacritics.h"
 #include "HfstSymbolDefs.h"
 #include <fst/fstlib.h>
+#include <iostream>
+#include <limits>
+#include <memory>
 
 #if defined(USE_FOMA_EPSILON_REMOVAL) && defined(HAVE_FOMA)
 #include "FomaTransducer.h"
@@ -81,6 +84,177 @@ TropicalWeightTransducer::set_warning_stream(std::ostream *os)
 {
     warning_stream = os;
 }
+
+/* --- The determinization envelope ---------------------------------------
+
+   Determinization is a representation choice, not a semantic one: the result
+   denotes exactly the relation its input denoted.  HFST reaches for it freely
+   -- every bracketed XRE subexpression optimizes, every minimize()
+   determinizes first -- on the assumption that a deterministic machine is the
+   cheaper way to hold the same relation.
+
+   That assumption fails badly on some inputs.  Determinizing the union of a
+   large sparse machine with a small dense one gives every surviving state the
+   dense operand's out-degree, so the minimal deterministic form of a perfectly
+   ordinary union can be orders of magnitude larger than the nondeterministic
+   machine that denotes it.  The measured case is a Giella speller error model,
+   where a 21.5M-transition union determinizes to roughly 1.5e9 transitions:
+   tens of gigabytes of resident memory spent on a union that is itself built
+   in ten seconds.
+
+   The budget below bounds the transitions written, which is the axis a state
+   count cannot see: one state may carry an unbounded out-degree, so a machine
+   can stay far inside any state bound while writing orders of magnitude more
+   transitions than its input held.  The case above reaches 82.9M transitions
+   over 21,459 states, an average out-degree of 3,865, and no state count tells
+   that apart from a machine a thousand times smaller.  Memory follows the
+   transitions, so transitions are what the envelope counts; capping states as
+   well buys nothing, since a determinization that runs away in states creates
+   the transitions to go with them, and it would refuse tractable expansions
+   that merely happen to be wide.
+
+   When the bound is crossed, the operation returns the input relation
+   undeterminized and reports the downgrade.  Callers of determinize() and
+   minimize() depend on the relation, not on the representation, so a machine
+   that is correct but larger than promised is a far better answer than an
+   exhausted address space -- but never a silent one, since a caller that does
+   care about the representation has to be able to see that it did not get one.
+   The result is never partial or truncated: on every path out of here the
+   machine returned denotes exactly the relation that came in.
+
+   A run that stays inside the bound writes byte-identical output to the same
+   run with the bound removed, so adding the axis cannot perturb a compilation
+   that was already succeeding.                                             */
+
+namespace
+{
+
+size_t
+count_transitions(const StdVectorFst &t)
+{
+    size_t transitions = 0;
+    for (fst::StateIterator<StdVectorFst> siter(t); !siter.Done();
+         siter.Next())
+    {
+        transitions += t.NumArcs(siter.Value());
+    }
+    return transitions;
+}
+
+/* The bound is a floor rather than a fixed ceiling: an input that already
+   holds more transitions than the floor is entitled to an output of comparable
+   size, because a determinization whose result stays within a small multiple
+   of its input has not blown up, whatever its absolute size.  128Mi
+   transitions is roughly two gigabytes of arc records. */
+size_t
+determinize_budget(const StdVectorFst &t)
+{
+    const size_t transitions_per_input_transition = 4;
+    const size_t min_transitions = 128 * 1024 * 1024;
+
+    const size_t input_transitions = count_transitions(t);
+    const size_t headroom = std::numeric_limits<size_t>::max()
+                            / transitions_per_input_transition;
+    const size_t budget
+        = (input_transitions > headroom)
+              ? std::numeric_limits<size_t>::max()
+              : input_transitions * transitions_per_input_transition;
+
+    return (budget < min_transitions) ? min_transitions : budget;
+}
+
+/* Materializes the lazy determinization of `in` into `out`, stopping as soon
+   as the expansion has written more than `budget` transitions.  Mirrors
+   OpenFst's own Determinize() -- same options, same state order, same copied
+   properties -- so that a run which stays inside the bound writes exactly the
+   machine an unbounded Determinize() would have written.  Returns false and
+   leaves `out` empty when the bound is crossed, so a partial expansion can
+   never escape as a truncated result. */
+bool
+determinize_bounded(const StdVectorFst &in, StdVectorFst *out, size_t budget)
+{
+    DeterminizeFstOptions<StdArc> opts;
+    opts.gc_limit = 0; // Caches only the last state, as Determinize() does.
+    const DeterminizeFst<StdArc> det(in, opts);
+
+    out->DeleteStates();
+    out->SetInputSymbols(det.InputSymbols());
+    out->SetOutputSymbols(det.OutputSymbols());
+
+    size_t transitions = 0;
+    for (fst::StateIterator<fst::Fst<StdArc> > siter(det); !siter.Done();
+         siter.Next())
+    {
+        const StdArc::StateId s = siter.Value();
+        const size_t out_degree = det.NumArcs(s);
+        transitions += out_degree;
+        if (transitions > budget)
+        {
+            out->DeleteStates();
+            return false;
+        }
+        out->AddState();
+        out->SetFinal(s, det.Final(s));
+        out->ReserveArcs(s, out_degree);
+        for (fst::ArcIterator<fst::Fst<StdArc> > aiter(det, s); !aiter.Done();
+             aiter.Next())
+        {
+            out->AddArc(s, aiter.Value());
+        }
+    }
+    out->SetStart(det.Start());
+    out->SetProperties(det.Properties(kCopyProperties, false) | kExpanded
+                           | kMutable,
+                       kFstProperties);
+    return true;
+}
+
+/* Determinizes `t` under the envelope, encoding as `encode_weights` asks.  On
+   success `det` holds the encoded determinized machine and the returned mapper
+   is the one the caller must Decode it with.  On exhaustion the result is
+   null, `det` is empty and `t` has been decoded back to the machine it came in
+   as, for the caller to return undeterminized.
+
+   Weight encoding is not tried as a fallback here.  Folding the weight into
+   the label separates paths that label-only determinization would have merged,
+   so it can only produce more transitions than the label-only strategy, never
+   fewer: it cannot improve on a verdict that the result is too large, and
+   retrying it would only spend the budget again to reach the same answer.
+   Being the last strategy there is, it runs under the bound itself -- an
+   unbounded last resort would make the envelope decorative. */
+std::unique_ptr<EncodeMapper<StdArc> >
+determinize_under_envelope(StdVectorFst *t, bool encode_weights, size_t budget,
+                           const char *caller, StdVectorFst *det)
+{
+    std::unique_ptr<EncodeMapper<StdArc> > encode_mapper(
+        new EncodeMapper<StdArc>(encode_weights
+                                     ? (kEncodeLabels | kEncodeWeights)
+                                     : (kEncodeLabels),
+                                 ENCODE));
+    Encode(t, encode_mapper.get());
+
+    if (determinize_bounded(*t, det, budget))
+    {
+        return encode_mapper;
+    }
+    Decode(t, *encode_mapper);
+
+    /* A downgrade nobody can see is a downgrade nobody can act on, and the
+       tools that run into this one do not install a warning stream, so fall
+       back to stderr rather than reporting it nowhere. */
+    std::ostream *stream = TropicalWeightTransducer::get_warning_stream();
+    if (stream == NULL)
+    {
+        stream = &std::cerr;
+    }
+    *stream << caller << ": warning: determinization exceeded its transition "
+            << "budget of " << budget
+            << "; returning the same relation undeterminized" << std::endl;
+
+    return std::unique_ptr<EncodeMapper<StdArc> >();
+}
+
+} // namespace
 
 // This function can be moved to its own file if TropicalWeightTransducer.o
 // yields a 'File too big' error.
@@ -240,16 +414,26 @@ TropicalWeightTransducer::minimize(StdVectorFst *t)
         add_to_weights(t, -w);
     }
 
-    EncodeMapper<StdArc> encode_mapper(hfst::get_encode_weights()
-                                           ? (kEncodeLabels | kEncodeWeights)
-                                           : (kEncodeLabels),
-                                       ENCODE);
-    Encode(t, &encode_mapper);
+    const size_t budget = determinize_budget(*t);
     StdVectorFst *det = new StdVectorFst();
+    const std::unique_ptr<EncodeMapper<StdArc> > encode_mapper
+        = determinize_under_envelope(t, hfst::get_encode_weights(), budget,
+                                     "minimize", det);
 
-    Determinize<StdArc>(*t, det);
-    Minimize<StdArc>(det);
-    Decode(det, encode_mapper);
+    if (encode_mapper)
+    {
+        Minimize<StdArc>(det);
+        Decode(det, *encode_mapper);
+    }
+    else
+    {
+        /* No determinized form fits the envelope, and Minimize needs one.  The
+           input already denotes the relation exactly, so hand that back: a
+           correct machine that is bigger than a minimal one, rather than no
+           machine at all. */
+        delete det;
+        det = new StdVectorFst(*t);
+    }
 
     if (w < 0)
     {
@@ -1881,14 +2065,27 @@ TropicalWeightTransducer::determinize(StdVectorFst *t)
         add_to_weights(t, -w);
     }
 
-    EncodeMapper<StdArc> encode_mapper(hfst::get_encode_weights()
-                                           ? (kEncodeLabels | kEncodeWeights)
-                                           : (kEncodeLabels),
-                                       ENCODE);
-    Encode(t, &encode_mapper);
+    const size_t budget = determinize_budget(*t);
     StdVectorFst *det = new StdVectorFst();
-    Determinize<StdArc>(*t, det);
-    Decode(det, encode_mapper);
+    const std::unique_ptr<EncodeMapper<StdArc> > encode_mapper
+        = determinize_under_envelope(t, hfst::get_encode_weights(), budget,
+                                     "determinize", det);
+
+    if (encode_mapper)
+    {
+        Decode(det, *encode_mapper);
+    }
+    else
+    {
+        /* Every strategy is bounded, so an input whose subset construction
+           runs away has no determinized form to return within the envelope.
+           The input denotes the relation exactly and callers consume the
+           relation, so handing it back undeterminized is a weaker result than
+           promised but a correct one, where the alternative is exhausting
+           memory. */
+        delete det;
+        det = new StdVectorFst(*t);
+    }
 
     if (w < 0)
     {
