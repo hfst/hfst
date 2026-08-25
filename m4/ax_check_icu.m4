@@ -75,24 +75,24 @@ AC_DEFUN([AX_CHECK_ICU], [
 
   if test "$succeeded" != "yes" && test "$PKG_CONFIG" != "no" ; then
     AC_MSG_CHECKING(for ICU >= $1 via pkg-config)
-        if $PKG_CONFIG --atleast-version=$1 icu-i18n ; then
+        if $PKG_CONFIG --atleast-version=$1 icu-i18n icu-uc ; then
             AC_MSG_RESULT(yes)
             succeeded=yes
 
             AC_MSG_CHECKING(ICU_CPPFLAGS)
-            ICU_CPPFLAGS=`$PKG_CONFIG --variable=CPPFLAGS icu-i18n`
+            ICU_CPPFLAGS=`$PKG_CONFIG --variable=CPPFLAGS icu-i18n icu-uc`
             AC_MSG_RESULT($ICU_CPPFLAGS)
 
             AC_MSG_CHECKING(ICU_CFLAGS)
-            ICU_CFLAGS=`$PKG_CONFIG --variable=CFLAGS icu-i18n`
+            ICU_CFLAGS=`$PKG_CONFIG --variable=CFLAGS icu-i18n icu-uc`
             AC_MSG_RESULT($ICU_CFLAGS)
 
             AC_MSG_CHECKING(ICU_CXXFLAGS)
-            ICU_CXXFLAGS=`$PKG_CONFIG --variable=CXXFLAGS icu-i18n`
+            ICU_CXXFLAGS=`$PKG_CONFIG --variable=CXXFLAGS icu-i18n icu-uc`
             AC_MSG_RESULT($ICU_CXXFLAGS)
 
             AC_MSG_CHECKING(ICU_LIBS)
-            ICU_LIBS=`$PKG_CONFIG --libs icu-i18n`
+            ICU_LIBS=`$PKG_CONFIG --libs icu-i18n icu-uc`
             AC_MSG_RESULT($ICU_LIBS)
         else
             ICU_CPPFLAGS=""
