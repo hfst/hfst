@@ -37,6 +37,13 @@ extern "C"
         return (void *)fsa;
     }
 
+    void
+    hfst_transducer_free(void *t)
+    {
+        assert(t != nullptr);
+        delete static_cast<hfst::HfstTransducer *>(t);
+    }
+
     void *
     hfst_input_stream(const char *filename)
     {
