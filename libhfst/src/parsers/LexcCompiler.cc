@@ -66,6 +66,7 @@ extern FILE *hlexcin;
 extern int hlexcparse();
 extern int hlexcnerrs;
 extern int hlexclex_destroy();
+extern int hlexclineno;
 
 #define COLOUR_BOLD "\033[01m"
 #define COLOUR_RED "\033[31m"
@@ -269,6 +270,7 @@ LexcCompiler &
 LexcCompiler::parse(FILE *infile)
 {
     lexc_ = this;
+    token_reset_positions();
     if (infile == stdin)
     {
         hfst::lexc::set_infile_name("<stdin>");
@@ -277,7 +279,7 @@ LexcCompiler::parse(FILE *infile)
     {
         hfst::lexc::set_infile_name("<unnamed>");
     }
-    hlexclex_destroy();
+    // hlexclex_destroy();
     hlexcin = infile;
     hlexcparse();
     xre_.remove_defined_multichar_symbols();
@@ -292,7 +294,8 @@ LexcCompiler &
 LexcCompiler::parse(const char *filename)
 {
     lexc_ = this;
-    hlexclex_destroy();
+    // hlexclex_destroy();
+    token_reset_positions();
     hfst::lexc::set_infile_name(filename);
     hlexcin = hfst::hfst_fopen(filename, "r");
     if (hlexcin == NULL)
