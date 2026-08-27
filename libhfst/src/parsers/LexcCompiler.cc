@@ -66,7 +66,6 @@ extern FILE *hlexcin;
 extern int hlexcparse();
 extern int hlexcnerrs;
 extern int hlexclex_destroy();
-extern int hlexclineno;
 
 #define COLOUR_BOLD "\033[01m"
 #define COLOUR_RED "\033[31m"
@@ -1794,25 +1793,31 @@ main(int argc, char **argv)
     std::cout << "sfst parse(FILE)...";
     FILE *sfstFile = hfst::hfst_fopen("LexcCompiler_test.lexc", "r");
     lexcSfst.parse(sfstFile);
+    hlexclex_destroy();
     fclose(sfstFile);
     std::cout << "parse(filename)...";
     lexcSfst.parse("LexcCompiler_test2.lexc");
+    hlexclex_destroy();
 #endif
 #if HAVE_OPENFST
     std::cout << "ofst parse(FILE)...";
     FILE *ofstFile = hfst::hfst_fopen("LexcCompiler_test.lexc", "r");
     lexcOfst.parse(ofstFile);
+    hlexclex_destroy();
     fclose(ofstFile);
     std::cout << "parse(filename)...";
     lexcOfst.parse("LexcCompiler_test2.lexc");
+    hlexclex_destroy();
 #endif
 #if HAVE_FOMA
     std::cout << "foma parse(FILE)...";
     FILE *fomaFile = hfst::hfst_fopen("LexcCompiler_test.lexc", "r");
     lexcFoma.parse(fomaFile);
+    hlexclex_destroy();
     fclose(fomaFile);
     std::cout << "parse(filename)...";
     lexcFoma.parse("LexcCompiler_test2.lexc");
+    hlexclex_destroy();
 #endif
 
     std::cout << std::endl << "add multichars:";
