@@ -1,0 +1,79 @@
+[build-system]
+requires = ["setuptools>=77", "swig>=4.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "hfst"
+dynamic = ["version"]
+description = "Python interface for HFST (Helsinki Finite-State Technology)"
+readme = "python/pypi/README.rst"
+requires-python = ">=3.9"
+license = "GPL-3.0-or-later"
+authors = [
+    { name = "HFST team", email = "hfst-bugs@helsinki.fi" },
+]
+keywords = ["hfst", "finite-state", "transducer", "morphology", "nlp"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Science/Research",
+    "Intended Audience :: Developers",
+    "Operating System :: POSIX :: Linux",
+    "Operating System :: MacOS :: MacOS X",
+    "Programming Language :: C++",
+    "Programming Language :: Python :: 3",
+    "Topic :: Scientific/Engineering",
+    "Topic :: Text Processing :: Linguistic",
+]
+
+[project.urls]
+Homepage = "https://hfst.github.io/"
+Repository = "https://github.com/hfst/hfst"
+"Bug Tracker" = "https://github.com/hfst/hfst/issues"
+
+# setup.py supplies the (dynamic) version, read from configure.ac.
+
+[tool.cibuildwheel]
+# Build CPython wheels for Linux + macOS + Pyodide. Windows is deferred (needs
+# the unistd.h -> io.h / flex-signature fixups from the old copy-files-win.sh).
+build = "cp3*-manylinux_x86_64 cp3*-manylinux_aarch64 cp3*-macosx_* cp313-pyodide_wasm32"
+build-frontend = "build"
+
+# Generated flex/bison sources are shipped in the sdist; SWIG runs during the
+# extension build, so swig must be present in the build environment.
+# Smoke-test the built wheel per platform (import + core ops + all back-ends).
+# The full functional suite (python/test/test.sh) is run by the C++ make check.
+test-command = "python {project}/python/test/wheel_smoke_test.py"
+
+[tool.cibuildwheel.linux]
+# OpenFst (libfst) and foma are not available in the manylinux (AlmaLinux)
+# images, so build them (and ICU) from source before building the wheel.
+before-all = "sh {project}/python/cibw-before-all-linux.sh"
+environment = { HFST_EXTRA_INCLUDE_DIRS = "/usr/local/include", HFST_EXTRA_LIBRARY_DIRS = "/usr/local/lib" }
+repair-wheel-command = "auditwheel repair -w {dest_dir} {wheel}"
+
+[tool.cibuildwheel.macos]
+# Build each wheel for the host arch (macos-15-intel -> x86_64, macos-15 -> arm64).
+archs = ["auto"]
+before-all = "sh {project}/python/cibw-before-all-macos.sh"
+repair-wheel-command = "delocate-wheel --require-archs {delocate_archs} -w {dest_dir} -v {wheel}"
+
+[tool.cibuildwheel.macos.environment]
+# Homebrew ICU/readline bottles on the GitHub runners currently require the
+# runner OS as their minimum macOS version; delocate enforces that for vendored
+# dylibs.
+MACOSX_DEPLOYMENT_TARGET = "15.0"
+# ICU and readline are keg-only; cibuildwheel evaluates these through the shell,
+# so command substitution resolves the Homebrew prefixes at build time.
+HFST_EXTRA_INCLUDE_DIRS = "$(brew --prefix icu4c)/include:$(brew --prefix readline)/include:/usr/local/include"
+HFST_EXTRA_LIBRARY_DIRS = "$(brew --prefix icu4c)/lib:$(brew --prefix readline)/lib:/usr/local/lib"
+
+[tool.cibuildwheel.pyodide]
+# cibuildwheel has selected the Pyodide xbuildenv before this hook runs.
+before-build = "sh {project}/python/cibw-before-build-pyodide.sh"
+
+[tool.cibuildwheel.pyodide.environment]
+HFST_WITH_SFST = "0"
+HFST_NO_READLINE = "1"
+HFST_PYODIDE_DEPS_DIR = "$(pwd)/wasm-deps/pyodide"
+HFST_EXTRA_INCLUDE_DIRS = "$(pwd)/wasm-deps/pyodide/include:$(pwd)/wasm-deps/pyodide/build/foma:$(pwd)/wasm-deps/pyodide/build/foma/foma"
+HFST_EXTRA_LIBRARY_DIRS = "$(pwd)/wasm-deps/pyodide/lib"

@@ -9,16 +9,30 @@
 
 SWIG_INTERFACE = libhfst.i
 
-BUILT_SOURCES = %_wrap.cpp.cpp
+# The Python bindings are built from the unified pyproject.toml/setup.py at the
+# top of the tree, in "shared" mode: the extension links against the libhfst
+# just built by this same tree (../libhfst/src/.libs) instead of recompiling
+# all of libhfst. This is the same build the PyPI wheels use (in static mode),
+# so PyPI and distribution (e.g. Debian python3-libhfst) packaging share one
+# configuration.
 
-%_wrap.cpp.cpp: $(SWIG_INTERFACE) setup.py
-	$(PYTHON) setup.py build
+TOP = $(abs_top_srcdir)
+HFST_LIBS = $(abs_top_builddir)/libhfst/src/.libs
+
+BUILT_SOURCES = build-python-bindings
+
+build-python-bindings: $(SWIG_INTERFACE) $(TOP)/setup.py $(TOP)/pyproject.toml
+	cd $(TOP) && HFST_USE_SHARED_LIB=1 HFST_LIBRARY_DIR=$(HFST_LIBS) \
+	    $(PYTHON) setup.py build
 
 install-exec-local:
-	$(PYTHON) setup.py install $(PYTHON_INSTALL_PARAMS)
+	cd $(TOP) && HFST_USE_SHARED_LIB=1 HFST_LIBRARY_DIR=$(HFST_LIBS) \
+	    $(PYTHON) setup.py install $(PYTHON_INSTALL_PARAMS)
+
+.PHONY: build-python-bindings
 
 SUBDIRS = test
-EXTRA_DIST = libhfst.i docstrings.i README setup.py \
+EXTRA_DIST = libhfst.i docstrings.i README \
 hfst_extensions.cpp hfst_file_extensions.cpp hfst_lexc_extensions.cpp hfst_sfst_extensions.cpp \
 hfst_lookup_extensions.cpp hfst_pmatch_extensions.cpp hfst_prolog_extensions.cpp \
 hfst_regex_extensions.cpp hfst_rules_extensions.cpp hfst_xfst_extensions.cpp \

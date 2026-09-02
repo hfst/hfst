@@ -318,9 +318,9 @@ for type in types:
     def test_tokenized(tok, pathin, pathout, exp, weight=0):
         tokenized = None
         if (pathout == None):
-            tokenized = tok.tokenize_one_level(pathin)
+            tokenized = tok.tokenize_one_level(pathin, False)
         else:
-            tokenized = tok.tokenize(pathin, pathout)
+            tokenized = tok.tokenize(pathin, pathout, False)
         if not hfst.tokenized_fst(tokenized, weight).compare(hfst.regex(exp)):
             if pathout == None:
                 raise RuntimeError('test_tokenized failed with input: ' + pathin)
