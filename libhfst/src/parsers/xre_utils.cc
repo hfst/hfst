@@ -1248,9 +1248,27 @@ check_multichar_symbol(const char *symbol)
     if (defined_multichar_symbols_->find(std::string(symbol))
         == defined_multichar_symbols_->end())
     {
+        char *buffer = (char *)malloc(strlen(symbol) + 100);
+        char *p = buffer;
+        if (should_colourise())
+        {
+            int n = sprintf(p, COLOUR_RED);
+            assert(n >= 0);
+            p += n;
+        }
+        int n = sprintf(p, "Warning: ");
+        assert(n >= 0);
+        p += n;
+        if (should_colourise())
+        {
+            n = sprintf(p, COLOUR_RESET);
+            assert(n >= 0);
+            p += n;
+        }
+        n = sprintf(p, "multichar symbol '%s' used but not defined\n", symbol);
         std::ostream *err = xreerrstr();
-        *err << "warning: multichar symbol '" << symbol
-             << "' used but not defined" << std::endl;
+        *(err) << std::string(buffer);
+        free(buffer);
         xreflush(err);
     }
 }
