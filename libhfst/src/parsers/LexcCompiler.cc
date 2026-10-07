@@ -205,6 +205,7 @@ LexcCompiler::reset()
     string hash("#");
     lexiconNames_.insert(hash);
     stringsTrie_ = hfst::implementations::HfstBasicTransducer(); // ?
+    xre_.remove_defined_multichar_symbols();
     for (const auto &it : regexps_)
     {
         delete it.second;
@@ -281,7 +282,7 @@ LexcCompiler::parse(FILE *infile)
     // hlexclex_destroy();
     hlexcin = infile;
     hlexcparse();
-    xre_.remove_defined_multichar_symbols();
+    // xre_.remove_defined_multichar_symbols();
     if (hlexcnerrs > 0)
     {
         parseErrors_ = true;
@@ -310,7 +311,7 @@ LexcCompiler::parse(const char *filename)
         return *this;
     }
     hlexcparse();
-    xre_.remove_defined_multichar_symbols();
+    // xre_.remove_defined_multichar_symbols();
     if (hlexcnerrs > 0)
     {
         parseErrors_ = true;
@@ -1737,7 +1738,8 @@ main(int argc, char **argv)
     std::cout << "Unit tests for " __FILE__ ":";
     std::cout << std::endl << "constructors: ";
     std::cout << " (default)...";
-    LexcCompiler lexcDefault();
+    LexcCompiler lexcDefault;
+    lexcDefault.reset();
 #if HAVE_SFST
     std::cout << " (SFST)...";
     LexcCompiler lexcSfst(SFST_TYPE);
@@ -1795,9 +1797,11 @@ main(int argc, char **argv)
     lexcSfst.parse(sfstFile);
     hlexclex_destroy();
     fclose(sfstFile);
+    lexcSfst.reset();
     std::cout << "parse(filename)...";
     lexcSfst.parse("LexcCompiler_test2.lexc");
     hlexclex_destroy();
+    lexcSfst.reset();
 #endif
 #if HAVE_OPENFST
     std::cout << "ofst parse(FILE)...";
@@ -1805,19 +1809,23 @@ main(int argc, char **argv)
     lexcOfst.parse(ofstFile);
     hlexclex_destroy();
     fclose(ofstFile);
+    lexcOfst.reset();
     std::cout << "parse(filename)...";
     lexcOfst.parse("LexcCompiler_test2.lexc");
     hlexclex_destroy();
+    lexcOfst.reset();
 #endif
 #if HAVE_FOMA
     std::cout << "foma parse(FILE)...";
     FILE *fomaFile = hfst::hfst_fopen("LexcCompiler_test.lexc", "r");
     lexcFoma.parse(fomaFile);
     hlexclex_destroy();
+    lexcFoma.reset();
     fclose(fomaFile);
     std::cout << "parse(filename)...";
     lexcFoma.parse("LexcCompiler_test2.lexc");
     hlexclex_destroy();
+    lexcFoma.reset();
 #endif
 
     std::cout << std::endl << "add multichars:";
