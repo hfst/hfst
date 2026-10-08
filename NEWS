@@ -3,6 +3,12 @@
 This file contains all noteworthy changes in HFST development between releases.
 For full listing of changes see ChangeLog.
 
+## Noteworthy changes in 3.17.4
+
+* fix to reporting missing multichars in multi-file lexc compilations within
+  Xerox regular expression blocks: `< regexes > `.
+* fix to line numbering in multi-file lexc compilations
+
 ## Noteworthy changes in 3.17.3
 
 * determinisation optimisations from bbqsrc
