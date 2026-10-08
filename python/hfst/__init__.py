@@ -47,7 +47,14 @@ CLASSES:
 
 """
 
-__version__ = "3.16.0.0"
+try:
+    from importlib.metadata import version as _pkg_version, PackageNotFoundError
+    try:
+        __version__ = _pkg_version("hfst")
+    except PackageNotFoundError:
+        __version__ = "unknown"
+except ImportError:  # Older Python versions
+    __version__ = "unknown"
 
 import hfst.exceptions
 import hfst.sfst_rules
@@ -185,7 +192,7 @@ def start_xfst(**kwargs):
 from sys import stdout
 
 def regex(re, **kwargs):
-    """
+    r"""
     Get a transducer as defined by regular expression *re*.
 
     Parameters
@@ -988,24 +995,24 @@ def fsa(arg):
        if len(arg) == 0:
            retval.set_final_weight(0, 0) # epsilon transducer with zero weight
        else:
-           retval.disjunct(deftok.tokenize(_check_word(arg)), 0)
+           retval.disjunct(deftok.tokenize(_check_word(arg), False), 0)
     elif _is_weighted_word(arg):
        if len(arg) == 0:
            retval.set_final_weight(0, arg[1]) # epsilon transducer with weight
        else:
-           retval.disjunct(deftok.tokenize(_check_word(arg[0])), arg[1])
+           retval.disjunct(deftok.tokenize(_check_word(arg[0]), False), arg[1])
     elif isinstance(arg, tuple) or isinstance(arg, list):
        for word in arg:
            if _is_weighted_word(word):
               if len(word) == 0:
                   retval.set_final_weight(0, word[1]) # epsilon transducer with weight
               else:
-                  retval.disjunct(deftok.tokenize(_check_word(word[0])), word[1])
+                  retval.disjunct(deftok.tokenize(_check_word(word[0]), False), word[1])
            elif isinstance(word, str):
               if len(word) == 0:
                   retval.set_final_weight(0, 0) # epsilon transducer with zero weight
               else:
-                  retval.disjunct(deftok.tokenize(_check_word(word)), 0)
+                  retval.disjunct(deftok.tokenize(_check_word(word), False), 0)
            else:
               raise RuntimeError('Tuple/list element not a string or tuple of string and weight.')
     else:
@@ -1211,7 +1218,7 @@ def tokenized_fst(arg, weight=0):
        tok = hfst.HfstTokenizer()
        tok.add_multichar_symbol('foo')
        tok.add_multichar_symbol('bar')
-       tr = hfst.tokenized_fst(tok.tokenize('foobar', 'foobaz'))
+       tr = hfst.tokenized_fst(tok.tokenize('foobar', 'foobaz', False))
 
     will create the transducer [foo:foo bar:b 0:a 0:z].
     """
@@ -1349,4 +1356,3 @@ class ImplementationType:
     HFST2_TYPE = libhfst.HFST2_TYPE
     UNSPECIFIED_TYPE = libhfst.UNSPECIFIED_TYPE
     ERROR_TYPE = libhfst.ERROR_TYPE
-

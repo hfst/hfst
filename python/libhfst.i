@@ -109,43 +109,92 @@ namespace std {
 
 // *** HfstException and its subclasses (will be wrapped under module hfst.exceptions). *** //
 
-class HfstException
+%{
+// Translate C++ HfstExceptions thrown by libhfst into the pure-Python
+// hfst exception classes defined below, so they can be caught with 'except'.
+// hfst_get_exception() returns the clean class name set by the HFST_THROW
+// macros (e.what() may additionally contain a message).
+static void hfst_python_raise_current_exception(const std::string & message)
 {
-  public:
-    HfstException();
-    HfstException(const std::string&, const std::string&, size_t);
-    ~HfstException();
-    std::string what() const;
-};
+    std::string clsname = hfst_get_exception();
+    PyObject * module = PyImport_ImportModule("libhfst");
+    PyObject * cls = NULL;
+    if (module != NULL)
+    {
+        if (!clsname.empty())
+            cls = PyObject_GetAttrString(module, clsname.c_str());
+        Py_DECREF(module);
+    }
+    if (cls == NULL)
+        PyErr_Clear();
+    if (cls != NULL && PyExceptionClass_Check(cls))
+        PyErr_SetString(cls, message.c_str());
+    else
+        PyErr_SetString(PyExc_RuntimeError, message.c_str());
+    Py_XDECREF(cls);
+}
+%}
 
-class HfstTransducerTypeMismatchException : public HfstException { public: HfstTransducerTypeMismatchException(const std::string&, const std::string&, size_t); ~HfstTransducerTypeMismatchException(); std::string what() const; };
-class ImplementationTypeNotAvailableException : public HfstException { public: ImplementationTypeNotAvailableException(const std::string&, const std::string&, size_t, hfst::ImplementationType type); ~ImplementationTypeNotAvailableException(); std::string what() const; hfst::ImplementationType get_type() const; };
-class FunctionNotImplementedException : public HfstException { public: FunctionNotImplementedException(const std::string&, const std::string&, size_t); ~FunctionNotImplementedException(); std::string what() const; };
-class StreamNotReadableException : public HfstException { public: StreamNotReadableException(const std::string&, const std::string&, size_t); ~StreamNotReadableException(); std::string what() const; };
-class StreamCannotBeWrittenException : public HfstException { public: StreamCannotBeWrittenException(const std::string&, const std::string&, size_t); ~StreamCannotBeWrittenException(); std::string what() const; };
-class StreamIsClosedException : public HfstException { public: StreamIsClosedException(const std::string&, const std::string&, size_t); ~StreamIsClosedException(); std::string what() const; };
-class EndOfStreamException : public HfstException { public: EndOfStreamException(const std::string&, const std::string&, size_t); ~EndOfStreamException(); std::string what() const; };
-class TransducerIsCyclicException : public HfstException { public: TransducerIsCyclicException(const std::string&, const std::string&, size_t); ~TransducerIsCyclicException(); std::string what() const; };
-class NotTransducerStreamException : public HfstException { public: NotTransducerStreamException(const std::string&, const std::string&, size_t); ~NotTransducerStreamException(); std::string what() const; };
-class NotValidAttFormatException : public HfstException { public: NotValidAttFormatException(const std::string&, const std::string&, size_t); ~NotValidAttFormatException(); std::string what() const; };
-class NotValidPrologFormatException : public HfstException { public: NotValidPrologFormatException(const std::string&, const std::string&, size_t); ~NotValidPrologFormatException(); std::string what() const; };
-class NotValidLexcFormatException : public HfstException { public: NotValidLexcFormatException(const std::string&, const std::string&, size_t); ~NotValidLexcFormatException(); std::string what() const; };
-class StateIsNotFinalException : public HfstException { public: StateIsNotFinalException(const std::string&, const std::string&, size_t); ~StateIsNotFinalException(); std::string what() const; };
-class ContextTransducersAreNotAutomataException : public HfstException { public: ContextTransducersAreNotAutomataException(const std::string&, const std::string&, size_t); ~ContextTransducersAreNotAutomataException(); std::string what() const; };
-class TransducersAreNotAutomataException : public HfstException { public: TransducersAreNotAutomataException(const std::string&, const std::string&, size_t); ~TransducersAreNotAutomataException(); std::string what() const; };
-class StateIndexOutOfBoundsException : public HfstException { public: StateIndexOutOfBoundsException(const std::string&, const std::string&, size_t); ~StateIndexOutOfBoundsException(); std::string what() const; };
-class TransducerHeaderException : public HfstException { public: TransducerHeaderException(const std::string&, const std::string&, size_t); ~TransducerHeaderException(); std::string what() const; };
-class MissingOpenFstInputSymbolTableException : public HfstException { public: MissingOpenFstInputSymbolTableException(const std::string&, const std::string&, size_t); ~MissingOpenFstInputSymbolTableException(); std::string what() const; };
-class TransducerTypeMismatchException : public HfstException { public: TransducerTypeMismatchException(const std::string&, const std::string&, size_t); ~TransducerTypeMismatchException(); std::string what() const; };
-class EmptySetOfContextsException : public HfstException { public: EmptySetOfContextsException(const std::string&, const std::string&, size_t); ~EmptySetOfContextsException(); std::string what() const; };
-class SpecifiedTypeRequiredException : public HfstException { public: SpecifiedTypeRequiredException(const std::string&, const std::string&, size_t); ~SpecifiedTypeRequiredException(); std::string what() const; };
-class HfstFatalException : public HfstException { public: HfstFatalException(const std::string&, const std::string&, size_t); ~HfstFatalException(); std::string what() const; };
-class TransducerHasWrongTypeException : public HfstException { public: TransducerHasWrongTypeException(const std::string&, const std::string&, size_t); ~TransducerHasWrongTypeException(); std::string what() const; };
-class IncorrectUtf8CodingException : public HfstException { public: IncorrectUtf8CodingException(const std::string&, const std::string&, size_t); ~IncorrectUtf8CodingException(); std::string what() const; };
-class EmptyStringException : public HfstException { public: EmptyStringException(const std::string&, const std::string&, size_t); ~EmptyStringException(); std::string what() const; };
-class SymbolNotFoundException : public HfstException { public: SymbolNotFoundException(const std::string&, const std::string&, size_t); ~SymbolNotFoundException(); std::string what() const; };
-class MetadataException : public HfstException { public: MetadataException(const std::string&, const std::string&, size_t); ~MetadataException(); std::string what() const; };
-class FlagDiacriticsAreNotIdentitiesException : public HfstException { public: FlagDiacriticsAreNotIdentitiesException(const std::string&, const std::string&, size_t); ~FlagDiacriticsAreNotIdentitiesException(); std::string what() const; };
+// Wrap every call so C++ exceptions become Python exceptions instead of
+// calling std::terminate.
+%exception {
+    try {
+        $action
+    }
+    catch (const HfstException & e) {
+        hfst_python_raise_current_exception(e.what());
+        SWIG_fail;
+    }
+    catch (const std::exception & e) {
+        SWIG_exception(SWIG_RuntimeError, e.what());
+    }
+}
+
+// HfstException and its subclasses are exposed to Python as pure-Python
+// Exception subclasses: naturally catchable and constructible with any
+// arguments. C++ throws are translated to these by the %exception above.
+%pythoncode %{
+class HfstException(Exception):
+    def __init__(self, *args):
+        Exception.__init__(self, *args)
+    def what(self):
+        # Exceptions constructed as (name, file, line) mirror the C++
+        # HfstException::what() format; exceptions translated from C++ carry
+        # the already-formatted message as a single argument.
+        a = self.args
+        if len(a) == 3:
+            return "Exception: %s in file: %s on line: %s" % (a[0], a[1], a[2])
+        return " ".join([str(x) for x in a])
+
+class HfstTransducerTypeMismatchException(HfstException): pass
+class ImplementationTypeNotAvailableException(HfstException): pass
+class FunctionNotImplementedException(HfstException): pass
+class StreamNotReadableException(HfstException): pass
+class StreamCannotBeWrittenException(HfstException): pass
+class StreamIsClosedException(HfstException): pass
+class EndOfStreamException(HfstException): pass
+class TransducerIsCyclicException(HfstException): pass
+class NotTransducerStreamException(HfstException): pass
+class NotValidAttFormatException(HfstException): pass
+class NotValidPrologFormatException(HfstException): pass
+class NotValidLexcFormatException(HfstException): pass
+class StateIsNotFinalException(HfstException): pass
+class ContextTransducersAreNotAutomataException(HfstException): pass
+class TransducersAreNotAutomataException(HfstException): pass
+class StateIndexOutOfBoundsException(HfstException): pass
+class TransducerHeaderException(HfstException): pass
+class MissingOpenFstInputSymbolTableException(HfstException): pass
+class TransducerTypeMismatchException(HfstException): pass
+class EmptySetOfContextsException(HfstException): pass
+class SpecifiedTypeRequiredException(HfstException): pass
+class HfstFatalException(HfstException): pass
+class TransducerHasWrongTypeException(HfstException): pass
+class IncorrectUtf8CodingException(HfstException): pass
+class EmptyStringException(HfstException): pass
+class SymbolNotFoundException(HfstException): pass
+class MetadataException(HfstException): pass
+class FlagDiacriticsAreNotIdentitiesException(HfstException): pass
+%}
 
 
 namespace hfst_ol
@@ -263,7 +312,7 @@ enum ImplementationType
 // *** Some other functions *** //
 
 bool is_diacritic(const std::string & symbol);
-hfst::HfstTransducerVector compile_pmatch_expression(const std::string & pmatch) throw();
+hfst::HfstTransducerVector compile_pmatch_expression(const std::string & pmatch);
 
 // internal functions
 %pythoncode %{
@@ -337,7 +386,7 @@ public:
   void set_property(const std::string& property, const std::string& value);
   std::string get_property(const std::string& property) const;
   const std::map<std::string,std::string>& get_properties() const;
-  bool compare(const HfstTransducer&, bool harmonize=true) const throw();
+  bool compare(const HfstTransducer&, bool harmonize=true) const;
   unsigned int number_of_states() const;
   unsigned int number_of_arcs() const;
   StringSet get_alphabet() const;
@@ -355,22 +404,22 @@ public:
 
   // First versions of all functions returning an HfstTransducer& that return void instead:
 
-  void concatenate(const HfstTransducer& tr, bool harmonize=true) throw() { self->concatenate(tr, harmonize); }
-  void disjunct(const HfstTransducer& tr, bool harmonize=true) throw() { self->disjunct(tr, harmonize); }
-  void subtract(const HfstTransducer& tr, bool harmonize=true) throw() { self->subtract(tr, harmonize); }
-  void intersect(const HfstTransducer& tr, bool harmonize=true) throw() { self->intersect(tr, harmonize); }
-  void compose(const HfstTransducer& tr, bool harmonize=true) throw() { self->compose(tr, harmonize); }
+  void concatenate(const HfstTransducer& tr, bool harmonize=true) { self->concatenate(tr, harmonize); }
+  void disjunct(const HfstTransducer& tr, bool harmonize=true) { self->disjunct(tr, harmonize); }
+  void subtract(const HfstTransducer& tr, bool harmonize=true) { self->subtract(tr, harmonize); }
+  void intersect(const HfstTransducer& tr, bool harmonize=true) { self->intersect(tr, harmonize); }
+  void compose(const HfstTransducer& tr, bool harmonize=true) { self->compose(tr, harmonize); }
   void compose_intersect(const HfstTransducerVector &v, bool invert=false, bool harmonize=true) { self->compose_intersect(v, invert, harmonize); }
   void priority_union(const HfstTransducer &another) { self->priority_union(another); }
   void lenient_composition(const HfstTransducer &another, bool harmonize=true) { self->lenient_composition(another, harmonize); }
-  void cross_product(const HfstTransducer &another, bool harmonize=true) throw() { self->cross_product(another, harmonize); }
+  void cross_product(const HfstTransducer &another, bool harmonize=true) { self->cross_product(another, harmonize); }
   void shuffle(const HfstTransducer &another, bool harmonize=true) { self->shuffle(another, harmonize); }
   void remove_epsilons() { self->remove_epsilons(); }
   void determinize() { self->determinize(); }
   void minimize() { self->minimize(); }
   void prune() { self->prune(); }
   void eliminate_flags() { self->eliminate_flags(); }
-  void eliminate_flag(const std::string& f) throw() { self->eliminate_flag(f); }
+  void eliminate_flag(const std::string& f) { self->eliminate_flag(f); }
   void n_best(unsigned int n) { self->n_best(n); }
   void convert(ImplementationType impl) { self->convert(impl); }
   void repeat_star() { self->repeat_star(); }
@@ -440,13 +489,13 @@ public:
         $self->extract_longest_paths(results, obey_flags);
         return results;
     }
-    hfst::HfstTwoLevelPaths _extract_paths(int max_num=-1, int cycles=-1) const throw()
+    hfst::HfstTwoLevelPaths _extract_paths(int max_num=-1, int cycles=-1) const
     {
       hfst::HfstTwoLevelPaths results;
       $self->extract_paths(results, max_num, cycles);
       return results;
     }
-    hfst::HfstTwoLevelPaths _extract_paths_fd(int max_num=-1, int cycles=-1, bool filter_fd=true) const throw()
+    hfst::HfstTwoLevelPaths _extract_paths_fd(int max_num=-1, int cycles=-1, bool filter_fd=true) const
     {
       hfst::HfstTwoLevelPaths results;
       $self->extract_paths_fd(results, max_num, cycles, filter_fd);
@@ -465,19 +514,19 @@ public:
       return results;
     }
 
-    HfstOneLevelPaths _lookup_vector(const StringVector& s, int limit = -1, double time_cutoff = 0.0) const throw()
+    HfstOneLevelPaths _lookup_vector(const StringVector& s, int limit = -1, double time_cutoff = 0.0) const
     {
       return hfst::lookup_vector($self, false /*fd*/, s, limit, time_cutoff);
     }
-    HfstOneLevelPaths _lookup_fd_vector(const StringVector& s, int limit = -1, double time_cutoff = 0.0) const throw()
+    HfstOneLevelPaths _lookup_fd_vector(const StringVector& s, int limit = -1, double time_cutoff = 0.0) const
     {
       return hfst::lookup_vector($self, true /*fd*/, s, limit, time_cutoff);
     }
-    HfstOneLevelPaths _lookup_fd_string(const std::string& s, int limit = -1, double time_cutoff = 0.0) const throw()
+    HfstOneLevelPaths _lookup_fd_string(const std::string& s, int limit = -1, double time_cutoff = 0.0) const
     {
       return hfst::lookup_string($self, true /*fd*/, s, limit, time_cutoff);
     }
-    HfstOneLevelPaths _lookup_string(const std::string & s, int limit = -1, double time_cutoff = 0.0) const throw()
+    HfstOneLevelPaths _lookup_string(const std::string & s, int limit = -1, double time_cutoff = 0.0) const
     {
       return hfst::lookup_string($self, false /*fd*/, s, limit, time_cutoff);
     }
@@ -976,7 +1025,7 @@ public:
 ~HfstOutputStream(void);
 HfstOutputStream &flush();
 void close(void);
-hfst::HfstOutputStream & redirect(hfst::HfstTransducer &) throw();
+hfst::HfstOutputStream & redirect(hfst::HfstTransducer &);
 
 %extend {
 
@@ -1066,18 +1115,18 @@ def __init__(self, **kwargs):
 class HfstInputStream
 {
 public:
-    HfstInputStream(void) throw();
-    HfstInputStream(const std::string &filename) throw();
+    HfstInputStream(void);
+    HfstInputStream(const std::string &filename);
     ~HfstInputStream(void);
     void close(void);
     bool is_eof(void);
     bool is_bad(void);
     bool is_good(void);
-    ImplementationType get_type(void) const throw();
+    ImplementationType get_type(void) const;
 
 %extend {
 
-hfst::HfstTransducer * read() throw (EndOfStreamException) { return new hfst::HfstTransducer(*($self)); }
+hfst::HfstTransducer * read() { return new hfst::HfstTransducer(*($self)); }
 
 %pythoncode %{
 
@@ -1172,7 +1221,7 @@ class HfstBasicTransducer {
     void add_transition(HfstState s, const hfst::implementations::HfstBasicTransition & transition, bool add_symbols_to_alphabet=true);
     void remove_transition(HfstState s, const hfst::implementations::HfstBasicTransition & transition, bool remove_symbols_from_alphabet=false);
     bool is_final_state(HfstState s) const;
-    float get_final_weight(HfstState s) const throw();
+    float get_final_weight(HfstState s) const;
     void set_final_weight(HfstState s, const float & weight);
     void remove_final_weight(HfstState s);
 %rename("_transitions") transitions(HfstState s);
@@ -1195,7 +1244,7 @@ class HfstBasicTransducer {
     void disjunct(const StringPairVector &spv, float weight) { self->disjunct(spv, weight); }
     void harmonize(HfstBasicTransducer &another) { self->harmonize(another); }
 
-  HfstTwoLevelPaths _lookup(const StringVector &lookup_path, size_t * infinite_cutoff, float * max_weight, bool obey_flags) throw()
+  HfstTwoLevelPaths _lookup(const StringVector &lookup_path, size_t * infinite_cutoff, float * max_weight, bool obey_flags)
   {
     hfst::HfstTwoLevelPaths results;
     $self->lookup(lookup_path, results, infinite_cutoff, max_weight, -1, obey_flags);

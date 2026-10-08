@@ -39,6 +39,13 @@ libhfst.js
 /python/__pycache__/
 /check_installation/__pycache__/
 /python/_libhfst.i
+# Root-level Python build artifacts (unified pyproject/setup.py build).
+/build/
+/dist/
+/wheelhouse/
+/*.egg-info/
+/python/*.egg-info/
+/python/libhfst.py
 /python/build/
 /python/dist/
 /python/doc/html/
