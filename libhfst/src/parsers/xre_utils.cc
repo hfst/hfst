@@ -1245,6 +1245,12 @@ check_multichar_symbol(const char *symbol)
     if (defined_multichar_symbols_ == NULL)
         return;
 
+    if (strncmp(symbol, "@P.LEXNAME", strlen("@P.LEXNAME")) == 0)
+    {
+        // these special symbols leak into xres
+        return;
+    }
+
     if (defined_multichar_symbols_->find(std::string(symbol))
         == defined_multichar_symbols_->end())
     {
