@@ -1,0 +1,48 @@
+#ifndef HFST_MACOS_COMPAT_EXT_HASH_MAP
+#define HFST_MACOS_COMPAT_EXT_HASH_MAP
+
+#include <cstddef>
+#include <cstring>
+#include <functional>
+#include <memory>
+#include <unordered_map>
+
+namespace __gnu_cxx {
+
+template <class T>
+struct hash : public std::hash<T> {};
+
+template <>
+struct hash<const char*> {
+  size_t operator()(const char *s) const {
+    size_t h = 0;
+    for (; *s; ++s)
+      h = 5 * h + static_cast<unsigned char>(*s);
+    return h;
+  }
+};
+
+template <>
+struct hash<char*> {
+  size_t operator()(const char *s) const {
+    return hash<const char*>()(s);
+  }
+};
+
+template <
+  class Key,
+  class T,
+  class Hash = hash<Key>,
+  class Pred = std::equal_to<Key>,
+  class Alloc = std::allocator<std::pair<const Key, T> > >
+class hash_map : public std::unordered_map<Key, T, Hash, Pred, Alloc> {
+  typedef std::unordered_map<Key, T, Hash, Pred, Alloc> base_type;
+
+public:
+  using base_type::base_type;
+  void resize(size_t n) { this->rehash(n); }
+};
+
+} // namespace __gnu_cxx
+
+#endif

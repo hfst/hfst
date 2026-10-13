@@ -133,7 +133,7 @@ for type in types:
         tok = hfst.HfstTokenizer()
         tok.add_multichar_symbol('foo')
         tok.add_multichar_symbol('bar')
-        tr = hfst.tokenized_fst(tok.tokenize('foobar', 'foobaz'))
+        tr = hfst.tokenized_fst(tok.tokenize('foobar', 'foobaz', False))
         if not tr.compare(hfst.regex('[foo:foo bar:b 0:a 0:z]')):
             raise RuntimeError('')
 
@@ -171,9 +171,9 @@ for type in types:
         # HfstBasicTransducer.disjunct
         lexicon = hfst.HfstBasicTransducer()
         tok = hfst.HfstTokenizer()
-        lexicon.disjunct(tok.tokenize('dog'), 0.3)
-        lexicon.disjunct(tok.tokenize('cat'), 0.5)
-        lexicon.disjunct(tok.tokenize('elephant'), 1.6)
+        lexicon.disjunct(tok.tokenize('dog', False), 0.3)
+        lexicon.disjunct(tok.tokenize('cat', False), 0.5)
+        lexicon.disjunct(tok.tokenize('elephant', False), 1.6)
         lexicon = hfst.HfstTransducer(lexicon)
         if not lexicon.compare(hfst.regex('{dog}::0.3|{cat}::0.5|{elephant}::1.6')):
             raise RuntimeError('')
@@ -375,8 +375,8 @@ for type in types:
         tok.add_multichar_symbol('bar')
         tok.add_multichar_symbol('baz')
         
-        words = hfst.tokenized_fst(tok.tokenize('foobarfoo'))
-        t = hfst.tokenized_fst(tok.tokenize('foobarbaz'))
+        words = hfst.tokenized_fst(tok.tokenize('foobarfoo', False))
+        t = hfst.tokenized_fst(tok.tokenize('foobarbaz', False))
         words.disjunct(t)
 
 # Create a rule transducer that optionally replaces 'bar' with 'baz' between 'foo' and 'foo'.

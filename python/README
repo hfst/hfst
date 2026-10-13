@@ -1,33 +1,47 @@
 
-This folder contains source code for SWIG bindings for using HFST library with
-Python. The bindings work with Python version 2.7 and from version 3.4 upwards.
+This folder contains the SWIG interface (libhfst.i), the hand-written C++
+extension code (hfst_*_extensions.cpp) and the pure-Python package (hfst/) for
+the HFST Python bindings. The bindings require Python 3.9 or newer.
+
+The packaging itself lives at the top of the repository: a single pyproject.toml
+and setup.py build the bindings in two modes, so the same configuration is used
+for both PyPI wheels and distribution packages (e.g. Debian python3-libhfst):
+
+  * static  (default) - compile all of libhfst plus the in-tree sfst back-end
+    into the _libhfst extension and link the external back-ends (OpenFst, foma),
+    ICU and readline. This is what cibuildwheel uses to produce self-contained
+    wheels.
+  * shared  (HFST_USE_SHARED_LIB=1) - link against an already-installed libhfst
+    (-lhfst) and compile only the SWIG wrapper.
 
 ============
 REQUIREMENTS
 ============
 
-The requirements for HFST C++ library are given in README of parent directory.
-Compiling the bindings requires swig (tested with version 3.0.12) and
-distutils (tested with version 36.0.1) as well as a C++ compiler (tested with
-gcc 5.4.0).
+The requirements for the HFST C++ library are given in the README of the parent
+directory. Compiling the bindings requires swig (4.0+), a C++17 compiler, and,
+for the static build, bison and flex (to generate the parser sources) plus the
+OpenFst, foma, ICU and readline development files.
 
 =====================
 BUILDING THE BINDINGS
 =====================
 
-Building and installation is done using the standard Python module distutils.
-Once you've successfully built and installed HFST library (located in the
-parent directory, if you are compiling from source), use the script setup.py
-to build the Python extension eg. like so:
+From the top of the repository:
 
-    python setup.py build_ext --inplace
+    # Static, self-contained build (as used for wheels):
+    python -m build            # produces a wheel + sdist in dist/
+    #   or, for an in-place development build:
+    pip install .
 
-If you have only built HFST library but not installed it (or have an earlier
-version of HFST library installed) and want to build the bindings, running
+    # Shared build, linking an already-built ../libhfst/src library:
+    HFST_USE_SHARED_LIB=1 HFST_LIBRARY_DIR=$PWD/libhfst/src/.libs pip install .
 
-    python setup.py build_ext --inplace --local-hfst
+The autotools build (./configure --enable-python-bindings && make) drives the
+shared build automatically via python/Makefile.am.
 
-will link to the HFST library located in ../libhfst/src.
+For the static build, the flex/bison parser sources are generated on demand by
+python/generate-parsers.sh (invoked by setup.py when they are missing).
 
 
 =================
@@ -103,15 +117,16 @@ For documentation and examples, see <https://hfst.github.io/python/index.html>.
 KNOWN BUGS
 ==========
 
-Some version combinations of SWIG and Python make HFST exception classes
-subclasses of Python's _object instead of Exception. Then you will get an
-error like
+* Reading SFST-type transducers from an HfstInputStream (e.g.
+  hfst.HfstInputStream on a file of SFST_TYPE transducers) currently
+  segfaults in the SFST back-end. The OpenFst (tropical) and foma back-ends
+  are unaffected. This surfaces in python/test/test_streams*.py with the
+  'sfst' format and in test_examples.py. It is a pre-existing back-end issue,
+  not specific to the Python packaging, and is tracked separately.
 
-    TypeError: catching classes that do not inherit from BaseException is not allowed
-
-If this is the case, run
-
-    sed -i 's/class HfstException(_object):/class HfstException(Exception):/' libhfst.py
-
-after build/installation to be able to use HfstException and its subclasses in
-Python.
+Previously, HFST exception classes were wrapped by SWIG as subclasses of
+'object' rather than 'Exception', so they could not be caught and C++
+exceptions could crash the interpreter. This is now fixed: the exceptions in
+hfst.exceptions are pure-Python Exception subclasses and C++ exceptions are
+translated to them, so the old 'sed ... libhfst.py' workaround is no longer
+needed.

@@ -10,44 +10,44 @@ for type in [hfst.ImplementationType.SFST_TYPE, hfst.ImplementationType.TROPICAL
         tok = hfst.HfstTokenizer()
         tok.add_multichar_symbol('foo')
         tok.add_skip_symbol('b')
-        assert tok.tokenize('foobar') == (('foo', 'foo'), ('a', 'a'), ('r', 'r'))
-        assert tok.tokenize_one_level('foobar') == ('foo', 'a', 'r')
-        assert tok.tokenize('foobar','barfoo') == (('foo', 'a'), ('a', 'r'), ('r', 'foo'))
+        assert tok.tokenize('foobar', False) == (('foo', 'foo'), ('a', 'a'), ('r', 'r'))
+        assert tok.tokenize_one_level('foobar', False) == ('foo', 'a', 'r')
+        assert tok.tokenize('foobar','barfoo', False) == (('foo', 'a'), ('a', 'r'), ('r', 'foo'))
         
         tok = hfst.HfstTokenizer()
         
         tok = hfst.HfstTokenizer()
         tok.add_skip_symbol('foo')
-        assert tok.tokenize_one_level('foofofoobar') == ('f', 'o', 'b', 'a', 'r')
+        assert tok.tokenize_one_level('foofofoobar', False) == ('f', 'o', 'b', 'a', 'r')
         
         tok = hfst.HfstTokenizer()
         tok.add_multichar_symbol('foo')
         tok.add_skip_symbol('fo')
-        assert tok.tokenize_one_level('foofo') == ('foo',)
+        assert tok.tokenize_one_level('foofo', False) == ('foo',)
         
         tok = hfst.HfstTokenizer()
         tok.add_multichar_symbol('fo')
         tok.add_skip_symbol('foo')
-        assert tok.tokenize_one_level('foofo') == ('fo',)
+        assert tok.tokenize_one_level('foofo', False) == ('fo',)
         
         tok = hfst.HfstTokenizer()
         tok.add_multichar_symbol('fo')
         tok.add_multichar_symbol('foo')
         tok.add_multichar_symbol('of')
-        assert tok.tokenize_one_level('fofoofooof') == ('fo', 'foo', 'foo', 'of')
+        assert tok.tokenize_one_level('fofoofooof', False) == ('fo', 'foo', 'foo', 'of')
         
         tok = hfst.HfstTokenizer()
-        t = tok.tokenize('foobar')
+        t = tok.tokenize('foobar', False)
         assert t == (('f', 'f'), ('o', 'o'), ('o', 'o'), ('b', 'b'), ('a', 'a'), ('r', 'r'))
         
         tok = hfst.HfstTokenizer()
-        t = tok.tokenize_one_level('foobar')
+        t = tok.tokenize_one_level('foobar', False)
         assert t == ('f', 'o', 'o', 'b', 'a', 'r')
         
         tok = hfst.HfstTokenizer()
         tok.add_multichar_symbol('foo')
         tok.add_skip_symbol('b')
-        assert tok.tokenize('foobar','Foobar') == \
+        assert tok.tokenize('foobar','Foobar', False) == \
             (('foo', 'F'), ('a', 'o'), ('r', 'o'), ('@_EPSILON_SYMBOL_@', 'a'), ('@_EPSILON_SYMBOL_@', 'r'))
         
         tok = hfst.HfstTokenizer()

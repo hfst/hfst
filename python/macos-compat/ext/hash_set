@@ -1,0 +1,25 @@
+#ifndef HFST_MACOS_COMPAT_EXT_HASH_SET
+#define HFST_MACOS_COMPAT_EXT_HASH_SET
+
+#include <ext/hash_map>
+#include <memory>
+#include <unordered_set>
+
+namespace __gnu_cxx {
+
+template <
+  class Key,
+  class Hash = hash<Key>,
+  class Pred = std::equal_to<Key>,
+  class Alloc = std::allocator<Key> >
+class hash_set : public std::unordered_set<Key, Hash, Pred, Alloc> {
+  typedef std::unordered_set<Key, Hash, Pred, Alloc> base_type;
+
+public:
+  using base_type::base_type;
+  void resize(size_t n) { this->rehash(n); }
+};
+
+} // namespace __gnu_cxx
+
+#endif

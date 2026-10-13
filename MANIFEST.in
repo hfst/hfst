@@ -1,0 +1,45 @@
+# Files needed to build the hfst wheel from an sdist.
+#
+# The sdist must be self-contained: it compiles all of libhfst plus the in-tree
+# sfst back-end from source. OpenFst / foma / ICU / readline are external and
+# provided by the build environment (see python/cibw-before-all-*.sh).
+
+include configure.ac
+include COPYING*
+include pyproject.toml setup.py
+
+# SWIG interface + hand-written C++ extensions + the pure-Python package.
+include python/libhfst.i python/docstrings.i
+include python/hfst_*_extensions.cpp
+recursive-include python/hfst *.py
+include python/generate-parsers.sh
+include python/cibw-before-*.sh
+recursive-include python/macos-compat *
+include python/pypi/README.rst
+
+# libhfst C++ sources + headers.
+recursive-include libhfst/src *.cc *.h *.hh
+# Flex/bison inputs and any pre-generated parser sources present at sdist time.
+recursive-include libhfst/src/parsers *.ll *.yy
+
+# In-tree SFST back-end.
+recursive-include back-ends/sfst *.cc *.h
+
+# Test suite (used as the cibuildwheel test-command).
+recursive-include python/test *.py *.sh *.att *.prolog *.twolc *.xfst *.lexc *.sfstpl *.txt
+include python/test/test.bat
+
+# Keep the sdist to just what the wheel build needs (these are trimmed even if a
+# git-based file finder pulls in the whole tree).
+prune wasm-deps
+prune .devcontainer
+prune tools
+prune scripts
+prune test
+prune doc
+prune man
+prune check_installation
+prune lgpl-release
+prune python/doc
+prune docker
+recursive-exclude . *.o *.lo *.la

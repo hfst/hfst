@@ -1,0 +1,114 @@
+name: Build Python wheels
+
+on:
+  push:
+    branches: [master]
+    tags: ["v*"]
+  pull_request:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+jobs:
+  build_wheels:
+    name: Wheels on ${{ matrix.os }} (${{ matrix.archs }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            archs: x86_64
+          - os: macos-15-intel  # x86_64
+            archs: auto
+          - os: macos-15        # arm64
+            archs: auto
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Build wheels
+        uses: pypa/cibuildwheel@v4.1.0
+        env:
+          CIBW_ARCHS_LINUX: ${{ matrix.archs }}
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: wheels-${{ matrix.os }}-${{ matrix.archs }}
+          path: ./wheelhouse/*.whl
+
+  build_linux_aarch64_wheels:
+    name: Wheels on ubuntu-24.04-arm (aarch64)
+    runs-on: ubuntu-24.04-arm
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Build wheels
+        uses: pypa/cibuildwheel@v4.1.0
+        env:
+          CIBW_ARCHS_LINUX: aarch64
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: wheels-ubuntu-24.04-arm-aarch64
+          path: ./wheelhouse/*.whl
+
+  # Pyodide/Emscripten wheels are disabled until foma can build with Emscripten
+  # through CMake. Uncomment this job and add it back to publish.needs when
+  # https://github.com/mhulden/foma/pull/166 is accepted.
+  # build_pyodide_wheels:
+  #   name: Wheels on Pyodide (${{ matrix.build-id }})
+  #   runs-on: ubuntu-latest
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       build-id:
+  #         - cp313-pyodide_wasm32
+  #   steps:
+  #     - uses: actions/checkout@v7
+  #
+  #     - name: Build Pyodide wheels
+  #       uses: pypa/cibuildwheel@v4.1.0
+  #       with:
+  #         only: ${{ matrix.build-id }}
+  #
+  #     - uses: actions/upload-artifact@v7
+  #       with:
+  #         name: wheels-pyodide-${{ matrix.build-id }}
+  #         path: ./wheelhouse/*.whl
+
+  make_sdist:
+    name: Build sdist
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Install codegen tools
+        run: sudo apt-get -qy update && sudo apt-get -qy install --no-install-recommends bison flex
+
+      - name: Generate parser sources (ship in sdist)
+        run: sh python/generate-parsers.sh libhfst/src/parsers
+
+      - name: Build sdist
+        run: pipx run build --sdist
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: sdist
+          path: ./dist/*.tar.gz
+
+  publish:
+    name: Publish to PyPI
+    needs: [build_wheels, build_linux_aarch64_wheels, make_sdist]
+    runs-on: ubuntu-latest
+    # Only publish on a version tag or a GitHub release.
+    if: github.event_name == 'release' || startsWith(github.ref, 'refs/tags/v')
+    environment: pypi
+    permissions:
+      id-token: write   # Trusted Publishing (OIDC) — no stored token needed.
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          path: dist
+          merge-multiple: true
+
+      - uses: pypa/gh-action-pypi-publish@release/v1
