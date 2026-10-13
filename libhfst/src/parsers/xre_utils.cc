@@ -1245,7 +1245,8 @@ check_multichar_symbol(const char *symbol)
     if (defined_multichar_symbols_ == NULL)
         return;
 
-    if (strncmp(symbol, "@P.LEXNAME", strlen("@P.LEXNAME")) == 0)
+    if ((strncmp(symbol, "@P.LEXNAME", strlen("@P.LEXNAME")) == 0)
+        || (strncmp(symbol, "@R.LEXNAME", strlen("@R.LEXNAME")) == 0))
     {
         // these special symbols leak into xres
         return;
